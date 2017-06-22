@@ -1,10 +1,12 @@
 const should = require('should');
-const Pill = require('..');
-const {stack, or, Router} = Pill;
+
 const {createServer, readStream} = require('./utils.js');
 
-describe('async stack', function() {
-  it ('should iterate over chain', function() {
+const Pill = require('..');
+const {stack, or, Router} = Pill;
+
+describe('flow', function() {
+  it ('should iterate over stack', function() {
     let round = 0;
 
     const fn = stack(
@@ -30,7 +32,7 @@ describe('async stack', function() {
   });
 });
 
-describe('pill', function() {
+describe('Server', function() {
   it('should server requests', function() {
     const server = createServer(Pill.handler(
       async function({req, res}) {
@@ -154,7 +156,7 @@ describe('pill', function() {
   });
 
   describe('Router', function(){
-    it('Should parse route params', function() {
+    it('should parse route params', function() {
       const router = new Router();
 
       router.get('/users/:id', async function({req, res}) {
@@ -176,7 +178,7 @@ describe('pill', function() {
       .then((result) => should(result).be.equal('1'));
     });
 
-    it('Should use subrouter', function() {
+    it('should use subrouter', function() {
       const router = new Router();
 
       router.route('/users/', Router.handler({
@@ -198,6 +200,33 @@ describe('pill', function() {
       return server.fetch('/users/2')
       .then((res) => res.text())
       .then((result) => should(result).be.equal('2'));
+    });
+
+    it('should use nested subrouters', function() {
+      const router1 = new Router();
+      const router2 = new Router();
+      const router3 = new Router();
+
+      router3.get('/:id', async function({req, res}) {
+        res.send(req.params.id);
+      });
+
+      router2.route('/users/', router3);
+      router1.route('/api/', router2);
+
+      const server = createServer(Pill.handler(
+        router1,
+      ));
+
+      server.listen();
+
+      after(function() {
+        server.close();
+      });
+
+      return server.fetch('/api/users/3')
+      .then((res) => res.text())
+      .then((result) => should(result).be.equal('3'));
     });
   });
 });
