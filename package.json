@@ -1,0 +1,22 @@
+{
+    "main": "src/index.js",
+    "scripts": {
+        "start": "node .",
+        "cov": "istanbul cover node_modules/mocha/bin/_mocha -- -u exports -R spec test/**.spec.js",
+        "test": "mocha test/**.spec.js",
+        "lint": "npm run lint:js src/**.js",
+        "lint:js": "eslint"
+    },
+    "license": "MIT",
+    "devDependencies": {
+        "istanbul": "^0.4.5",
+        "mocha": "^3.4.2",
+        "node-fetch": "^1.7.1",
+        "should": "^11.2.1"
+    },
+    "dependencies": {
+        "eslint": "^4.0.0",
+        "lodash": "^4.17.4",
+        "path-to-regexp": "^1.7.0"
+    }
+}
