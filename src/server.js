@@ -7,7 +7,8 @@ async function contextHandler({req, res}, next) {
   const parsedUrl = url.parse(req.url, {query: true});
 
   const inReq = Object.create(req);
-  inReq.url = parsedUrl.path;
+
+  inReq.url = parsedUrl.pathname.replace(/\/+/g, '/');
   inReq.search = parsedUrl.search;
   inReq.query = parsedUrl.query;
   inReq.headers = {};
