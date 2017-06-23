@@ -2,8 +2,8 @@ const should = require('should');
 
 const {createServer, readStream} = require('./utils.js');
 
-const Pill = require('..');
-const {stack, or, Router} = Pill;
+const Server = require('..');
+const {stack, or, Router} = Server;
 
 describe('flow', function() {
   it ('should iterate over stack', function() {
@@ -34,7 +34,7 @@ describe('flow', function() {
 
 describe('Server', function() {
   it('should server requests', function() {
-    const server = createServer(Pill.handler(
+    const server = createServer(Server.handler(
       async function({req, res}) {
         should(req.headers.contentType).be.equal('text/plain');
         res.send('OK');
@@ -57,7 +57,7 @@ describe('Server', function() {
   });
 
   it('should read body', function() {
-    const server = createServer(Pill.handler(
+    const server = createServer(Server.handler(
       async function({req}, next) {
         if (req.method !== 'GET') {
           req.body = await readStream(req);
@@ -85,7 +85,7 @@ describe('Server', function() {
   });
 
   it('should specify response headers', function() {
-    const server = createServer(Pill.handler(
+    const server = createServer(Server.handler(
       async function({res}) {
         res.headers.contentType.set('application/json');
         res.send(JSON.stringify(null));
@@ -108,7 +108,7 @@ describe('Server', function() {
   });
 
   it('should use or handler', function() {
-    const server = createServer(Pill.handler(
+    const server = createServer(Server.handler(
       or(
         async function() {},
         async function() {},
@@ -130,7 +130,7 @@ describe('Server', function() {
   });
 
   it('should use stack handler', function() {
-    const server = createServer(Pill.handler(
+    const server = createServer(Server.handler(
       stack(
         async function(ctx, next) {
           await next();
@@ -163,7 +163,7 @@ describe('Server', function() {
         res.send(req.params.id);
       });
 
-      const server = createServer(Pill.handler(
+      const server = createServer(Server.handler(
         router,
       ));
 
@@ -187,7 +187,7 @@ describe('Server', function() {
         },
       }));
 
-      const server = createServer(Pill.handler(
+      const server = createServer(Server.handler(
         router,
       ));
 
@@ -214,7 +214,7 @@ describe('Server', function() {
       router2.route('/users/', router3);
       router1.route('/api/', router2);
 
-      const server = createServer(Pill.handler(
+      const server = createServer(Server.handler(
         router1,
       ));
 
