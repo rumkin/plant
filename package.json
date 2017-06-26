@@ -22,14 +22,14 @@
     "type-is": "^1.6.15"
   },
   "name": "@plant/plant",
-  "version": "0.3.0",
+  "version": "0.3.2",
   "description": "Web application framework",
   "directories": {
     "test": "test"
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@bitbucket.org/rumkin/plant.git"
+    "url": "https://github.com/rumkin/plant.git"
   },
   "keywords": [
     "server",
@@ -39,5 +39,6 @@
     "http-server"
   ],
   "author": "rumkin",
-  "homepage": "https://bitbucket.org/rumkin/plant#readme"
+  "homepage": "https://github.com/rumkin/plant",
+  "bugs": "https://github.com/rumkin/plant/issues"
 }
