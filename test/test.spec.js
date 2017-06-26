@@ -155,6 +155,39 @@ describe('Server', function() {
     .then((result) => should(result).be.equal('last'));
   });
 
+  it('should set cookies', function(){
+    const server = createServer(Server.handler(
+      async function({res}) {
+        res.setCookie('one', 1);
+        res.setCookie('two', 2);
+        res.end();
+      }
+    ));
+
+    server.listen();
+
+    after(function() {
+      server.close();
+    });
+
+    return server.fetch('/')
+    .then((res) => {
+
+      return res;
+    })
+    .then(({status, headers}) => {
+      // Check header
+      should(status).be.equal(200);
+
+      // Check set-cookie headers
+      const cookies = headers.raw()['set-cookie'];
+      should(cookies).be.deepEqual([
+        'one=1; Path=/',
+        'two=2; Path=/',
+      ]);
+    });
+  });
+
   describe('Router', function(){
     it('should parse route params', function() {
       const router = new Router();

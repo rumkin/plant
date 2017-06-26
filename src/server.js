@@ -1,4 +1,5 @@
 const url = require('url');
+const cookie = require('cookie');
 const {isPlainObject, isString, camelCase, kebabCase} = require('lodash');
 const {stack, or, getHandler} = require('./flow.js');
 const Router = require('./router.js');
@@ -6,19 +7,28 @@ const Router = require('./router.js');
 async function contextHandler({req, res}, next) {
   const parsedUrl = url.parse(req.url, {query: true});
 
+  // Create inner request
   const inReq = Object.create(req);
 
   inReq.url = parsedUrl.pathname.replace(/\/+/g, '/');
   inReq.search = parsedUrl.search;
   inReq.query = parsedUrl.query;
   inReq.headers = {};
-  const inRes = Object.create(res);
 
   Object.keys(req.headers)
   .forEach((key) => {
     inReq.headers[camelCase(key)] = req.headers[key];
   });
 
+  if (inReq.headers.hasOwnProperty('cookie')) {
+    inReq.cookies = cookie.parse(inReq.headers.cookie);
+  }
+  else {
+    inReq.cookies = {};
+  }
+
+  // Create inner response
+  const inRes = Object.create(res);
   const headers = {};
 
   inRes.headers = new Proxy(headers, {
@@ -129,7 +139,32 @@ async function contextHandler({req, res}, next) {
   };
 
   inRes.end = function(...args) {
+    this.sendHeaders();
     return res.end(...args);
+  };
+
+  inRes.pipe = function(stream) {
+    this.sendHeaders();
+    return res.pipe(stream);
+  };
+
+  inRes.setCookie = inRes.cookie = function(name, value, options) {
+    const opts = Object.assign({path: '/'}, options);
+
+    this.headers.setCookie.push(
+      cookie.serialize(name, String(value), opts)
+    );
+    return this;
+  };
+
+  inReq.clearCookie = function(name, options) {
+    const opts = Object.assign({expires: new Date(1), path: '/'}, options);
+
+    this.headers.setCookie.push(
+      cookie.serialize(name, '', opts)
+    );
+
+    return this;
   };
 
   await next({req: inReq, res: inRes});
@@ -244,3 +279,5 @@ module.exports =  Server;
 Server.Router = Router;
 Server.stack = stack;
 Server.or = or;
+Server.errorHandler = errorHandler;
+Server.contextHandler = contextHandler;
