@@ -7,11 +7,22 @@ const Router = require('./router.js');
 
 function createInnerRequest(req) {
   const inReq = Object.create(req);
-  const parsedUrl = url.parse(req.url, {query: true});
+  const {headers} = req;
+  const parsedUrl = url.parse(`http://${headers.host}${req.url}`, {query: true});
+
+  const host = parsedUrl.hostname;
+
+  inReq.host = host;
+  inReq.domains = /\.\d+$/.test(host)
+    ? []
+    : parsedUrl.hostname.split('.').reverse();
+  inReq.port = parseInt(parsedUrl.port || '80');
 
   inReq.url = parsedUrl.pathname.replace(/\/+/g, '/');
   inReq.search = parsedUrl.search;
   inReq.query = parsedUrl.query;
+
+  inReq.body = {};
 
   return inReq;
 }

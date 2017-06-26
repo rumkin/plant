@@ -34,11 +34,10 @@ describe('flow', function() {
 });
 
 describe('Server', function() {
-  it('should server requests', function() {
+  it('should serve requests', function() {
     const server = createServer(Server.handler(
       async function({req, res}) {
-        should(req.headers.get('content-type')).be.equal('text/plain');
-        res.send('OK');
+        res.send(req.headers.get('content-type'));
       }
     ));
 
@@ -54,7 +53,39 @@ describe('Server', function() {
       },
     })
     .then((res) => res.text())
-    .then((result) => should(result).be.equal('OK'));
+    .then((result) => should(result).be.equal('text/plain'));
+  });
+
+  it('should parse url data', function() {
+    const server = createServer(Server.handler(
+      async function({req, res}) {
+        res.json({
+          host: req.host,
+          port: req.port,
+          domains: req.domains,
+          url: req.url,
+          query: req.query,
+        });
+      }
+    ));
+
+    server.listen();
+
+    after(function() {
+      server.close();
+    });
+
+    return server.fetch('/request?json=1')
+    .then((res) => res.json())
+    .then((result) => should(result).be.deepEqual({
+      host: '127.0.0.1',
+      port: server.address().port,
+      domains: [],
+      url: '/request',
+      query: {
+        json: '1',
+      },
+    }));
   });
 
   it('should read body', function() {
