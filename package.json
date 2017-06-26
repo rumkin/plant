@@ -18,7 +18,8 @@
   "dependencies": {
     "cookie": "^0.3.1",
     "lodash": "^4.17.4",
-    "path-to-regexp": "^1.7.0"
+    "path-to-regexp": "^1.7.0",
+    "type-is": "^1.6.15"
   },
   "name": "@plant/plant",
   "version": "0.3.0",

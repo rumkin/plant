@@ -4,6 +4,7 @@ const {Readable} = require('stream');
 const {isObject, isPlainObject, isString} = require('lodash');
 const {stack, or, getHandler} = require('./flow.js');
 const Router = require('./router.js');
+const typeIs = require('type-is');
 
 function createInnerRequest(req) {
   const inReq = Object.create(req);
@@ -27,6 +28,9 @@ function createInnerRequest(req) {
   inReq.search = parsedUrl.search;
   inReq.query = parsedUrl.query;
 
+  inReq.is = function(types) {
+    return typeIs.is(req.headers['content-type'], types);
+  };
   inReq.body = {};
 
   return inReq;

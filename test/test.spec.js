@@ -56,6 +56,33 @@ describe('Server', function() {
     .then((result) => should(result).be.equal('text/plain'));
   });
 
+  it('should determine request mime-type', function() {
+    const server = createServer(Server.handler(
+      async function({req, res}) {
+        if (req.is('html')) {
+          res.send('html');
+        }
+        else {
+          res.send(req.headers.get('content-type'));
+        }
+      }
+    ));
+
+    server.listen();
+
+    after(function() {
+      server.close();
+    });
+
+    return server.fetch('/', {
+      headers: {
+        'content-type': 'text/html',
+      },
+    })
+    .then((res) => res.text())
+    .then((result) => should(result).be.equal('html'));
+  });
+
   it('should parse url data', function() {
     const server = createServer(Server.handler(
       async function({req, res}) {
