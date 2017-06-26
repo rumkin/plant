@@ -36,7 +36,7 @@ class Router {
 
   addRoute(method, route, ...handlers) {
     this.handlers.push({
-      method: method && method.toUpperCase(),
+      method: method && method.toLowerCase(),
       route,
       handlers: handlers.map(getHandler),
     });

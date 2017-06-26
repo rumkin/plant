@@ -28,6 +28,7 @@ function createInnerRequest(req) {
   inReq.search = parsedUrl.search;
   inReq.query = parsedUrl.query;
 
+  inReq.method = req.method.toLowerCase();
   inReq.is = function(types) {
     return typeIs.is(req.headers['content-type'], types);
   };
@@ -44,8 +45,13 @@ function createInnerResponse(res) {
 
 function setHeadersMethods(req, res, inReq, inRes) {
   inReq.headers = {
-    get(name, alt) {
-      return req.headers[name] || alt;
+    get(...args) {
+      if (args.length) {
+        return req.headers[args[0]] || args[1];
+      }
+      else {
+        return Object.assign({}, req.headers);
+      }
     },
     has(name) {
       return req.headers.hasOwnProperty(name);
@@ -68,6 +74,9 @@ function setHeadersMethods(req, res, inReq, inRes) {
       else {
         res.setHeader(...args);
       }
+    },
+    remove(name) {
+      res.removeHeader(name);
     },
     get(...args) {
       if (args.length) {

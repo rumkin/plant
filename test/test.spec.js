@@ -87,6 +87,7 @@ describe('Server', function() {
     const server = createServer(Server.handler(
       async function({req, res}) {
         res.json({
+          method: req.method,
           protocol: req.protocol,
           host: req.host,
           port: req.port,
@@ -106,6 +107,7 @@ describe('Server', function() {
     return server.fetch('/request?json=1')
     .then((res) => res.json())
     .then((result) => should(result).be.deepEqual({
+      method: 'get',
       protocol: 'http',
       host: '127.0.0.1',
       port: server.address().port,
