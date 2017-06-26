@@ -1,4 +1,5 @@
 const should = require('should');
+const fs = require('fs');
 
 const {createServer, readStream} = require('./utils.js');
 
@@ -36,7 +37,7 @@ describe('Server', function() {
   it('should server requests', function() {
     const server = createServer(Server.handler(
       async function({req, res}) {
-        should(req.headers.contentType).be.equal('text/plain');
+        should(req.headers.get('content-type')).be.equal('text/plain');
         res.send('OK');
       }
     ));
@@ -87,7 +88,7 @@ describe('Server', function() {
   it('should specify response headers', function() {
     const server = createServer(Server.handler(
       async function({res}) {
-        res.headers.contentType.set('application/json');
+        res.headers.set('content-type', 'application/json');
         res.send(JSON.stringify(null));
       }
     ));
@@ -171,10 +172,6 @@ describe('Server', function() {
     });
 
     return server.fetch('/')
-    .then((res) => {
-
-      return res;
-    })
     .then(({status, headers}) => {
       // Check header
       should(status).be.equal(200);
@@ -185,6 +182,30 @@ describe('Server', function() {
         'one=1; Path=/',
         'two=2; Path=/',
       ]);
+    });
+  });
+
+  it('should output streams', function(){
+    const server = createServer(Server.handler(
+      async function({res}) {
+        res.send(fs.createReadStream(__filename));
+      }
+    ));
+
+    server.listen();
+
+    after(function() {
+      server.close();
+    });
+
+    return server.fetch('/')
+    .then((res) => {
+      should(res.status).be.equal(200);
+      return res;
+    })
+    .then((res) => res.text())
+    .then((body) => {
+      should(body).be.equal(fs.readFileSync(__filename, 'utf8'));
     });
   });
 
