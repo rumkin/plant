@@ -60,6 +60,7 @@ describe('Server', function() {
     const server = createServer(Server.handler(
       async function({req, res}) {
         res.json({
+          protocol: req.protocol,
           host: req.host,
           port: req.port,
           domains: req.domains,
@@ -78,6 +79,7 @@ describe('Server', function() {
     return server.fetch('/request?json=1')
     .then((res) => res.json())
     .then((result) => should(result).be.deepEqual({
+      protocol: 'http',
       host: '127.0.0.1',
       port: server.address().port,
       domains: [],

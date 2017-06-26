@@ -8,10 +8,15 @@ const Router = require('./router.js');
 function createInnerRequest(req) {
   const inReq = Object.create(req);
   const {headers} = req;
-  const parsedUrl = url.parse(`http://${headers.host}${req.url}`, {query: true});
+  const protocol = req.connection.encrypted
+    ? 'https'
+    : 'http';
+
+  const parsedUrl = url.parse(`${protocol}://${headers.host}${req.url}`, {query: true});
 
   const host = parsedUrl.hostname;
 
+  inReq.protocol = protocol;
   inReq.host = host;
   inReq.domains = /\.\d+$/.test(host)
     ? []
