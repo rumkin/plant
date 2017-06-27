@@ -124,7 +124,7 @@ function getSubrouteMatcher(route) {
   return async function(ctx, next){
     const {req} = ctx;
 
-    const params = matcher(req.url);
+    const params = matcher(req.url.replace(/\/*$/, '/'));
 
     if (! params) {
       return;
