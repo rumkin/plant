@@ -22,7 +22,7 @@
     "type-is": "^1.6.15"
   },
   "name": "@plant/plant",
-  "version": "0.3.4",
+  "version": "0.4.0",
   "description": "Web application framework",
   "directories": {
     "test": "test"

@@ -2,7 +2,7 @@ const url = require('url');
 const cookie = require('cookie');
 const {Readable} = require('stream');
 const {isObject, isPlainObject, isString} = require('lodash');
-const {stack, or, getHandler} = require('./flow.js');
+const {and, or, getHandler} = require('./utils.js');
 const Router = require('./router.js');
 const typeIs = require('type-is');
 
@@ -263,7 +263,7 @@ class Server {
 
       handlers = [
         or(
-          stack(
+          and(
             Router.getSubrouteMatcher(route),
             ...args.slice(1).map(getHandler),
           ),
@@ -282,8 +282,8 @@ class Server {
     return this.use(or(...handlers));
   }
 
-  stack(...handlers) {
-    return this.use(stack(...handlers));
+  and(...handlers) {
+    return this.use(and(...handlers));
   }
 
   router(routes) {
@@ -291,11 +291,11 @@ class Server {
   }
 
   handler() {
-    const stacked = stack(...this.handlers);
+    const cascade = and(...this.handlers);
     const context = this.context;
 
     return function(req, res) {
-      stacked(Object.assign(context, {req, res}))
+      cascade(Object.assign(context, {req, res}))
       .catch((error) => {
         // Write error to res.
         if (! res.headersSent) {
@@ -311,6 +311,8 @@ class Server {
 }
 
 module.exports =  Server;
+
 Server.Router = Router;
-Server.stack = stack;
+Server.and = and;
 Server.or = or;
+Server.getHandler = getHandler;

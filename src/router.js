@@ -1,6 +1,6 @@
 const pathToRegexp = require('path-to-regexp');
 const {isPlainObject, isString} = require('lodash');
-const {or, stack, getHandler} = require('./flow.js');
+const {or, and, getHandler} = require('./utils.js');
 
 class Router {
   static new(...args) {
@@ -70,7 +70,7 @@ class Router {
 
   handler() {
     return or(...this.handlers.map(
-      ({method, route, handlers}) => stack(
+      ({method, route, handlers}) => and(
         method ? getRouteMatcher(method, route) : getSubrouteMatcher(route),
         ...this.pre,
         ...handlers,

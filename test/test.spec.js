@@ -4,13 +4,13 @@ const fs = require('fs');
 const {createServer, readStream} = require('./utils.js');
 
 const Server = require('..');
-const {stack, or, Router} = Server;
+const {and, or, Router} = Server;
 
 describe('flow', function() {
-  it ('should iterate over stack', function() {
+  it ('should iterate over `and`', function() {
     let round = 0;
 
-    const fn = stack(
+    const fn = and(
       async function(ctx, next) {
         round += 1;
         should(round).be.equal(1);
@@ -192,9 +192,9 @@ describe('Server', function() {
     .then((result) => should(result).be.equal('last'));
   });
 
-  it('should use stack handler', function() {
+  it('should use `and` handler', function() {
     const server = createServer(Server.handler(
-      stack(
+      and(
         async function(ctx, next) {
           await next();
         },
