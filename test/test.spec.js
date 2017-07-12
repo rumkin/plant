@@ -56,6 +56,36 @@ describe('Server', function() {
     .then((result) => should(result).be.equal('text/plain'));
   });
 
+  it('should update to proxy values', function() {
+    const server = createServer(Server.handler(
+      async function({req, res}) {
+        res.json({
+          ip: req.ip,
+          host: req.host
+        });
+      }
+    ));
+
+    server.listen();
+
+    after(function() {
+      server.close();
+    });
+
+    return server.fetch('/', {
+      headers: {
+        'x-forwarded-for': '127.0.0.2',
+        'x-forwarded-host': 'www.online',
+      },
+    })
+    .then((res) => res.json())
+    .then((result) => {
+      should(result).be.instanceof(Object);
+      should(result).has.ownProperty('host').which.equal('www.online');
+      should(result).has.ownProperty('ip').which.equal('127.0.0.2');
+    });
+  });
+
   it('should determine request mime-type', function() {
     const server = createServer(Server.handler(
       async function({req, res}) {
