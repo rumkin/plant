@@ -88,7 +88,7 @@ function setHeadersMethods(req, res, inReq, inRes) {
 
   inRes.headers = {
     set(...args) {
-      if (args.length === 0) {
+      if (args.length === 1) {
         for (const [header, value] of Object.entries(args[0])) {
           res.setHeader(header, value);
         }
