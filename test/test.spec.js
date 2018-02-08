@@ -324,6 +324,28 @@ describe('Server', function() {
       .then((result) => should(result).be.equal('1'));
     });
 
+    it('should define several method handlers with addRoute()', function() {
+      const router = new Router();
+
+      router.addRoute(['post', 'get'], '/users/', async function({req, res}) {
+        res.send('1');
+      });
+
+      const server = createServer(Server.handler(
+        router,
+      ));
+
+      server.listen();
+
+      after(function() {
+        server.close();
+      });
+
+      return server.fetch('/users/1', {method: 'get'})
+      .then((res) => res.text())
+      .then((result) => should(result).be.equal('1'));
+    });
+
     it('should use subrouter', function() {
       const router = new Router();
 

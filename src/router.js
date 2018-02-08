@@ -34,12 +34,31 @@ class Router {
     this.handlers = [];
   }
 
-  addRoute(method, route, ...handlers) {
-    this.handlers.push({
-      method: method && method.toLowerCase(),
-      route,
-      handlers: handlers.map(getHandler),
-    });
+  addRoute(_method, route, ...handlers) {
+    if (_method) {
+      let methods;
+      if (Array.isArray(_method)) {
+        methods = _method;
+      }
+      else {
+        methods = _method.split(/\s+/);
+      }
+
+      for (const method of methods) {
+        this.handlers.push({
+          method: method.toLowerCase(),
+          route,
+          handlers: handlers.map(getHandler),
+        });
+      }
+    }
+    else {
+      this.handlers.push({
+        method: null,
+        route,
+        handlers: handlers.map(getHandler),
+      });
+    }
     return this;
   }
 
@@ -82,10 +101,12 @@ class Router {
 [
   'all',
   'get',
+  'head',
   'post',
   'put',
   'patch',
   'delete',
+  'options',
 ].forEach((name) => {
   const method = name.toUpperCase();
 
@@ -100,7 +121,7 @@ function getRouteMatcher(method, route) {
   return async function(ctx, next){
     const {req} = ctx;
 
-    if (req.method !== method && method !== 'ALL') {
+    if (req.method !== method && method !== 'all') {
       return;
     }
 
@@ -111,8 +132,7 @@ function getRouteMatcher(method, route) {
     }
 
     const inReq = Object.create(req);
-
-    inReq.params = params;
+    inReq.params = Object.assign({}, req.params, params);
 
     await next(Object.assign({}, ctx, {req: inReq}));
   };
@@ -131,8 +151,7 @@ function getSubrouteMatcher(route) {
     }
 
     const inReq = Object.create(req);
-
-    inReq.params = params;
+    inReq.params = Object.assign({}, req.params, params);
 
     inReq.url = '/' + params[0];
     inReq.baseUrl = (req.baseUrl || '') + req.url.slice(0, -params[0].length);

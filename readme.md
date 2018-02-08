@@ -36,6 +36,36 @@ plant.use('/server.js', async function({res}, next) {
 http.createServer(plant.handler())
 .listen(PORT);
 ```
+
+## Router
+
+To make applications modular it is possible to create routers factory:
+
+```javascript
+const Plant = require('@plant/plant');
+const {Router} = Plant;
+
+const plant = new Plant();
+
+const alice = {name: 'Alice'};
+const bob = {name: 'Bob'};
+
+plant.use('/alice', userRouter(alice));
+plant.use('/bob', userRouter(bob));
+
+function userRouter(user) {
+    const router = new Router();
+
+    router.get('/name', ({res}) => {
+        res.json(user.name);
+    });
+
+    return router;
+}
+```
+
+Routers are stackable too so it's possible to create complex routers.
+
 ## API
 
 ### Headers interface
