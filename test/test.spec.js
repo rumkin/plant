@@ -136,14 +136,18 @@ describe('Server', function() {
       server.close();
     });
 
-    return server.fetch('/request?json=1', {}, 'localhost')
+    return server.fetch('/request?json=1', {
+      headers: {
+        'X-Forwarded-Host': 'some.custom.host.test',
+      },
+    })
     .then((res) => res.json())
     .then((result) => should(result).be.deepEqual({
       method: 'get',
       protocol: 'http',
-      host: 'localhost',
-      port: server.address().port,
-      domains: ['localhost'],
+      host: 'some.custom.host.test',
+      port: 80,
+      domains: ['test', 'host', 'custom', 'some'],
       url: '/request',
       query: {
         json: '1',

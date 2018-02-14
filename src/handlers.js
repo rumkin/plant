@@ -6,25 +6,24 @@ const {isObject} = require('lodash');
 
 function overwriteProxyHeaders(req, inReq) {
   const {remoteAddress} = req.connection;
+  let ip = remoteAddress;
+  let host = req.headers['host'];
 
   if (remoteAddress === '::ffff:127.0.0.1') {
     const xForwardedFor = req.headers['x-forwarded-for'];
     const xForwardedHost = req.headers['x-forwarded-host'];
 
     if (xForwardedFor) {
-      inReq.ip = xForwardedFor;
-    }
-    else {
-      inReq.ip = remoteAddress;
+      ip = xForwardedFor;
     }
 
     if (xForwardedHost) {
-      inReq.host = xForwardedHost;
-    }
-    else {
-      inReq.host = req.headers['host'];
+      host = xForwardedHost;
     }
   }
+
+  inReq.host = host;
+  inReq.ip = ip;
 }
 
 function createInnerRequest(req) {
