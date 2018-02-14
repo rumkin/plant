@@ -113,20 +113,22 @@ describe('Server', function() {
     .then((result) => should(result).be.equal('html'));
   });
 
-  it('should parse url data', function() {
-    const server = createServer(Server.handler(
-      async function({req, res}) {
-        res.json({
-          method: req.method,
-          protocol: req.protocol,
-          host: req.host,
-          port: req.port,
-          domains: req.domains,
-          url: req.url,
-          query: req.query,
-        });
-      }
-    ));
+  it('should parse url data and hosts', function() {
+    const plant = new Server();
+
+    plant.use(async function({req, res}) {
+      res.json({
+        method: req.method,
+        protocol: req.protocol,
+        host: req.host,
+        port: req.port,
+        domains: req.domains,
+        url: req.url,
+        query: req.query,
+      });
+    });
+
+    const server = createServer(plant.handler());
 
     server.listen();
 
@@ -134,14 +136,14 @@ describe('Server', function() {
       server.close();
     });
 
-    return server.fetch('/request?json=1')
+    return server.fetch('/request?json=1', {}, 'localhost')
     .then((res) => res.json())
     .then((result) => should(result).be.deepEqual({
       method: 'get',
       protocol: 'http',
-      host: '127.0.0.1',
+      host: 'localhost',
       port: server.address().port,
-      domains: [],
+      domains: ['localhost'],
       url: '/request',
       query: {
         json: '1',
@@ -341,7 +343,7 @@ describe('Server', function() {
         server.close();
       });
 
-      return server.fetch('/users/1', {method: 'get'})
+      return server.fetch('/users/', {method: 'get'})
       .then((res) => res.text())
       .then((result) => should(result).be.equal('1'));
     });
