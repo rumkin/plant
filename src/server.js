@@ -54,6 +54,13 @@ class Server {
         ),
       ];
     }
+    else if (args.length > 1) {
+      handlers = [or(
+        and(
+          ...args.map(getHandler)
+        )
+      )];
+    }
     else {
       handlers = args.map(getHandler);
     }
