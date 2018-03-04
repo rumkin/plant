@@ -27,8 +27,8 @@ function getHandler(handler) {
  * @param  {...function()|Handlable} handlers Handlable async functions.
  * @return {function(object,function)} Returns function which pass context through the queue.
  */
-const whileNotHeadersSent = whileNot(function({res}) {
-  return res.headersSent;
+const whileBodyIsNull = whileNot(function({res}) {
+  return res.body !== null;
 });
 
 /**
@@ -38,7 +38,7 @@ const whileNotHeadersSent = whileNot(function({res}) {
  * @return {function(object, funcition())} Returns function to pass value into handlers.
  */
 const or = function(...args) {
-  return whileNotHeadersSent(...args.map(getHandler));
+  return whileBodyIsNull(...args.map(getHandler));
 };
 
 /**
@@ -51,6 +51,31 @@ const and = function(...args) {
   return cascade(...args.map(getHandler));
 };
 
+
+/**
+ * readStream - Read text stream in promise. Note that stream size should not
+ * be greater than available memory.
+ *
+ * @param  {Stream.Readable} stream Data stream.
+ * @return {Buffer}                 Concatenated stream data.
+ */
+function readStream(stream) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+
+    stream.on('data', (chunk) => {
+      chunks.push(chunk);
+    });
+
+    stream.on('end', () => {
+      resolve(Buffer.concat(chunks).toString());
+    });
+
+    stream.on('error', reject);
+  });
+}
+
 exports.or = or;
 exports.and = and;
 exports.getHandler = getHandler;
+exports.readStream = readStream;

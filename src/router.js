@@ -1,3 +1,4 @@
+const path = require('path');
 const pathToRegexp = require('path-to-regexp');
 const {isPlainObject, isString} = require('lodash');
 const {or, and, getHandler} = require('./utils.js');
@@ -125,7 +126,7 @@ function getRouteMatcher(method, route) {
       return;
     }
 
-    const params = matcher(req.url);
+    const params = matcher(req.path);
 
     if (! params) {
       return;
@@ -143,8 +144,9 @@ function getSubrouteMatcher(route) {
 
   return async function(ctx, next){
     const {req} = ctx;
+    const url = req.path;
 
-    const params = matcher(req.url.replace(/\/*$/, '/'));
+    const params = matcher(url);
 
     if (! params) {
       return;
@@ -153,8 +155,8 @@ function getSubrouteMatcher(route) {
     const inReq = Object.create(req);
     inReq.params = Object.assign({}, req.params, params);
 
-    inReq.url = '/' + params[0];
-    inReq.baseUrl = (req.baseUrl || '') + req.url.slice(0, -params[0].length);
+    inReq.path = '/' + params[0];
+    inReq.basePath = req.basePath + url.slice(0, -params[0].length);
 
     await next(Object.assign({}, ctx, {req: inReq}));
   };

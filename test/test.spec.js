@@ -61,7 +61,7 @@ describe('Server', function() {
       async function({req, res}) {
         res.json({
           ip: req.ip,
-          host: req.host
+          host: req.url.hostname,
         });
       }
     ));
@@ -117,14 +117,18 @@ describe('Server', function() {
     const plant = new Server();
 
     plant.use(async function({req, res}) {
+      const {url} = req;
+
       res.json({
         method: req.method,
-        protocol: req.protocol,
-        host: req.host,
-        port: req.port,
+        protocol: url.protocol,
+        host: url.hostname,
+        port: url.port,
         domains: req.domains,
-        url: req.url,
-        query: req.query,
+        url: req.path,
+        query: {
+          json: url.searchParams.get('json'),
+        },
       });
     });
 
@@ -144,9 +148,9 @@ describe('Server', function() {
     .then((res) => res.json())
     .then((result) => should(result).be.deepEqual({
       method: 'get',
-      protocol: 'http',
+      protocol: 'http:',
       host: 'some.custom.host.test',
-      port: 80,
+      port: '',
       domains: ['test', 'host', 'custom', 'some'],
       url: '/request',
       query: {
@@ -159,7 +163,7 @@ describe('Server', function() {
     const server = createServer(Server.handler(
       async function({req}, next) {
         if (req.method !== 'GET') {
-          req.body = await readStream(req);
+          req.body = await req.bodyStream.receive();
         }
 
         await next();
@@ -252,6 +256,68 @@ describe('Server', function() {
     return server.fetch('/')
     .then((res) => res.text())
     .then((result) => should(result).be.equal('last'));
+  });
+
+  it('should make turns with use(h1, h2)', function() {
+    const server = createServer(Server.new()
+      .use(
+        async function({req}, next) {
+          if (req.path === '/turn') {
+            return await next();
+          }
+        },
+        async function({res}) {
+          res.text('turn');
+        }
+      )
+      .use(
+        async function({res}) {
+          res.text('last');
+        }
+      )
+      .handler()
+    );
+
+    server.listen();
+
+    after(function() {
+      server.close();
+    });
+
+    return server.fetch('/')
+    .then((res) => res.text())
+    .then((result) => should(result).be.equal('last'));
+  });
+
+  it('should visit turn defined with use(h1, h2)', function() {
+    const server = createServer(Server.new()
+      .use(
+        async function({req}, next) {
+          if (req.path === '/turn') {
+            return await next();
+          }
+        },
+        async function({res}) {
+          res.text('turn');
+        }
+      )
+      .use(
+        async function({res}) {
+          res.text('last');
+        }
+      )
+      .handler()
+    );
+
+    server.listen();
+
+    after(function() {
+      server.close();
+    });
+
+    return server.fetch('/turn')
+    .then((res) => res.text())
+    .then((result) => should(result).be.equal('turn'));
   });
 
   it('should set cookies', function(){

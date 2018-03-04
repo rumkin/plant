@@ -31,12 +31,13 @@ class Server {
     .handler();
   }
 
-  constructor({handlers, context = {}} = {}) {
+  constructor({handlers, context = {}, onError} = {}) {
     this.handlers = handlers
       ? [...handlers.map(getHandler)]
       : [errorHandler, commonHandler];
 
     this.context = Object.assign({}, context);
+    this.errorHandler = onError;
   }
 
   use(...args) {
@@ -81,9 +82,14 @@ class Server {
     return this.use(Router.handler(routes));
   }
 
+  errorHandler(handler) {
+    this.errorHandler = handler;
+  }
+
   handler() {
     const cascade = and(...this.handlers);
     const context = this.context;
+    const errorHandler = this.errorHandler;
 
     return function(req, res) {
       cascade(Object.assign(context, {req, res}))
@@ -93,8 +99,14 @@ class Server {
           res.statusCode = 500;
           res.write('Internal server error');
         }
+        else if (errorHandler) {
+          res.end(); // End request
+          errorHandler(error);
+        }
         else {
+          res.end(); // End request
           console.error(error);
+          throw error;
         }
       });
     };
