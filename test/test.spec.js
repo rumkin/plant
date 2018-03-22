@@ -388,9 +388,7 @@ describe('Server', function() {
         res.send(req.params.id);
       });
 
-      const server = createServer(Server.handler(
-        router,
-      ));
+      const server = createServer(Server.handler(router));
 
       server.listen();
 
@@ -406,13 +404,11 @@ describe('Server', function() {
     it('should define several method handlers with addRoute()', function() {
       const router = new Router();
 
-      router.addRoute(['post', 'get'], '/users/', async function({req, res}) {
+      router.addRoute(['post', 'get'], '/users/', async function({res}) {
         res.send('1');
       });
 
-      const server = createServer(Server.handler(
-        router,
-      ));
+      const server = createServer(Server.handler(router));
 
       server.listen();
 
@@ -434,9 +430,7 @@ describe('Server', function() {
         },
       }));
 
-      const server = createServer(Server.handler(
-        router,
-      ));
+      const server = createServer(Server.handler(router));
 
       server.listen();
 
@@ -464,9 +458,7 @@ describe('Server', function() {
       router2.route('/users/:user/', router3);
       router1.route('/api/', router2);
 
-      const server = createServer(Server.handler(
-        router1,
-      ));
+      const server = createServer(Server.handler(router1));
 
       server.listen();
 
