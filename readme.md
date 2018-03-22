@@ -1,45 +1,89 @@
-# Plant
+# 🌳 Plant
 
-Plant is an express/connect and koa like web server created with modular architecture in mind
-and functional design patterns on practice. It uses isolated customizable contexts to be modular.
+[![npm](https://img.shields.io/npm/v/@plant/plant.svg?style=flat-square)](https://npmjs.com/package/@plant/plant)
+[![Travis](https://img.shields.io/travis/rumkin/plant.svg?style=flat-square)](https://travis-ci.org/rumkin/plant)
+[![npm](https://img.shields.io/npm/dw/@plant/plant.svg?style=flat-square)](https://npmjs.com/package/@plant/plant)
+![](https://img.shields.io/badge/size-52%20KiB-blue.svg?style=flat-square)
+
+---
+
+Plant is ES2017 WhatWG standard based web server created with modular architecture in mind
+and functional design patterns on practice. It uses cascades (an isolated customizable contexts)
+to be modular and pure.
+
+## 💪 Features
+
+- Modular.
+- Powerful.
+- Predictable.
+- WhatWG standards friendly.
+- Lightweight (52Kb).
+
+## Install
+
+Production version from NPM registry:
+
+```
+npm i @plant/plant
+```
+
+Latest dev version from github:
+```bash
+npm i rumkin/plant
+```
+
+## Usage
+
+Plant is using cascades: independent modifiable context protected from intersection.
 
 ```javascript
-const Plant = require('@plant/plant');
 const http = require('http');
-const fs = require('fs');
-
-const PORT = process.env.PORT || 8080;
+const Plant = require('@plant/plant');
 
 const plant = new Plant();
 
-// Log request execution time
-plant.use(async function({res, req}, next) {
-    const start = Date.now();
-    await next();
-    const time = Date.now() - start;
-
-    console.log('%s %s %s sec', res.statusCode, req.url, time / 1000);
-});
-
 // Send text response
-plant.use('/api/v1/hello', async function({res}, next) {
-    res.text('Hello World');
-});
-
-// Send stream response
-plant.use('/server.js', async function({res}, next) {
-    // Send current file source
-    res.send(fs.createReadStream(__filename));
+plant.use('/greet', async function({res}, next) {
+    res.body = 'Hello World';
 });
 
 // Build request handler
 http.createServer(plant.handler())
-.listen(PORT);
+.listen(8080);
 ```
+
+## Examples
+
+* [Cookie handling](https://github.com/rumkin/plant/tree/master/examples) example.
+* [File serving](https://github.com/rumkin/plant/tree/master/examples) example.
+* [Context separations](https://github.com/rumkin/plant/tree/master/examples/context.js) example.
+* [Session](https://github.com/rumkin/plant/tree/master/examples/session.js) example.
+
+## Cascades
+
+Cascades is is isolated scopes presented with Context objects. Each level
+of cascade could modify context on it's own without touching overlaying context.
+
+Default context contains **req**, **res** and **socket** items. And you can
+specify your own context to underlaying cascades:
+
+```javascript
+plant.use(async function({req, res, socket}, next) => {
+    await next({});
+});
+
+plant.use(async (ctx, next) => {
+    ctx; // -> {}
+});
+```
+
+It allow to create predictable behaviour and avoid unexpected side effects to
+change. Plant itself overwrite default node.js HTTP Request and Response objects
+with Plant.Request and Plant.Response.
 
 ## Router
 
-To make applications modular it is possible to create routers factory:
+Plant designed to be API and WebApps ready. So it provide router out from the box.
 
 ```javascript
 const Plant = require('@plant/plant');
@@ -47,30 +91,371 @@ const {Router} = Plant;
 
 const plant = new Plant();
 
-const alice = {name: 'Alice'};
-const bob = {name: 'Bob'};
+// Greeting manager
+class GreetManager {
+    constructor(user) {
+        this.user = user;
+    }
 
-plant.use('/alice', userRouter(alice));
-plant.use('/bob', userRouter(bob));
+    greet() {
+        return `Hello, ${this.user}`;
+    }
+}
 
-function userRouter(user) {
+// Greeting manager router
+function greetingRouter(manager) {
     const router = new Router();
 
-    router.get('/name', ({res}) => {
-        res.json(user.name);
+    router.get('/', ({res}) => {
+        res.body = manager.greet();
     });
 
     return router;
 }
+
+plant.use('/guest', greetingRouter(new GreetManager('guest')));
+plant.use('/admin', greetingRouter(new GreetManager('Admin')));
+plant.use('/world', greetingRouter(new GreetManager('World')));
 ```
 
 Routers are stackable too so it's possible to create complex routers.
 
 ## API
 
+### Plant Type
+
+Plant is the handlers configuration tool. It allow to
+specify execution order, define routes and set uncaught error handler. It has no readable props.
+
+### Plant.constuctor()
+```text
+([options:PlantOptions]) -> Plant
+```
+
+#### PlantOptions Type
+```text
+{
+    handlers: Handlers[] = [],
+    errorHandler: (Error) -> void = console.log,
+    context: Object = {},
+}
+```
+
+Plant server configuration options.
+
+|Property|Description|
+|:-------|:----------|
+|handlers| Array of request handlers added to cascade|
+|errorHandler| This error handler will capture unhandled error when response is send|
+|context| Default context values. Empty object by default|
+
+### Plant.use()
+```text
+([route:String], ...handlers:Handler) -> Plant
+```
+
+This method do several things:
+1. If route specified add route.
+2. If handler count greater than one it creates turn for request which allow
+to change Request execution direction.
+
+##### Example
+
+```javascript
+function conditionHandler({res}, next) {
+    if ('n' in req.url.query) {
+        return next();
+    }
+}
+
+plant.use('/a', conditionHandler, ({res}) => res.text('n param passed'));
+plant.use('/a', ({res}) => res.text('n param not passed'));
+```
+
+### Plant.or()
+```text
+(...handlers: Handler) -> Router
+```
+
+Add handlers in parallel. Plant will iterate over handler until response body is set.
+
+##### Example
+
+```javascript
+plant.or(
+    // Executed. Send nothing, so go to the next handler.
+    ({req}) => {},
+    // Executed. Send 'ok'.
+    ({res}) => { res.body = 'ok'; },
+    // Not executed. Previous handler set response body.
+    ({req}) => {}
+);
+```
+
+### Plant.and()
+```text
+(...handlers:Handle) -> Plant
+```
+This method set new cascades. It's the same as call `use` for each handler.
+
+##### Example
+```javascript
+function add({i = 0, ctx}, next) {
+    return next({...ctx, i: i + 1});
+}
+
+// This ...
+plant.and(add, add, add, ({i, res}) => res.send(i)); // i is 3
+
+// ... is same as call `use` serially:
+plant.use(add);
+plant.use(add);
+plant.use(add);
+plant.use(({i, res}) => res.send(i)); // i is 3
+
+```
+
+### Plant.router()
+
+```text
+(route:Router, routes:RouterOptions) -> Plant
+```
+
+Route method initialize new router with `params` and add it into cascade.
+
+##### Example
+
+```javascript
+// Few useful handlers
+function handleGetUser({req, res}) { /* get user and return response */ }
+function handleUpdateUser({req, res}) {/* update user and return response */}
+
+// Configure with routes mapping.
+plant.router({
+    'get /users/:id': handleGetUser,
+    'put /users/:id': handleUpdateUser,
+});
+
+// Configure with factory function
+plant.router((router) => {
+    router.get('/users/:id', handleGetUser);
+    router.put('/users/:id', handleUpdateUser);
+});
+```
+
+### Plant.handler()
+
+```text
+() -> http.RequestListener
+```
+
+This method returns requestListener value for native node.js http/https server:
+
+##### Example
+
+```javascript
+http.createServer(plant.handler())
+.listen(8080);
+```
+
+### Handler Type
+
+This type specify cascadable function or object which has method to create such function.
+
+```javascript
+const router = new Router();
+router.get('/', ({res}) => {
+    res.body = 'Hello';
+});
+
+server.use(router.handler());
+```
+
+### Router Type
+
+Router allow to group url-dependent functions and extract params from URL.
+
+##### Example
+
+```javascript
+const plant = new Plant();
+const router = new Plant.Router;
+
+router.get('/', () => { /* get resource */ });
+router.post('/', () => { /* post resource */ });
+router.delete('/', () => { /* delete resource */ });
+
+plant.use(router);
+```
+
+### Router.get()
+
+```text
+(url:String, ...handlers:Handle) -> Router
+```
+
+##### Example
+
+```javascript
+router
+```
+
+### Request Type
+
+```text
+{
+    url: UrlObject,
+    method: String,
+    headers: Headers,
+    sender: String,
+    domains: String[],
+    path: String,
+    basePath: String,
+    body: Buffer|Null,
+    data: Object,
+    stream: Stream,
+}
+```
+
+|Property|Description|
+|:-------|:----------|
+|url| Url is a result of `url.parse` call. It's presented with [UrlObject](https://nodejs.org/dist/latest-v9.x/docs/api/url.html#url_legacy_urlobject) |
+|method| Lowercased HTTP method |
+|headers| WhatWG Headers object |
+|sender| Request sender URI. Usually it is an client IP address |
+|domains| Domains name separated by '.' in reverse order |
+|path| Current unprocessed pathname part |
+|basePath| Pathname part processed by overlaying handler |
+|body| Request body. It is `null` by default before body reading|
+|data| Data contains values passed within body JSON or Multipart Form|
+|stream| Is Readable stream of Request body|
+
+### Request.is()
+```text
+(type:String|String[]) -> Boolean
+```
+
+Determine if request header 'content-type' contains `type`. Needle `type` can be
+a mimetype('text/html') or shorthand ('json', 'html', etc.).
+
+This method uses [type-is](https://www.npmjs.com/package/type-is) package.
+
+### Response Type
+```text
+{
+    statusCode: Number,
+    headers: Headers,
+    body: Buffer|Stream|String|Null
+}
+```
+
+|Property|Description|
+|:-------|:----------|
+|statusCode| Status code. `200` By default|
+|headers| Response headers as Whatwg Headers object|
+|body| Response body. Default is `null`|
+
+### Response.status()
+```text
+(statusCode:number) -> Response
+```
+
+Set response `statusCode` property.
+
+##### Example
+
+```javascript
+res.status(200)
+.send('Hello');
+```
+
+### Response.redirect()
+
+```text
+(url:String) -> Response
+```
+
+Redirect page to another url. Set empty body.
+
+##### Example
+
+```javascript
+res.redirect('../users')
+.text('Page moved');
+```
+
+### Response.json()
+
+```text
+(json:*) -> Response
+```
+
+Convert JS value as response converting it to JSON string. Set `application/json` content type.
+
+```javascript
+res.json({number: 3.14159});
+```
+
+### Response.text()
+
+```text
+(text:String) -> Response
+```
+
+Send text as response. Set `text/plain` content type.
+
+##### Example
+
+```javascript
+res.text('3.14159');
+```
+
+### Response.html()
+
+```text
+(html:String) -> Response
+```
+Send string as response. Set `text/html` content type.
+
+##### Example
+
+```javascript
+res.html('<html><body>3.14159</body></html>');
+```
+
+### Response.stream()
+
+```text
+(stream:Readable) -> Response
+```
+Send Readable stream in response.
+
+##### Example
+
+```javascript
+res.headers.set('content-type', 'application/octet-stream');
+res.stream(fs.createReadStream(req.path));
+```
+
+### Response.send()
+
+```text
+(content:String|Buffer|Stream) -> Response
+```
+
+Set any string-like value as response.
+
+### Response.end()
+
+```text
+() -> Response
+```
+
+Set empty body.
+
 ### Headers interface
 
-In node.js request and response headers has different interfaces. Plant unifies them:
+Plant is using [WhatWG Headers](https://developer.mozilla.org/en-US/docs/Web/API/Headers) for Request and Response.
 
 ```javascript
 // Request headers
@@ -90,7 +475,8 @@ plant.use(async function({req, res}, next) {
 });
 ```
 
-Request and Response has common methods: `get`, `names`, `entries`. Response headers also has `set` and `remove` methods.
+> Request Headers object has immutable mode (Headers.MODE_IMMUTABLE) and
+according to specification it will throw each time when you try to modify it.
 
 ### Error capturing
 
@@ -140,18 +526,28 @@ Also plant is using express-like response methods: text, html, json, send:
 
 ```javascript
 plant.use(async function({req, res}) {
-    // Echo body
-    res.json(req.body);
+    res.send(req.stream);
 });
 ```
 
 ### Difference from Express
 
-The first is middlewares are called handlers. Plant has no `listen` method at all. Request object has `domains` property instead of `subdomains` and has *all* parts of host from tld zone. Plant doesn't resolve proxy headers and should to use special handler.
+The first: middlewares are called handlers. Plant is an object (not a function), it has no `listen` method at all.
+Request and Response objects are not ancestors of http.IncomingMessage and http.ServerResponse.
 
-### Other custom behavior
+Request object has `domains` property instead of `subdomains` and has *all* parts of host from tld zone:
 
-Method name has lower case.
+```javascript
+req.domains; // -> ['com', 'github', 'api'] for api.github.com
+```
+
+### Other custom behaviour
+
+Request method property value is lowercased:
+
+```javascript
+req.method; // -> 'get'
+```
 
 ## License
 

@@ -1,24 +1,70 @@
+/**
+ * @module Http.Headers
+ * @description WhatWG Headers implementation.
+ */
+
+/**
+ * @const {String} MODE_NONE - None mode flag. This mode allow Headers modification.
+ */
+const MODE_NONE = 'none';
+/**
+ * @const {String} MODE_IMMUTABLE - Immutable mode falg. This mode deny Headers modification.
+ */
+const MODE_IMMUTABLE = 'immutable';
+
+/**
+ * @typedef {ObjectInitials|ArrayInitials} HeadersInitials - Initial values for Headers. Could be object of strings or entires list.
+ */
+/**
+ * @typedef {Object.<String,String>} ObjectInitials Header initials as Object
+ */
+/**
+ * @typedef {Array.<Array.<String,String>>} ArrayInitials Header initials as array of entries.
+ */
+
+/**
+ * @class
+ * @classdesc WhatWG Headers implementation.
+ */
 class Headers {
-  constructor(_initials = [], mode = 'none') {
-    let initials = _initials;
-    if (! Array.isArray(_initials)) {
-      initials = Object.entries(_initials);
+  /**
+   * @param  {HeadersInitials} initials = [] Header initial value.
+   * @param  {String} mode = MODE_NONE Headers object mode.
+   * @return {Headers} Headers instance
+   * @constructor
+   */
+  constructor(initials = [], mode = MODE_NONE) {
+    if (! Array.isArray(initials)) {
+      initials = Object.entries(initials);
     }
 
     this._headers = new Map();
-    this._mode = 'none';
+    this._mode = MODE_NONE;
     initials.forEach(([name, value]) => {
       this.set(name, value);
     });
     this._mode = mode;
   }
 
+  /**
+   * Headers mode getter.
+   *
+   * @return {String} Should returns MODE_NONE or MODE_IMMUTABLE value.
+   */
   get mode() {
     return this._mode;
   }
 
+  /**
+   * Set header value. Overwrite previous values.
+   *
+   * @param  {String} _name  Header name.
+   * @param  {String} _value Header value.
+   * @returns {void}
+   * @throws {Error} Throws if current mode is immutable.
+   */
   set(_name, _value) {
-    if (this._mode !== 'none') {
+    if (this._mode !== MODE_NONE) {
       throw new TypeError(`Headers mode is ${this._mode}`);
     }
 
@@ -28,8 +74,16 @@ class Headers {
     this._headers.set(name, [value]);
   }
 
+  /**
+   * Append header. Preserve previous values.
+   *
+   * @param  {String} _name  Header name.
+   * @param  {String} _value Header value.
+   * @returns {void}
+   * @throws {Error} Throws if current mode is immutable.
+   */
   append(_name, _value) {
-    if (this._mode !== 'none') {
+    if (this._mode !== MODE_NONE) {
       throw new TypeError(`Headers mode is ${this._mode}`);
     }
 
@@ -44,8 +98,15 @@ class Headers {
     }
   }
 
+  /**
+   * Remove header from headers list
+   *
+   * @param  {String} _name Header name.
+   * @return {void}
+   * @throws {Error} Throws if current mode is immutable.
+   */
   delete(_name) {
-    if (this._mode !== 'none') {
+    if (this._mode !== MODE_NONE) {
       throw new TypeError(`Headers mode is ${this._mode}`);
     }
 
@@ -54,12 +115,42 @@ class Headers {
     );
   }
 
+  /**
+   * Specify whether header with name is contained in Headers list.
+   *
+   * @example
+   *
+   *  headers.set('accept', 'text/plain');
+   *  headers.has('accept');
+   *  // > true
+   *  headers.delete('accept');
+   *  headers.has('accept');
+   *  // > false
+   * @param  {String} _name Header name
+   * @return {Boolean} Returns true if one or more header values is set.
+   */
   has(_name) {
     return this._headers.has(
       normalizedName(_name)
     );
   }
 
+  /**
+   * Return header value by name. If there is several headers returns all of them
+   * concatenated by `, `.
+   *
+   * @example
+   *
+   *  headers.set('accept', 'text/plain');
+   *  headers.get('accept');
+   *  // > "text/plain"
+   *  headers.append('accept', 'text/html');
+   *  headers.get('accept');
+   *  // > "text/plain, text/html"
+   *
+   * @param  {String} _name Header name
+   * @return {String} Concatenated header values.
+   */
   get(_name) {
     const name = normalizedName(_name);
     if (! this._headers.has(name)) {
@@ -69,29 +160,53 @@ class Headers {
     return this._headers.get(name).join(', ');
   }
 
+  /**
+   * Return iterator of header names.
+   *
+   * @return {Iterable.<String>} Iterator of header names.
+   */
   keys() {
     return this._headers.keys();
   }
 
+  /**
+   * Return iterator of headers values.
+   *
+   * @return {Iterator.<Array.<String>>} Iterator of each header values.
+   */
   values() {
     return this._headers.values();
   }
 
+  /**
+   * Returns iterator of entries.
+   *
+   * @return {Iterator.<Array>} Return iterator of Object.entries alike values.
+   */
   entries() {
     return this._headers.entries();
   }
 
-  forEach(callback, thisArg) {
-    this._headers.forEach(callback, thisArg);
+  /**
+   * Call `callback` for each header entry.
+   *
+   * @param  {function(Array.<String>,String)} fn Function that calls for each hander entry.
+   * @param  {type} thisArg  This value for function.
+   * @returns {void}
+   */
+  forEach(fn, thisArg) {
+    this._headers.forEach(fn, thisArg);
   }
 }
 
+Headers.MODE_NONE = MODE_NONE;
+Headers.MODE_IMMUTABLE = MODE_IMMUTABLE;
 
 /**
- * normalizedName - Normalize HTTP Field name
+ * Normalize HTTP Field name
  *
  * @param  {*} _name HTTP Field name
- * @return {string}  Returns normalized HTTP Field name
+ * @return {String}  Returns normalized HTTP Field name
  * @throws {TypeError} If string contains unsupported characters
  */
 function normalizedName(_name) {
@@ -108,12 +223,11 @@ function normalizedName(_name) {
   return name.toLowerCase();
 }
 
-
 /**
- * normalizedValue - Normalize HTTP Field value.
+ * Normalize HTTP Field value.
  *
  * @param  {*} _value Anything convertable to valid HTTP Field value string
- * @return {string}   Normalized HTTP Field value.
+ * @return {String}   Normalized HTTP Field value.
  * @throws {TypeError} If value contains new line characters
  */
 function normalizedValue(_value) {

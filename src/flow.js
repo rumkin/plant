@@ -1,7 +1,12 @@
 /**
+ * @module Plant.Flow
+ * @description Methods to control cascade flows.
+ */
+
+/**
  * Create async cascade resolver.
- * @param  {...function()|Handlable} handlers Handlable async functions.
- * @return {function(object)} Returns function which pass context through the stack.
+ * @param {...HandleType} args Handlable async functions.
+ * @returns {function(Context)} Returns function which pass context through the stack.
  */
 function cascade(...args) {
   const resolver = async (initialCtx) => {
@@ -22,9 +27,10 @@ function cascade(...args) {
 }
 
 /**
- * Create async queue resolver which works while condition returns false.
- * @param  {function(object)} condition Condition function which returns bool.
- * @return {function(...function()|Handlable)} Handlable async queue handler creator.
+ * Creates async queue resolver which works while condition returns false.
+ *
+ * @param  {function(Context)} condition - Condition function which returns bool.
+ * @returns {function(...HandleType)} Handlable async queue handler creator.
  */
 function whileNot(condition) {
   return function(...handlers) {

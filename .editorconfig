@@ -9,7 +9,7 @@ indent_style = space
 insert_final_newline = true
 trim_trailing_whitespace = true
 
-[{*.js, package.json, .travis.yml}]
+[{*.js,*.json,.travis.yml}]
 indent_size = 2
 
 [*.md]

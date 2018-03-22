@@ -1,8 +1,7 @@
 node_modules
 npm-debug.log
-coverage
 *.pid
-
+docs/
 
 **/.DS_Store
 

@@ -1,11 +1,29 @@
-const {URL} = require('url');
-const cookie = require('cookie');
-const {Readable} = require('stream');
-const typeIs = require('type-is');
-const {isObject} = require('lodash');
-const Headers = require('./headers');
-const {readStream} = require('./utils');
+/**
+* @module Plant.CommonHandleType
+* @description Common Http Request and Response handlers.
+*/
 
+const {parse: parseUrl} = require('url');
+const cookie = require('cookie');
+const isObject = require('lodash.isobject');
+
+const Headers = require('./headers');
+const Request = require('./request');
+const Response = require('./response');
+
+/**
+ * @typedef {Object} NativeContext - Initial plant context with native instances for req and res.
+ * @prop {http.IncomingMessage} req - Request instance.
+ * @prop {http.ServerResponse} res - Response instance.
+ */
+
+/**
+ * getResolvedNetworkProps - Get host, port, remote ip and encryption from
+ * forward http headers.
+ *
+ * @param  {http.IncomingMessage} req - HTTP Request.
+ * @returns {Array<String,String,Boolean>} Return hostname, ip and encyption status as Array.
+ */
 function getResolvedNetworkProps(req) {
   const {remoteAddress} = req.connection;
   let ip = remoteAddress;
@@ -24,124 +42,45 @@ function getResolvedNetworkProps(req) {
       host = xForwardedHost;
     }
 
-    encrypted = req.headers['x-ssl'] === '1';
+    encrypted = req.headers['x-forwarded-proto'] === '1';
   }
 
   return [host, ip, encrypted];
 }
 
-class Request {
-  constructor({ip, headers, url, method, origin}) {
-    this.ip = ip;
-    this.url = url;
-    this.method = method;
-    this.headers = headers;
-    this.domains = /\.\d+$/.test(url.hostname)
-      ? []
-      : url.hostname.split('.').reverse();
-    this.path = url.pathname.replace(/\/+/g, '/');
-    this.basePath = '/';
-    this.body = {};
-    this.bodyStream = {
-      receive() {
-        return readStream(origin);
-      },
-    };
-  }
-
-  is(types) {
-    return typeIs.is(this.headers.get('content-type'), types);
-  }
-}
-
-function getRequestFrom(req) {
+/**
+ * createRequest - Create Plant Request from native http.IncomingMessage
+ *
+ * @param  {http.IncomingMessage} req Native Http request
+ * @return {Request} Returns `this`.
+ */
+function createRequest(req) {
   const [host, ip, encrypted] = getResolvedNetworkProps(req);
   const protocol = encrypted
     ? 'https'
     : 'http';
 
-  const urlString = `${protocol}://${host}${req.url}`;
-  const url = new URL(urlString);
+  const url = parseUrl(`${protocol}://${host}${req.url}`, true);
   const method = req.method.toLowerCase();
 
   const inReq = new Request({
-    ip, // TODO Remove???
+    sender: ip,
     method,
     url,
-    headers: new Headers(req.headers, 'immutable'),
+    headers: new Headers(req.headers, Headers.MODE_IMMUTABLE),
     origin: req,
   });
 
   return inReq;
 }
 
-class Response {
-  constructor({status = 200, headers = null, body = null} = {}) {
-    this.status = status;
-    this.headers = headers || new Headers();
-    this.body = body;
-  }
-
-  status(status) {
-    this.statusCode = status;
-    return this;
-  };
-
-  json(result) {
-    this.body = JSON.stringify(result);
-    this.headers.set('content-type', 'application/json');
-    // this.headers.set('content-length', Byffer.byteLength(this.body));
-
-    return this;
-  };
-
-  text(result, enc = 'utf8') {
-    this.headers.set('content-type', 'text/plain');
-    // this.headers.set('content-length', Buffer.byteLength(result, enc));
-    this.body = result;
-
-    return this;
-  };
-
-  html(result, enc = 'utf8') {
-    this.headers.set('content-type', 'text/html');
-    // this.headers.set('content-length', Buffer.byteLength(result, enc));
-    this.body = result;
-
-    return this;
-  };
-
-  sendStream(stream) {
-    if (typeof stream.pipe !== 'function') {
-      throw new TypeError('Not a Stream');
-    }
-
-    this.body = stream;
-
-    return this;
-  };
-
-  send(result) {
-    if (isObject(result) && (result instanceof Readable)) {
-      this.sendStream(result);
-    }
-    else {
-      this.body = String(result);
-    }
-
-    return this;
-  };
-
-  pipe(stream) {
-    return res.pipe(stream);
-  };
-
-  end() {
-    this.body = '';
-  };
-}
-
-function getResponseFrom(res) {
+/**
+ * createResponse - Create Plant.Response instance from http.ServerResponse.
+ *
+ * @param  {http.ServerResponse} res Nodejs http ServerResponse instance.
+ * @return {Response}     Plant.Response instance.
+ */
+function createResponse(res) {
   return new Response({
     status: res.statusCode,
     headers: new Headers(res.headers),
@@ -149,6 +88,15 @@ function getResponseFrom(res) {
   });
 }
 
+/**
+ * addCookieSupport - add methods to set cookies and current cookie data object.
+ *
+ * @param  {http.IncomingMessage} req - Native HTTP Request instance
+ * @param  {http.ServerResponse} res  - Native HTTP Response instance
+ * @param  {Request} inReq - Plant.Request instance
+ * @param  {Response} inRes - Plant.Response instance
+ * @return {void}
+ */
 function addCookieSupport(req, res, inReq, inRes) {
   if (inReq.headers.hasOwnProperty('cookie')) {
     inReq.cookies = cookie.parse(inReq.headers.cookie);
@@ -186,17 +134,17 @@ function addCookieSupport(req, res, inReq, inRes) {
   };
 }
 
-
 /**
  * commonHandler - Shim between nodejs HTTP and Plant HTTP Interface
  *
- * @param  {http.InnerMessage} {req Nodejs native Request instance.
- * @param  {http.ResponseMessage} res} Nodejs native Response instance.
+ * @param  {HttpContex} context - Default HTTP context.
  * @param  {function} next Default Plant's next method
+ * @return {void}
+ * @async
  */
 async function commonHandler({req, res}, next) {
-  const inReq = getRequestFrom(req);
-  const inRes = getResponseFrom(res);
+  const inReq = createRequest(req);
+  const inRes = createResponse(res);
 
   // Modify innner request and response object
   addCookieSupport(req, res, inReq, inRes);
@@ -213,21 +161,38 @@ async function commonHandler({req, res}, next) {
     res.setHeader(name, values);
   });
 
-  if (! isObject(inRes.body)) {
-    res.end(inRes.body);
+  const {body} = inRes;
+
+  if (isObject(body)) {
+    if (typeof body.pipe === 'function') {
+      res.flushHeaders();
+      body.pipe(res);
+    }
+    else {
+      throw new TypeError('Invalid body type');
+    }
   }
   else {
-    res.flushHeaders();
-    inRes.body.pipe(res);
+    res.end(body);
   }
 }
 
+/**
+ * errorHandler - Handle errorc from underlaying handlers. Should be top handler
+ * to return errors to client.
+ *
+ * @param  {NativeContext} context - Plant handler context object.
+ * @param  {Function} next - Next handler emitter.
+ * @return {void}
+ * @async
+ */
 async function errorHandler({req, res}, next) {
   try {
     await next();
   }
   catch (error) {
     console.error(error);
+
     if (! req.headersSent) {
       if (typeof error === 'number' && error < 600) {
         res.statusCode = error;

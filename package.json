@@ -1,26 +1,32 @@
 {
   "name": "@plant/plant",
-  "version": "0.9.0",
+  "version": "1.0.0",
   "description": "Web application framework",
   "main": "src/index.js",
   "scripts": {
     "start": "node .",
-    "cov": "istanbul cover node_modules/mocha/bin/_mocha -- -u exports -R spec test/**.spec.js",
     "test": "mocha test/**.spec.js",
     "lint": "npm run lint:js src/**.js",
-    "lint:js": "eslint"
+    "lint:js": "eslint",
+    "prebulish": "lint",
+    "jsdoc": "jsdoc",
+    "docgen": "jsdoc --configure .jsdoc.json --verbose"
   },
   "license": "MIT",
   "devDependencies": {
     "eslint": "^4.0.0",
     "istanbul": "^0.4.5",
+    "jsdoc": "^3.5.5",
+    "minami": "^1.2.3",
     "mocha": "^3.4.2",
     "node-fetch": "^2.0.0",
     "should": "^11.2.1"
   },
   "dependencies": {
     "cookie": "^0.3.1",
-    "lodash": "^4.17.4",
+    "lodash.isobject": "^3.0.2",
+    "lodash.isplainobject": "^4.0.6",
+    "lodash.isstring": "^4.0.1",
     "path-to-regexp": "^1.7.0",
     "type-is": "^1.6.15"
   },

@@ -1,3 +1,7 @@
+/**
+ * @module Plant.ServerFlow
+ * @description Flow control utils for Plant Cascade Server
+ */
 const {cascade, whileNot} = require('./flow.js');
 
 /**
@@ -24,7 +28,7 @@ function getHandler(handler) {
 /**
  * Create async request handlers queue. It iterate request handlers and if
  * request handler doesn't sent response it runs next request handler and so.
- * @param  {...function()|Handlable} handlers Handlable async functions.
+ * @param  {...(function()|Handlable)} handlers Handlable async functions.
  * @return {function(object,function)} Returns function which pass context through the queue.
  */
 const whileBodyIsNull = whileNot(function({res}) {
@@ -34,8 +38,8 @@ const whileBodyIsNull = whileNot(function({res}) {
 /**
  * Returns function that runs handlers until request headers are not sent.
  *
- * @param  {...function()|Handlable} args List of handlable values.
- * @return {function(object, funcition())} Returns function to pass value into handlers.
+ * @param  {...(function()|Handlable)} args - List of handlable values.
+ * @returns {function(object, function())} Returns function to pass value into handlers.
  */
 const or = function(...args) {
   return whileBodyIsNull(...args.map(getHandler));
@@ -44,38 +48,13 @@ const or = function(...args) {
 /**
  * Returns function that runs handlers in depth.
  *
- * @param  {...function()|Handlable} args List of handlable values.
- * @return {function(object} Returns function to pass value into handlers.
+ * @param  {...(function()|Handlable)} args - List of handlable values.
+ * @returns {function(object)} Returns function to pass value into handlers.
  */
 const and = function(...args) {
   return cascade(...args.map(getHandler));
 };
 
-
-/**
- * readStream - Read text stream in promise. Note that stream size should not
- * be greater than available memory.
- *
- * @param  {Stream.Readable} stream Data stream.
- * @return {Buffer}                 Concatenated stream data.
- */
-function readStream(stream) {
-  return new Promise((resolve, reject) => {
-    const chunks = [];
-
-    stream.on('data', (chunk) => {
-      chunks.push(chunk);
-    });
-
-    stream.on('end', () => {
-      resolve(Buffer.concat(chunks).toString());
-    });
-
-    stream.on('error', reject);
-  });
-}
-
 exports.or = or;
 exports.and = and;
 exports.getHandler = getHandler;
-exports.readStream = readStream;

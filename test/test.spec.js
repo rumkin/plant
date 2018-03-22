@@ -1,7 +1,15 @@
 const should = require('should');
 const fs = require('fs');
 
-const {createServer, readStream} = require('./utils.js');
+const {createServer} = require('./utils');
+function readStream(stream) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    stream.on('data', (chunk) => chunks.push(chunk));
+    stream.on('error', reject);
+    stream.on('end', () => resolve(Buffer.concat(chunks)));
+  });
+}
 
 const Server = require('..');
 const {and, or, Router} = Server;
@@ -60,7 +68,7 @@ describe('Server', function() {
     const server = createServer(Server.handler(
       async function({req, res}) {
         res.json({
-          ip: req.ip,
+          sender: req.sender,
           host: req.url.hostname,
         });
       }
@@ -82,7 +90,7 @@ describe('Server', function() {
     .then((result) => {
       should(result).be.instanceof(Object);
       should(result).has.ownProperty('host').which.equal('www.online');
-      should(result).has.ownProperty('ip').which.equal('127.0.0.2');
+      should(result).has.ownProperty('sender').which.equal('127.0.0.2');
     });
   });
 
@@ -127,7 +135,7 @@ describe('Server', function() {
         domains: req.domains,
         url: req.path,
         query: {
-          json: url.searchParams.get('json'),
+          ...url.query,
         },
       });
     });
@@ -150,7 +158,7 @@ describe('Server', function() {
       method: 'get',
       protocol: 'http:',
       host: 'some.custom.host.test',
-      port: '',
+      port: null,
       domains: ['test', 'host', 'custom', 'some'],
       url: '/request',
       query: {
@@ -163,7 +171,7 @@ describe('Server', function() {
     const server = createServer(Server.handler(
       async function({req}, next) {
         if (req.method !== 'GET') {
-          req.body = await req.bodyStream.receive();
+          req.body = await readStream(req.stream);
         }
 
         await next();
@@ -259,24 +267,23 @@ describe('Server', function() {
   });
 
   it('should make turns with use(h1, h2)', function() {
-    const server = createServer(Server.new()
-      .use(
-        async function({req}, next) {
-          if (req.path === '/turn') {
-            return await next();
-          }
-        },
-        async function({res}) {
-          res.text('turn');
+    const plant = Server.new();
+
+    plant.use(
+      async function({req}, next) {
+        if (req.path === '/turn') {
+          return await next();
         }
-      )
-      .use(
-        async function({res}) {
-          res.text('last');
-        }
-      )
-      .handler()
-    );
+      },
+      async function({res}) {
+        res.text('turn');
+      }
+    )
+    .use(async function({res}) {
+      res.text('last');
+    });
+
+    const server = createServer(plant.handler());
 
     server.listen();
 
@@ -290,24 +297,24 @@ describe('Server', function() {
   });
 
   it('should visit turn defined with use(h1, h2)', function() {
-    const server = createServer(Server.new()
-      .use(
-        async function({req}, next) {
-          if (req.path === '/turn') {
-            return await next();
-          }
-        },
-        async function({res}) {
-          res.text('turn');
+    const plant = Server.new()
+    .use(
+      async function({req}, next) {
+        if (req.path === '/turn') {
+          return await next();
         }
-      )
-      .use(
-        async function({res}) {
-          res.text('last');
-        }
-      )
-      .handler()
+      },
+      async function({res}) {
+        res.text('turn');
+      }
+    )
+    .use(
+      async function({res}) {
+        res.text('last');
+      }
     );
+
+    const server = createServer(plant.handler());
 
     server.listen();
 
@@ -447,11 +454,14 @@ describe('Server', function() {
       const router2 = new Router();
       const router3 = new Router();
 
-      router3.get('/:id', async function({req, res}) {
-        res.send(req.params.id);
+      router3.get('/param/:param', async function({req, res}) {
+        res.json({
+          ...req.params,
+          raw: 'raw' in req.url.query,
+        });
       });
 
-      router2.route('/users/', router3);
+      router2.route('/users/:user/', router3);
       router1.route('/api/', router2);
 
       const server = createServer(Server.handler(
@@ -464,9 +474,13 @@ describe('Server', function() {
         server.close();
       });
 
-      return server.fetch('/api/users/3')
-      .then((res) => res.text())
-      .then((result) => should(result).be.equal('3'));
+      return server.fetch('/api/users/3/param/id?raw')
+      .then((res) => res.json())
+      .then((result) => {
+        should(result).has.ownProperty('user').which.is.equal('3');
+        should(result).has.ownProperty('param').which.is.equal('id');
+        should(result).has.ownProperty('raw').which.is.equal(true);
+      });
     });
   });
 });

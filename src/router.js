@@ -1,8 +1,17 @@
-const path = require('path');
-const pathToRegexp = require('path-to-regexp');
-const {isPlainObject, isString} = require('lodash');
-const {or, and, getHandler} = require('./utils.js');
+/**
+* @module Plant.Router
+* @description Plant Server router
+*/
 
+const pathToRegexp = require('path-to-regexp');
+const isPlainObject = require('lodash.isplainobject');
+const isString = require('lodash.isstring');
+const {or, and, getHandler} = require('./server-flow.js');
+
+/**
+ * @class
+ * @classdesc Express-like Router implementation.
+ */
 class Router {
   static new(...args) {
     return new this(...args);
