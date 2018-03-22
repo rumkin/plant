@@ -11,6 +11,7 @@ const {commonHandler, errorHandler} = require('./handlers.js');
 const Router = require('./router');
 const Response = require('./response');
 const Request = require('./request');
+const Headers = require('./headers');
 
 /**
  * @function HandleFunc
@@ -244,3 +245,4 @@ Server.getHandler = getHandler;
 Server.Router = Router;
 Server.Request = Request;
 Server.Response = Response;
+Server.Headers = Headers;

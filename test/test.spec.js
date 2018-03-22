@@ -135,7 +135,7 @@ describe('Server', function() {
         domains: req.domains,
         url: req.path,
         query: {
-          ...url.query,
+          json: req.url.searchParams.get('json'),
         },
       });
     });
@@ -158,7 +158,7 @@ describe('Server', function() {
       method: 'get',
       protocol: 'http:',
       host: 'some.custom.host.test',
-      port: null,
+      port: '',
       domains: ['test', 'host', 'custom', 'some'],
       url: '/request',
       query: {
@@ -457,7 +457,7 @@ describe('Server', function() {
       router3.get('/param/:param', async function({req, res}) {
         res.json({
           ...req.params,
-          raw: 'raw' in req.url.query,
+          raw: req.url.searchParams.has('raw'),
         });
       });
 

@@ -3,11 +3,11 @@
 [![npm](https://img.shields.io/npm/v/@plant/plant.svg?style=flat-square)](https://npmjs.com/package/@plant/plant)
 [![Travis](https://img.shields.io/travis/rumkin/plant.svg?style=flat-square)](https://travis-ci.org/rumkin/plant)
 [![npm](https://img.shields.io/npm/dw/@plant/plant.svg?style=flat-square)](https://npmjs.com/package/@plant/plant)
-![](https://img.shields.io/badge/size-52%20KiB-blue.svg?style=flat-square)
+![](https://img.shields.io/badge/size-56%20KiB-blue.svg?style=flat-square)
 
 ---
 
-Plant is ES2017 WhatWG standard based web server created with modular architecture in mind
+Plant is WhatWG standards based web server, powered by ES2017, created with modular architecture in mind
 and functional design patterns on practice. It uses cascades (an isolated customizable contexts)
 to be modular and pure.
 
@@ -16,8 +16,8 @@ to be modular and pure.
 - Modular.
 - Powerful.
 - Predictable.
-- WhatWG standards friendly.
-- Lightweight (52Kb).
+- WhatWG standards based.
+- Lightweight (56Kb with comments).
 
 ## Install
 
@@ -69,11 +69,17 @@ specify your own context to underlaying cascades:
 
 ```javascript
 plant.use(async function({req, res, socket}, next) => {
-    await next({});
+    await next({}); // Set context empty
 });
 
 plant.use(async (ctx, next) => {
     ctx; // -> {}
+    await next({number: 3.14}); // Add number to context
+});
+
+plant.use(async (ctx, next) => {
+    ctx; // -> {number: 3.15}
+    await next(); // No context modification
 });
 ```
 
@@ -124,8 +130,9 @@ Routers are stackable too so it's possible to create complex routers.
 
 ### Plant Type
 
-Plant is the handlers configuration tool. It allow to
-specify execution order, define routes and set uncaught error handler. It has no readable props.
+Plant is the handlers configuration and flow manipulation instrument. It allow to
+specify execution order, define routes and set uncaught error handler.
+It has no readable props.
 
 ### Plant.constuctor()
 ```text
@@ -162,8 +169,8 @@ to change Request execution direction.
 ##### Example
 
 ```javascript
-function conditionHandler({res}, next) {
-    if ('n' in req.url.query) {
+function conditionHandler({req}, next) {
+    if (req.url.searchParams.has('n')) {
         return next();
     }
 }
@@ -288,23 +295,59 @@ router.delete('/', () => { /* delete resource */ });
 plant.use(router);
 ```
 
-### Router.get()
+### Router.all()
 
 ```text
 (url:String, ...handlers:Handle) -> Router
 ```
 
+Method to add handler for any HTTP method.
+
+### Router.get(), .post(), .put(), .patch(), .delete(), .head(), .options()
+
+```text
+(url:String, ...handlers:Handle) -> Router
+```
+
+Methods to add handler for exact HTTP method.
+
 ##### Example
 
 ```javascript
-router
+router.get('/users/:id', () => {});
+router.post('/users/', () => {});
+router.put('/users/:id', () => {});
+router.delete('/users/:id', () => {});
+// ...
+```
+
+### Router.route()
+
+```text
+(route:String, ...handlers:Router) -> Router
+```
+
+Add `handlers` into routes queue as new router. Subrouter will add matched
+url to `basePath` and reduce `path`. This is important for nested routers to
+receive url without prefix.
+
+##### Example
+```javascript
+router.route('/user', ({req}) => {
+    req.path; // -> '/'
+    req.basePath; // -> '/user'
+});
+router.get('/user', ({req}) => {
+    req.path; // -> '/user'
+    req.basePath; // -> '/'
+});
 ```
 
 ### Request Type
 
 ```text
 {
-    url: UrlObject,
+    url: URL,
     method: String,
     headers: Headers,
     sender: String,
@@ -319,7 +362,7 @@ router
 
 |Property|Description|
 |:-------|:----------|
-|url| Url is a result of `url.parse` call. It's presented with [UrlObject](https://nodejs.org/dist/latest-v9.x/docs/api/url.html#url_legacy_urlobject) |
+|url| Url is a WhatWG [URL](https://nodejs.org/dist/latest-v9.x/docs/api/url.html#url_class_url) |
 |method| Lowercased HTTP method |
 |headers| WhatWG Headers object |
 |sender| Request sender URI. Usually it is an client IP address |
@@ -390,7 +433,7 @@ res.redirect('../users')
 (json:*) -> Response
 ```
 
-Convert JS value as response converting it to JSON string. Set `application/json` content type.
+Send JS value as response with conversion it to JSON string. Set `application/json` content type.
 
 ```javascript
 res.json({number: 3.14159});
@@ -480,25 +523,29 @@ according to specification it will throw each time when you try to modify it.
 
 ### Error capturing
 
-With cascade async model errors could be captured with try/catch:
+Async cascade model allow to capture errors with try/catch:
 
 ```javascript
-plant.use(async function({req, res}, next) {
+async function errorHandler({req, res}, next) {
     try {
-        await next();
-    } catch (error) {
+        await next(); // Run all underlaying handlers
+    }
+    catch (error) {
         res.status(500);
 
         if (req.is('json')) {
             res.json({
                 error: error.message,
             });
-        } else {
+        }
+        else {
             res.text(error.message);
         }
     }
-});
+};
 ```
+
+---
 
 ### Difference from Koa
 
@@ -552,3 +599,7 @@ req.method; // -> 'get'
 ## License
 
 MIT.
+
+## Copyright
+
+&copy; Rumkin 2017-2018

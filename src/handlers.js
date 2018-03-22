@@ -3,7 +3,7 @@
 * @description Common Http Request and Response handlers.
 */
 
-const {parse: parseUrl} = require('url');
+const {URL} = require('url');
 const cookie = require('cookie');
 const isObject = require('lodash.isobject');
 
@@ -60,7 +60,7 @@ function createRequest(req) {
     ? 'https'
     : 'http';
 
-  const url = parseUrl(`${protocol}://${host}${req.url}`, true);
+  const url = new URL(`${protocol}://${host}${req.url}`);
   const method = req.method.toLowerCase();
 
   const inReq = new Request({
