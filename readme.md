@@ -54,10 +54,10 @@ http.createServer(plant.handler())
 
 ## Examples
 
-* [Cookie handling](https://github.com/rumkin/plant/tree/master/examples) example.
-* [File serving](https://github.com/rumkin/plant/tree/master/examples) example.
-* [Context separations](https://github.com/rumkin/plant/tree/master/examples/context.js) example.
-* [Session](https://github.com/rumkin/plant/tree/master/examples/session.js) example.
+* [Cookie handling](https://github.com/rumkin/plant/tree/master/example/cookie.js) example.
+* [File serving](https://github.com/rumkin/plant/tree/master/example/file.js) example.
+* [Context separations](https://github.com/rumkin/plant/tree/master/example/context.js) example.
+* [Session](https://github.com/rumkin/plant/tree/master/example/session.js) example.
 
 ## Cascades
 
