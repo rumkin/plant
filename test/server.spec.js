@@ -1,48 +1,42 @@
 const should = require('should');
 const fs = require('fs');
 
-const {createServer} = require('./utils');
-function readStream(stream) {
-  return new Promise((resolve, reject) => {
-    const chunks = [];
-    stream.on('data', (chunk) => chunks.push(chunk));
-    stream.on('error', reject);
-    stream.on('end', () => resolve(Buffer.concat(chunks)));
-  });
-}
+const {createServer, readStream} = require('./utils');
 
 const Server = require('..');
-const {and, or, Router} = Server;
+const {and, or} = Server;
 
-describe('flow', function() {
-  it ('should iterate over `and`', function() {
-    let round = 0;
+describe('Plant.Flow', function() {
+  describe('Cascade', function() {
+    it ('should iterate over `and`', function() {
+      let round = 0;
 
-    const fn = and(
-      async function(ctx, next) {
-        round += 1;
-        should(round).be.equal(1);
+      const fn = and(
+        async function(ctx, next) {
+          round += 1;
+          should(round).be.equal(1);
 
-        await next();
+          await next();
 
-        should(round).be.equal(3);
-      },
-      async function(ctx, next) {
-        round += 1;
-        should(round).be.equal(2);
+          should(round).be.equal(3);
+        },
+        async function(ctx, next) {
+          round += 1;
+          should(round).be.equal(2);
 
-        await next();
+          await next();
 
-        round += 1;
-      }
-    );
+          round += 1;
+        }
+      );
 
-    return fn(null, null);
+      return fn(null, null);
+    });
   });
 });
 
-describe('Server', function() {
-  it('should serve requests', function() {
+describe('Server()', function() {
+  it('Should serve HTTP requests', function() {
     const server = createServer(Server.handler(
       async function({req, res}) {
         res.send(req.headers.get('content-type'));
@@ -64,7 +58,7 @@ describe('Server', function() {
     .then((result) => should(result).be.equal('text/plain'));
   });
 
-  it('should update to proxy values', function() {
+  it('Should update to proxy values', function() {
     const server = createServer(Server.handler(
       async function({req, res}) {
         res.json({
@@ -94,7 +88,7 @@ describe('Server', function() {
     });
   });
 
-  it('should determine request mime-type', function() {
+  it('Should determine request mime-type', function() {
     const server = createServer(Server.handler(
       async function({req, res}) {
         if (req.is('html')) {
@@ -121,7 +115,7 @@ describe('Server', function() {
     .then((result) => should(result).be.equal('html'));
   });
 
-  it('should parse url data and hosts', function() {
+  it('Should parse url data and hosts', function() {
     const plant = new Server();
 
     plant.use(async function({req, res}) {
@@ -167,7 +161,7 @@ describe('Server', function() {
     }));
   });
 
-  it('should read body', function() {
+  it('Should read body', function() {
     const server = createServer(Server.handler(
       async function({req}, next) {
         if (req.method !== 'GET') {
@@ -195,7 +189,7 @@ describe('Server', function() {
     .then((result) => should(result).be.equal('test'));;
   });
 
-  it('should specify response headers', function() {
+  it('Should send response headers', function() {
     const server = createServer(Server.handler(
       async function({res}) {
         res.headers.set('content-type', 'application/json');
@@ -218,7 +212,7 @@ describe('Server', function() {
     .then((result) => should(result).be.equal(null));
   });
 
-  it('should use or handler', function() {
+  it('Should use or handler', function() {
     const server = createServer(Server.handler(
       or(
         async function() {},
@@ -240,7 +234,7 @@ describe('Server', function() {
     .then((result) => should(result).be.equal('last'));
   });
 
-  it('should use `and` handler', function() {
+  it('Should use `and` handler', function() {
     const server = createServer(Server.handler(
       and(
         async function(ctx, next) {
@@ -266,7 +260,7 @@ describe('Server', function() {
     .then((result) => should(result).be.equal('last'));
   });
 
-  it('should make turns with use(h1, h2)', function() {
+  it('Should make turns with use(h1, h2)', function() {
     const plant = Server.new();
 
     plant.use(
@@ -296,7 +290,7 @@ describe('Server', function() {
     .then((result) => should(result).be.equal('last'));
   });
 
-  it('should visit turn defined with use(h1, h2)', function() {
+  it('Should visit turn defined with use(h1, h2)', function() {
     const plant = Server.new()
     .use(
       async function({req}, next) {
@@ -327,7 +321,7 @@ describe('Server', function() {
     .then((result) => should(result).be.equal('turn'));
   });
 
-  it('should set cookies', function(){
+  it('Should set cookies', function(){
     const server = createServer(Server.handler(
       async function({res}) {
         res.setCookie('one', 1);
@@ -356,7 +350,7 @@ describe('Server', function() {
     });
   });
 
-  it('should output streams', function(){
+  it('Should output streams', function(){
     const server = createServer(Server.handler(
       async function({res}) {
         res.send(fs.createReadStream(__filename));
@@ -377,102 +371,6 @@ describe('Server', function() {
     .then((res) => res.text())
     .then((body) => {
       should(body).be.equal(fs.readFileSync(__filename, 'utf8'));
-    });
-  });
-
-  describe('Router', function(){
-    it('should parse route params', function() {
-      const router = new Router();
-
-      router.get('/users/:id', async function({req, res}) {
-        res.send(req.params.id);
-      });
-
-      const server = createServer(Server.handler(router));
-
-      server.listen();
-
-      after(function() {
-        server.close();
-      });
-
-      return server.fetch('/users/1')
-      .then((res) => res.text())
-      .then((result) => should(result).be.equal('1'));
-    });
-
-    it('should define several method handlers with addRoute()', function() {
-      const router = new Router();
-
-      router.addRoute(['post', 'get'], '/users/', async function({res}) {
-        res.send('1');
-      });
-
-      const server = createServer(Server.handler(router));
-
-      server.listen();
-
-      after(function() {
-        server.close();
-      });
-
-      return server.fetch('/users/', {method: 'get'})
-      .then((res) => res.text())
-      .then((result) => should(result).be.equal('1'));
-    });
-
-    it('should use subrouter', function() {
-      const router = new Router();
-
-      router.route('/users/', Router.handler({
-        'GET /:id': async function({req, res}) {
-          res.send(req.params.id);
-        },
-      }));
-
-      const server = createServer(Server.handler(router));
-
-      server.listen();
-
-      after(function() {
-        server.close();
-      });
-
-      return server.fetch('/users/2')
-      .then((res) => res.text())
-      .then((result) => should(result).be.equal('2'));
-    });
-
-    it('should use nested subrouters', function() {
-      const router1 = new Router();
-      const router2 = new Router();
-      const router3 = new Router();
-
-      router3.get('/param/:param', async function({req, res}) {
-        res.json({
-          ...req.params,
-          raw: req.url.searchParams.has('raw'),
-        });
-      });
-
-      router2.route('/users/:user/', router3);
-      router1.route('/api/', router2);
-
-      const server = createServer(Server.handler(router1));
-
-      server.listen();
-
-      after(function() {
-        server.close();
-      });
-
-      return server.fetch('/api/users/3/param/id?raw')
-      .then((res) => res.json())
-      .then((result) => {
-        should(result).has.ownProperty('user').which.is.equal('3');
-        should(result).has.ownProperty('param').which.is.equal('id');
-        should(result).has.ownProperty('raw').which.is.equal(true);
-      });
     });
   });
 });
