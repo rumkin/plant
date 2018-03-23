@@ -7,7 +7,7 @@ const isPlainObject = require('lodash.isplainobject');
 const isString = require('lodash.isstring');
 
 const {and, or, getHandler} = require('./server-flow');
-const {commonHandler, errorHandler} = require('./handlers.js');
+const {commonHandler, cookieHandler, errorHandler} = require('./handlers.js');
 const Router = require('./router');
 const Response = require('./response');
 const Request = require('./request');
@@ -106,10 +106,13 @@ class Server {
    * @param  {ServerOptions} options
    * @return {Server} Server instance.
    */
-  constructor({handlers, context = {}, onError} = {}) {
-    this.handlers = handlers
-      ? [...handlers.map(getHandler)]
-      : [errorHandler, commonHandler];
+  constructor({handlers = [], context = {}, onError} = {}) {
+    this.handlers = [
+      errorHandler,
+      commonHandler,
+      cookieHandler,
+      ...handlers.map(getHandler),
+    ];
 
     this.context = Object.assign({}, context);
     this.onError = onError;

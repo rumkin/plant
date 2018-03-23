@@ -1,5 +1,12 @@
+/**
+ * @module Plant
+ */
+
 const {Readable} = require('stream');
 const isObject = require('lodash.isobject');
+const isPlainObject = require('lodash.isplainobject');
+
+const Headers = require('./headers');
 
 /**
  * @class
@@ -7,13 +14,44 @@ const isObject = require('lodash.isobject');
  *
  * @prop {Number} statusCode - Response status code
  * @prop {Headers} headers - Response headers
- * @prop {Null|String|Readable} body - Response body.
+ * @prop {Null|Buffer|String|Readable} body - Response body.
  */
 class Response {
-  constructor({status = 200, headers = new Headers(), body = null} = {}) {
-    this.statusCode = status;
-    this.headers = headers;
+  /**
+   * @typedef {Object} ResponseOptions Options for Response constructor.
+   * @param {Number} statusCode=200 Response status code.
+   * @param {Headers|Object} [headers] Response headers.
+   * @param {String|Buffer|Readable|Null} body=null Response body.
+   */
+  /**
+   * @param {Response.Options} options={} Response options object.
+   * @throws {Error} If passed headers has immutable mode.
+   * @constructor
+   */
+  constructor({statusCode = 200, headers = new Headers, body = null} = {}) {
+    this.statusCode = statusCode;
+
+    if (isPlainObject(headers)) {
+      this.headers = new Headers(headers);
+    }
+    else if (headers.mode === Headers.MODE_IMMUTABLE) {
+      throw new Error(`Invalid headers mode: ${headers.mode}`);
+    }
+    else {
+      this.headers = headers;
+    }
+
     this.body = body;
+  }
+
+  /**
+   * Specify whether response is successful and returns status code in
+   * range of 200 and 299.
+   *
+   * @return {Boolean} True when status code is in success range.
+   */
+  get ok() {
+    return this.statusCode > 199 && this.statusCode < 300;
   }
 
   /**

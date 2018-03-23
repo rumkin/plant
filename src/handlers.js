@@ -11,10 +11,20 @@ const Headers = require('./headers');
 const Request = require('./request');
 const Response = require('./response');
 
+const {as} = require('./utils/types');
+const {Readable} = require('stream');
+
 /**
- * @typedef {Object} NativeContext - Initial plant context with native instances for req and res.
+ * @typedef {Object} NativeContext - Initial http context with native instances for req and res.
  * @prop {http.IncomingMessage} req - Request instance.
  * @prop {http.ServerResponse} res - Response instance.
+ */
+
+/**
+ * @typedef {Object} PlantContext - Default plant context with plant's instances for req and res.
+ * @prop {Request} req - Request instance.
+ * @prop {Response} res - Response instance.
+ * @prop {Object} socket - Request socket.
  */
 
 /**
@@ -64,11 +74,11 @@ function createRequest(req) {
   const method = req.method.toLowerCase();
 
   const inReq = new Request({
-    sender: ip,
     method,
     url,
     headers: new Headers(req.headers, Headers.MODE_IMMUTABLE),
-    origin: req,
+    stream: as(req, Readable),
+    sender: ip,
   });
 
   return inReq;
@@ -89,34 +99,32 @@ function createResponse(res) {
 }
 
 /**
- * addCookieSupport - add methods to set cookies and current cookie data object.
+ * Adds methods to set cookies and current cookie data object.
  *
- * @param  {http.IncomingMessage} req - Native HTTP Request instance
- * @param  {http.ServerResponse} res  - Native HTTP Response instance
- * @param  {Request} inReq - Plant.Request instance
- * @param  {Response} inRes - Plant.Response instance
+ * @param  {Request} req - Plant.Request instance
+ * @param  {Response} res - Plant.Response instance
  * @return {void}
  */
-function addCookieSupport(req, res, inReq, inRes) {
-  if (inReq.headers.hasOwnProperty('cookie')) {
-    inReq.cookies = cookie.parse(inReq.headers.cookie);
+function addCookieSupport(req, res) {
+  if (req.headers.hasOwnProperty('cookie')) {
+    req.cookies = cookie.parse(req.headers.cookie);
   }
   else {
-    inReq.cookies = {};
+    req.cookies = {};
   }
 
   // Set new cookie value
-  inRes.setCookie = inRes.cookie = function(cookieName, value, options) {
+  res.setCookie = res.cookie = function(cookieName, value, options) {
     const opts = Object.assign({path: '/'}, options);
     const headerValue = cookie.serialize(cookieName, String(value), opts);
 
-    inRes.headers.append('set-cookie', headerValue);
+    res.headers.append('set-cookie', headerValue);
 
     return this;
   };
 
   // Remove cookie by name
-  inRes.clearCookie = function(cookieName, options) {
+  res.clearCookie = function(cookieName, options) {
     const opts = Object.assign({expires: new Date(1), path: '/'}, options);
     const value = cookie.serialize(cookieName, '', opts);
 
@@ -126,8 +134,8 @@ function addCookieSupport(req, res, inReq, inRes) {
   };
 
   // Remove all cookies
-  inRes.clearCookies = function(options) {
-    Object.getOwnPropertyNames(inReq.cookies)
+  res.clearCookies = function(options) {
+    Object.getOwnPropertyNames(req.cookies)
     .forEach((cookieName) => {
       this.clearCookie(cookieName, options);
     });
@@ -146,16 +154,13 @@ async function commonHandler({req, res}, next) {
   const inReq = createRequest(req);
   const inRes = createResponse(res);
 
-  // Modify innner request and response object
-  addCookieSupport(req, res, inReq, inRes);
-
   await next({req: inReq, res: inRes, socket: req.socket});
 
   if (inRes.body === null) {
     inRes.status(404).text('Nothing found');
   }
 
-  res.statusCode = inRes.statusCode || 200;
+  res.statusCode = inRes.statusCode;
 
   inRes.headers.forEach((values, name) => {
     res.setHeader(name, values);
@@ -175,6 +180,18 @@ async function commonHandler({req, res}, next) {
   else {
     res.end(body);
   }
+}
+
+/**
+ * Add cookie controlls to request and response objects.
+ *
+ * @param  {PlantContext} context Plant Context.
+ * @param  {function([Object])} next Next cascade handler emitter,
+ * @returns {void} Returns nothing.
+ */
+function cookieHandler({req, res}, next) {
+  addCookieSupport(req, res);
+  return next();
 }
 
 /**
@@ -210,4 +227,5 @@ async function errorHandler({req, res}, next) {
 }
 
 exports.commonHandler = commonHandler;
+exports.cookieHandler = cookieHandler;
 exports.errorHandler = errorHandler;

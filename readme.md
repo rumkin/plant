@@ -13,11 +13,8 @@ to be modular and pure.
 
 ## 💪 Features
 
-- Modular.
-- Powerful.
-- Predictable.
 - WhatWG standards based.
-- Lightweight (56Kb with comments).
+- Lightweight (56Kb _with comments_).
 
 ## Install
 
@@ -124,7 +121,7 @@ plant.use('/admin', greetingRouter(new GreetManager('Admin')));
 plant.use('/world', greetingRouter(new GreetManager('World')));
 ```
 
-Routers are stackable too so it's possible to create complex routers.
+Routers are stackable too so it's possible to combine them into complex router.
 
 ## API
 
@@ -373,9 +370,30 @@ router.get('/user', ({req}) => {
 |data| Data contains values passed within body JSON or Multipart Form|
 |stream| Is Readable stream of Request body|
 
+### Request.Request()
+```text
+(options:RequestOptions) -> Request
+```
+
+Creates and configure Request instance. Headers passed to request object should
+be in immutable mode.
+
+#### RequestOptions
+```text
+{
+    method:String = 'get',
+    url:String|URL,
+    headers:Object|Headers = {},
+    sender:String,
+    body:Buffer|Null=null,
+    data:Object={},
+    stream:Readable|Null=null,
+}
+```
+
 ### Request.is()
 ```text
-(type:String|String[]) -> Boolean
+(type:String) -> Boolean
 ```
 
 Determine if request header 'content-type' contains `type`. Needle `type` can be
@@ -383,20 +401,61 @@ a mimetype('text/html') or shorthand ('json', 'html', etc.).
 
 This method uses [type-is](https://www.npmjs.com/package/type-is) package.
 
+### Request.type()
+```text
+(types:String[]) -> String|Null
+```
+
+Check if content-type header contains one of the passed `types`. If so returns
+matching value either returns `null`.
+
+##### Example
+```javascript
+switch(req.type(['json', 'multipart'])) {
+    case 'json':
+        req.data = JSON.parse(req.body);
+        break;
+    case 'multipart':
+        req.data = parseMultipart(req.body);
+        break;
+    default:
+        req.data = {};
+}
+```
+
 ### Response Type
 ```text
 {
+    ok: Boolean,
     statusCode: Number,
     headers: Headers,
-    body: Buffer|Stream|String|Null
+    body: Buffer|Stream|String|Null,
 }
 ```
 
 |Property|Description|
 |:-------|:----------|
+|ok| True if statusCode is in range of 200 and 299|
 |statusCode| Status code. `200` By default|
 |headers| Response headers as Whatwg Headers object|
 |body| Response body. Default is `null`|
+
+### Response.Response()
+```text
+(options:ResponseOptions) -> Request
+```
+
+Creates and configure response options. Headers passed as WhatWG instance should
+have mode 'none'.
+
+#### ResponseOptions
+```text
+{
+    statusCode:Number=200,
+    headers:Headers|Object={},
+    body:Buffer|Stream|String|Null=null,
+}
+```
 
 ### Response.status()
 ```text
