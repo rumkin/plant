@@ -103,7 +103,7 @@ class Server {
   /**
    * @constructor
    *
-   * @param  {ServerOptions} options
+   * @param  {ServerOptions} options Server options params.
    * @return {Server} Server instance.
    */
   constructor({handlers = [], context = {}, onError} = {}) {

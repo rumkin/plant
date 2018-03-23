@@ -134,6 +134,7 @@ class Router {
    *
    * @param {String} route Route URL or pattern.
    * @param {...HandleType} handlers Subroute handlers.
+   * @returns {void} No return value.
    */
   route(route, ...handlers) {
     this.addRoute(null, route, ...handlers);
