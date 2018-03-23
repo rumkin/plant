@@ -14,7 +14,8 @@ to be modular and pure.
 ## 💪 Features
 
 - WhatWG standards based.
-- Lightweight (56Kb _with comments_).
+- Lightweight: **56Kb** with jsdoc comments.
+- Fast (like Express): **14K** req/sec on echo test.
 
 ## Install
 
@@ -83,6 +84,27 @@ plant.use(async (ctx, next) => {
 It allow to create predictable behaviour and avoid unexpected side effects to
 change. Plant itself overwrite default node.js HTTP Request and Response objects
 with Plant.Request and Plant.Response.
+
+### Gzip example
+
+Cascades allow to process responses before sanding. For example you can gzip
+response body:
+
+```javascript
+plant.use(async ({req, res}, next) => {
+    await next();
+    // Create gzip encoder.
+    const gzip = zlib.createGzip();
+    // Get response body
+    const {body} = res;
+    // Set Gzip encoding
+    res.headers.set('content-encoding', 'gzip');
+    // Replace body with stream
+    res.stream(gzip);
+    // Write data to gzip and close stream.
+    gzip.end(body);
+});
+```
 
 ## Router
 

@@ -10,10 +10,12 @@
     "lint:js": "eslint",
     "prebulish": "lint",
     "jsdoc": "jsdoc",
-    "docgen": "jsdoc --configure .jsdoc.json --verbose"
+    "docgen": "jsdoc --configure .jsdoc.json --verbose",
+    "bench": "bash -c 'node example/hello.js &\npid=$!\nautocannon -p 1 -c 100 http://localhost:8080\nkill -9 $pid'"
   },
   "license": "MIT",
   "devDependencies": {
+    "autocannon": "^2.1.0",
     "eslint": "^4.0.0",
     "istanbul": "^0.4.5",
     "jsdoc": "^3.5.5",

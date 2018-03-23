@@ -6,12 +6,20 @@
 const isPlainObject = require('lodash.isplainobject');
 const isString = require('lodash.isstring');
 
+const httpHandler = require('./handlers/http-handler');
+const cookieHandler = require('./handlers/cookie-handler');
 const {and, or, getHandler} = require('./server-flow');
-const {commonHandler, cookieHandler, errorHandler} = require('./handlers.js');
 const Router = require('./router');
 const Response = require('./response');
 const Request = require('./request');
 const Headers = require('./headers');
+
+/**
+ * @typedef {Object} Plant.Context - Default plant context with plant's instances for req and res.
+ * @prop {Request} req - Request instance.
+ * @prop {Response} res - Response instance.
+ * @prop {Object} socket - Request socket.
+ */
 
 /**
  * @function HandleFunc
@@ -108,8 +116,7 @@ class Server {
    */
   constructor({handlers = [], context = {}, onError} = {}) {
     this.handlers = [
-      errorHandler,
-      commonHandler,
+      httpHandler,
       cookieHandler,
       ...handlers.map(getHandler),
     ];
@@ -211,29 +218,31 @@ class Server {
    */
   handler() {
     const cascade = and(...this.handlers);
-    const context = this.context;
-    const onError = this.onError;
+    const context = {...this.context};
 
-    return function(req, res) {
+    return (req, res) => {
       cascade(Object.assign({}, context, {req, res}))
-      .catch((error) => {
-        // Write error to res.
-        if (! res.headersSent) {
-          res.statusCode = 500;
-          res.write('Internal server error');
-          res.end();
-        }
-        else if (onError) {
-          res.end(); // End request
-          onError(error);
-        }
-        else {
-          res.end(); // End request
-          console.error(error);
-          throw error;
-        }
-      });
+      .catch(this.handleRequestError.bind(this, req, res));
     };
+  }
+
+  handleRequestError(req, res, error) {
+    // Write error to res.
+    if (! res.headersSent) {
+      res.statusCode = 500;
+      res.setHeader('content-type', 'text/plain');
+      res.write('Internal server error:\n' + error.stack);
+      res.end();
+    }
+    else if (this.onError) {
+      res.end(); // End request
+      this.onError(error);
+    }
+    else {
+      res.end(); // End request
+      console.error(error);
+      throw error;
+    }
   }
 }
 

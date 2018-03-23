@@ -3,24 +3,26 @@
  * @description Methods to control cascade flows.
  */
 
+function noop() {}
+
 /**
  * Create async cascade resolver.
  * @param {...HandleType} args Handlable async functions.
  * @returns {function(Context)} Returns function which pass context through the stack.
  */
 function cascade(...args) {
-  const resolver = async (initialCtx) => {
+  const resolver = (initialCtx) => {
     let ctx = initialCtx;
 
-    const next = (handlers) => async (newCtx) => {
+    async function next(handlers, newCtx) {
       ctx = newCtx || ctx;
 
       if (handlers.length) {
-        return await handlers[0](Object.assign({}, ctx), next(handlers.slice(1)));
+        return handlers[0](Object.assign({}, ctx), next.bind(null, handlers.slice(1)));
       }
-    };
+    }
 
-    return next(args)(ctx);
+    return next(args, ctx);
   };
 
   return resolver;
@@ -34,18 +36,20 @@ function cascade(...args) {
  */
 function whileNot(condition) {
   return function(...handlers) {
-    return async function(ctx, next) {
-      for (const handler of handlers) {
-        await handler(Object.assign({}, ctx), () => {});
-
-        if (condition(ctx) === true) {
-          return;
-        }
-      }
-
-      await next();
-    };
+    return conditional.bind(null, handlers, condition);
   };
+}
+
+async function conditional(handlers, condition, ctx, next) {
+  for (const handler of handlers) {
+    await handler(Object.assign({}, ctx), noop);
+
+    if (condition(ctx) === true) {
+      return;
+    }
+  }
+
+  await next();
 }
 
 exports.cascade = cascade;

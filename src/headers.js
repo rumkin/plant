@@ -38,12 +38,15 @@ class Headers {
       initials = Object.entries(initials);
     }
 
-    this._headers = new Map();
-    this._mode = MODE_NONE;
-    initials.forEach(([name, value]) => {
-      this.set(name, value);
-    });
+    this._headers = new Map(initials.map(([key, value]) => ([key, [value]])));
     this._mode = mode;
+
+    if (mode !== MODE_NONE) {
+      this.set =
+      this.append =
+      this.delete =
+      this.wrongMode;
+    }
   }
 
   /**
@@ -64,10 +67,6 @@ class Headers {
    * @throws {Error} Throws if current mode is immutable.
    */
   set(_name, _value) {
-    if (this._mode !== MODE_NONE) {
-      throw new TypeError(`Headers mode is ${this._mode}`);
-    }
-
     const name = normalizedName(_name);
     const value = normalizedValue(_value);
 
@@ -83,10 +82,6 @@ class Headers {
    * @throws {Error} Throws if current mode is immutable.
    */
   append(_name, _value) {
-    if (this._mode !== MODE_NONE) {
-      throw new TypeError(`Headers mode is ${this._mode}`);
-    }
-
     const name = normalizedName(_name);
     const value = normalizedValue(_value);
 
@@ -106,10 +101,6 @@ class Headers {
    * @throws {Error} Throws if current mode is immutable.
    */
   delete(_name) {
-    if (this._mode !== MODE_NONE) {
-      throw new TypeError(`Headers mode is ${this._mode}`);
-    }
-
     this._headers.delete(
       normalizedName(_name)
     );
@@ -196,6 +187,17 @@ class Headers {
    */
   forEach(fn, thisArg) {
     this._headers.forEach(fn, thisArg);
+  }
+
+  /**
+   * Throw TypeError with prevent changes message.
+   *
+   * @return {void} No return value.
+   * @throws {TypeError} Everytime it's called.
+   * @private
+   */
+  wrongMode() {
+    throw new TypeError(`Headers mode is ${this.mode}`);
   }
 }
 

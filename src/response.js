@@ -28,7 +28,7 @@ class Response {
    * @throws {Error} If passed headers has immutable mode.
    * @constructor
    */
-  constructor({statusCode = 200, headers = new Headers, body = null} = {}) {
+  constructor({statusCode = 200, headers = new Headers(), body = null} = {}) {
     this.statusCode = statusCode;
 
     if (isPlainObject(headers)) {

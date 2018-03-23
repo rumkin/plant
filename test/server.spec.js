@@ -58,6 +58,24 @@ describe('Server()', function() {
     .then((result) => should(result).be.equal('text/plain'));
   });
 
+  it('Should return 500 response on errors', async function() {
+    const server = createServer(Server.handler(
+      function() {
+        throw new Error('test');
+      }
+    ));
+
+    server.listen();
+
+    after(function() {
+      server.close();
+    });
+
+    const res = await server.fetch('/');
+
+    should(res.status).be.equal(500);
+  });
+
   it('Should update to proxy values', function() {
     const server = createServer(Server.handler(
       async function({req, res}) {
@@ -321,7 +339,7 @@ describe('Server()', function() {
     .then((result) => should(result).be.equal('turn'));
   });
 
-  it('Should set cookies', function(){
+  it('Should set cookies', function() {
     const server = createServer(Server.handler(
       async function({res}) {
         res.setCookie('one', 1);
