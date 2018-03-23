@@ -1,11 +1,11 @@
 var
 tmp
 example
+docs
 
-.dockerignore
+.jsdoc.json
 .editorconfig
 .eslintrc
 .travis.yml
 bake.sh
-Dockerfile
 todo.md

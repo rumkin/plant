@@ -13,9 +13,9 @@ to be modular and pure.
 
 ## 💪 Features
 
-- WhatWG standards based.
+- Fast like Express: **14K** req/sec on echo test.
 - Lightweight: **56Kb** with jsdoc comments.
-- Fast (like Express): **14K** req/sec on echo test.
+- WhatWG standards based.
 
 ## Install
 
