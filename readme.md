@@ -90,12 +90,14 @@ with Plant.Request and Plant.Response.
 
 ### Gzip example
 
-Cascades allow to process responses before sanding. For example you can gzip
+Cascades allow to process responses before sending. For example you can gzip
 response body:
 
 ```javascript
 plant.use(async ({req, res}, next) => {
+    // Get request be processed
     await next();
+
     // Create gzip encoder.
     const gzip = zlib.createGzip();
     // Get response body
@@ -618,7 +620,7 @@ plant.use(async function({req, res}, next) {
 > Request Headers object has immutable mode (Headers.MODE_IMMUTABLE) and
 according to specification it will throw each time when you try to modify it.
 
-#### Headers.MODE_NONE
+### Headers.MODE_NONE
 ```text
 String
 ```
@@ -679,7 +681,7 @@ be sent.
 ### Socket.Socket()
 
 ```text
-({onEnd:function}) -> Socket
+({onEnd:() -> void}) -> Socket
 ```
 
 Constructor has one only option `onEnd` which is a function called when
