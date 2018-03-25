@@ -6,6 +6,16 @@ const {createServer, readStream} = require('./utils');
 const Server = require('..');
 const {and, or} = Server;
 
+async function errorTrap(ctx, next) {
+  try {
+    await next();
+  }
+  catch (err) {
+    console.error(err);
+    throw err;
+  }
+}
+
 describe('Plant.Flow', function() {
   describe('Cascade', function() {
     it ('should iterate over `and`', function() {
@@ -38,6 +48,7 @@ describe('Plant.Flow', function() {
 describe('Server()', function() {
   it('Should serve HTTP requests', function() {
     const server = createServer(Server.handler(
+      errorTrap,
       async function({req, res}) {
         res.send(req.headers.get('content-type'));
       }
@@ -78,6 +89,7 @@ describe('Server()', function() {
 
   it('Should update to proxy values', function() {
     const server = createServer(Server.handler(
+      errorTrap,
       async function({req, res}) {
         res.json({
           sender: req.sender,
@@ -108,6 +120,7 @@ describe('Server()', function() {
 
   it('Should determine request mime-type', function() {
     const server = createServer(Server.handler(
+      errorTrap,
       async function({req, res}) {
         if (req.is('html')) {
           res.send('html');
@@ -136,6 +149,7 @@ describe('Server()', function() {
   it('Should parse url data and hosts', function() {
     const plant = new Server();
 
+    plant.use(errorTrap);
     plant.use(async function({req, res}) {
       const {url} = req;
 
@@ -181,6 +195,7 @@ describe('Server()', function() {
 
   it('Should read body', function() {
     const server = createServer(Server.handler(
+      errorTrap,
       async function({req}, next) {
         if (req.method !== 'GET') {
           req.body = await readStream(req.stream);
@@ -209,6 +224,7 @@ describe('Server()', function() {
 
   it('Should send response headers', function() {
     const server = createServer(Server.handler(
+      errorTrap,
       async function({res}) {
         res.headers.set('content-type', 'application/json');
         res.send(JSON.stringify(null));
@@ -232,6 +248,7 @@ describe('Server()', function() {
 
   it('Should use or handler', function() {
     const server = createServer(Server.handler(
+      errorTrap,
       or(
         async function() {},
         async function() {},
@@ -254,6 +271,7 @@ describe('Server()', function() {
 
   it('Should use `and` handler', function() {
     const server = createServer(Server.handler(
+      errorTrap,
       and(
         async function(ctx, next) {
           await next();
@@ -280,6 +298,8 @@ describe('Server()', function() {
 
   it('Should make turns with use(h1, h2)', function() {
     const plant = Server.new();
+
+    plant.use(errorTrap);
 
     plant.use(
       async function({req}, next) {
@@ -310,6 +330,7 @@ describe('Server()', function() {
 
   it('Should visit turn defined with use(h1, h2)', function() {
     const plant = Server.new()
+    .use(errorTrap)
     .use(
       async function({req}, next) {
         if (req.path === '/turn') {
@@ -341,6 +362,7 @@ describe('Server()', function() {
 
   it('Should set cookies', function() {
     const server = createServer(Server.handler(
+      errorTrap,
       async function({res}) {
         res.setCookie('one', 1);
         res.setCookie('two', 2);
@@ -368,8 +390,41 @@ describe('Server()', function() {
     });
   });
 
+  it('Should get cookies', function() {
+    const plant = Server.create(
+      errorTrap,
+      async function({req, res}) {
+        res.json({
+          cookie: req.cookies.test,
+        });
+      }
+    );
+    plant.errorHandler((error) => {
+      console.error(error);
+    });
+
+    const server = createServer(plant.handler());
+
+    server.listen();
+
+    after(function() {
+      server.close();
+    });
+
+    return server.fetch('/', {
+      headers: {
+        'cookie': 'test=1',
+      },
+    })
+    .then((res) => res.json())
+    .then((body) => {
+      should(body).has.ownProperty('cookie').which.is.equal('1');
+    });
+  });
+
   it('Should output streams', function(){
     const server = createServer(Server.handler(
+      errorTrap,
       async function({res}) {
         res.send(fs.createReadStream(__filename));
       }

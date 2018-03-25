@@ -199,6 +199,22 @@ class Headers {
   wrongMode() {
     throw new TypeError(`Headers mode is ${this.mode}`);
   }
+
+  /**
+   * Not standard. Get raw header value as array of strings. Not concatenated
+   * into string. If header not exists returns empty array.
+   *
+   * @param  {String} name Header name.
+   * @return {String[]} List of passed header values.
+   */
+  raw(name) {
+    if (this.has(name)) {
+      return this._headers.get(name);
+    }
+    else {
+      return [];
+    }
+  }
 }
 
 Headers.MODE_NONE = MODE_NONE;
