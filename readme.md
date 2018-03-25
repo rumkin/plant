@@ -13,7 +13,7 @@ to be modular and pure.
 
 ## 💪 Features
 
-- Fast like Express: **14K** req/sec on echo test.
+- Faster then Express on Hello World test **15K** vs **14K** req/sec.
 - Lightweight: **56Kb** with jsdoc comments.
 - WhatWG standards based.
 
@@ -52,10 +52,13 @@ http.createServer(plant.handler())
 
 ## Examples
 
-* [Cookie handling](https://github.com/rumkin/plant/tree/master/example/cookie.js) example.
-* [File serving](https://github.com/rumkin/plant/tree/master/example/file.js) example.
-* [Context separations](https://github.com/rumkin/plant/tree/master/example/context.js) example.
-* [Session](https://github.com/rumkin/plant/tree/master/example/session.js) example.
+* [Hello World](https://github.com/rumkin/plant/tree/master/example/hello-world.js).
+* [Echo](https://github.com/rumkin/plant/tree/master/example/echo.js).
+* [Cookie handling](https://github.com/rumkin/plant/tree/master/example/cookie.js).
+* [File serving](https://github.com/rumkin/plant/tree/master/example/file.js).
+* [Response Gzip compression](https://github.com/rumkin/plant/tree/master/example/gzip.js).
+* [Context separations](https://github.com/rumkin/plant/tree/master/example/context.js).
+* [Session](https://github.com/rumkin/plant/tree/master/example/session.js).
 
 ## Cascades
 
@@ -449,6 +452,7 @@ switch(req.type(['json', 'multipart'])) {
 ```text
 {
     ok: Boolean,
+    hasBody: Boolean,
     statusCode: Number,
     headers: Headers,
     body: Buffer|Stream|String|Null,
@@ -458,8 +462,9 @@ switch(req.type(['json', 'multipart'])) {
 |Property|Description|
 |:-------|:----------|
 |ok| True if statusCode is in range of 200 and 299|
+|hasBody| True if body is not null. Specify is response should be sent|
 |statusCode| Status code. `200` By default|
-|headers| Response headers as Whatwg Headers object|
+|headers| Response headers as WhatWG Headers object|
 |body| Response body. Default is `null`|
 
 ### Response.Response()
@@ -577,7 +582,18 @@ Set any string-like value as response.
 
 Set empty body.
 
-### Headers interface
+
+### Headers Type
+
+```text
+{
+    mode: String=Headers.MODE_NONE
+}
+```
+
+|Property|Description|
+|:-------|:----------|
+|mode|Headers mutability mode|
 
 Plant is using [WhatWG Headers](https://developer.mozilla.org/en-US/docs/Web/API/Headers) for Request and Response.
 
@@ -602,7 +618,89 @@ plant.use(async function({req, res}, next) {
 > Request Headers object has immutable mode (Headers.MODE_IMMUTABLE) and
 according to specification it will throw each time when you try to modify it.
 
-### Error capturing
+#### Headers.MODE_NONE
+```text
+String
+```
+
+_Constant_. Default Headers mode which allow any modifications.
+
+### Headers.MODE_IMMUTABLE
+```text
+String
+```
+
+_Constant_. Headers mode which prevent headers from modifications.
+
+### Headers.Headers()
+```text
+(
+    headers:Object|Array.<Array.<String, String>>,
+    mode:String=Headers.MODE_NONE
+) -> Headers
+```
+
+Constructor accepts header values as object or entries and mode string. Request
+headers always immutable so Request.headers will always have MODE_IMMUTABLE mode
+value.
+
+##### Example
+
+```javascript
+const headers = new Headers({
+    'content-type': 'text/plain',
+}, Headers.MODE_IMMUTABLE);
+// ... same as ...
+const headers = new Headers([
+    ['content-type', 'text/plain'],
+]);
+```
+
+### Headers.raw()
+```text
+(header:String) -> String[]
+```
+
+*Nonstandard*. Returns all header values as array. If header is not set returns
+empty array.
+
+### Socket Type
+```text
+{
+    isEnded: Boolean = false,
+}
+```
+
+Socket wraps connection and allow disconnect from other side when needed. To
+stop request call `socket.end()`. This will prevent response from be sent and
+close connection. All overlay cascades will be executed, but response will not
+be sent.
+
+### Socket.Socket()
+
+```text
+({onEnd:function}) -> Socket
+```
+
+Constructor has one only option `onEnd` which is a function called when
+connection ended.
+
+### Socket.isEnded
+```text
+Boolean
+```
+
+Property specifies whether socket is ended. Using to prevent response from
+sending and cascade from propagation.
+
+### Socket.end()
+```text
+() -> void
+```
+
+End connection. Call `onEnd` function passed into constructor.
+
+## Error handling
 
 Async cascade model allow to capture errors with try/catch:
 

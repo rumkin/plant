@@ -166,7 +166,9 @@ class Headers {
    * @return {Iterator.<Array.<String>>} Iterator of each header values.
    */
   values() {
-    return this._headers.values();
+    return Array.from(this._headers.values())
+    .map((value) => value.join(', '))
+    [Symbol.iterator]();
   }
 
   /**
@@ -175,7 +177,9 @@ class Headers {
    * @return {Iterator.<Array>} Return iterator of Object.entries alike values.
    */
   entries() {
-    return this._headers.entries();
+    return Array.from(this._headers.entries())
+    .map(([name, value]) => [name, value.join(', ')])
+    [Symbol.iterator]();
   }
 
   /**
@@ -183,10 +187,12 @@ class Headers {
    *
    * @param  {function(Array.<String>,String)} fn Function that calls for each hander entry.
    * @param  {type} thisArg  This value for function.
-   * @returns {void}
+   * @returns {void} Returns no value.
    */
-  forEach(fn, thisArg) {
-    this._headers.forEach(fn, thisArg);
+  forEach(fn, thisArg = this) {
+    this._headers.forEach((values, key) => {
+      fn(values.join(', '), key, thisArg);
+    }, thisArg);
   }
 
   /**

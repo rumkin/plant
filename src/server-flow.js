@@ -26,14 +26,23 @@ function getHandler(handler) {
 }
 
 /**
+ * Determine that request is finished. Using to manage cascade depth.
+ *
+ * @param {NativeContext} options Native context.
+ * @returns {Boolean} Return true if response has body or socket closed.
+ */
+function isFinished({res, socket}) {
+  return res.hasBody === true || socket.isEnded === true;
+}
+
+/**
  * Create async request handlers queue. It iterate request handlers and if
  * request handler doesn't sent response it runs next request handler and so.
+ *
  * @param  {...(function()|Handlable)} handlers Handlable async functions.
  * @return {function(object,function)} Returns function which pass context through the queue.
  */
-const whileBodyIsNull = whileNot(function({res}) {
-  return res.body !== null;
-});
+const whileNotFinished = whileNot(isFinished);
 
 /**
  * Returns function that runs handlers until request headers are not sent.
@@ -42,7 +51,7 @@ const whileBodyIsNull = whileNot(function({res}) {
  * @returns {function(object, function())} Returns function to pass value into handlers.
  */
 const or = function(...args) {
-  return whileBodyIsNull(...args.map(getHandler));
+  return whileNotFinished(...args.map(getHandler));
 };
 
 /**

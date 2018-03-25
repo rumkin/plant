@@ -1,6 +1,6 @@
 const should = require('should');
 
-const {Router, Request, Response, and} = require('..');
+const {Router, Request, Response, Socket, and} = require('..');
 
 describe('Router()', function(){
   it('Should get params from req.url', async function() {
@@ -10,13 +10,15 @@ describe('Router()', function(){
       res.send(req.params.id);
     });
 
+    const socket = new Socket();
+
     const req = new Request({
       url: 'http://localhost:8080/users/1',
     });
 
     const res = new Response();
 
-    await and(router.handler())({req, res});
+    await and(router.handler())({req, res, socket});
 
     should(res.body).be.a.String().and.equal('1');
   });
@@ -28,13 +30,14 @@ describe('Router()', function(){
       res.send('1');
     });
 
+    const socket = new Socket();
+
     const req = new Request({
       url: 'http://localhost:8080/users',
     });
-
     const res = new Response();
 
-    await and(router.handler())({req, res});
+    await and(router.handler())({req, res, socket});
 
     should(res.body).be.a.String().and.equal('1');
   });
@@ -48,13 +51,15 @@ describe('Router()', function(){
       },
     }));
 
+    const socket = new Socket();
+
     const req = new Request({
       url: 'http://localhost:8080/users/2',
     });
 
     const res = new Response();
 
-    await and(router.handler())({req, res});
+    await and(router.handler())({req, res, socket});
 
     should(res.body).be.a.String().and.equal('2');
   });
@@ -74,13 +79,15 @@ describe('Router()', function(){
     router2.route('/users/:user/', router3);
     router1.route('/api/', router2);
 
+    const socket = new Socket();
+
     const req = new Request({
       url: 'http://localhost:8080/api/users/3/param/id?raw',
     });
 
     const res = new Response();
 
-    await and(router1.handler())({req, res});
+    await and(router1.handler())({req, res, socket});
 
     const result = JSON.parse(res.body);
 

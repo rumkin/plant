@@ -12,20 +12,21 @@ const {and, or, getHandler} = require('./server-flow');
 const Router = require('./router');
 const Response = require('./response');
 const Request = require('./request');
+const Socket = require('./socket');
 const Headers = require('./headers');
 
 /**
- * @typedef {Object} Plant.Context - Default plant context with plant's instances for req and res.
- * @prop {Request} req - Request instance.
- * @prop {Response} res - Response instance.
- * @prop {Object} socket - Request socket.
+ * @typedef {Object} Plant.Context Default plant context with plant's instances for req and res.
+ * @prop {Request} req Request instance.
+ * @prop {Response} res Response instance.
+ * @prop {Socket} socket Socket instance.
  */
 
 /**
  * @function HandleFunc
  * @description Cascade handling function
- * @param {Object} context - Plant context object
- * @param {function(?Object)} next - Plant cascade server callback.
+ * @param {Object} context Plant context object
+ * @param {function(?Object)} next Plant cascade server callback.
  * @async
  * @returns {Promise<void>} Handle func should modify it's arguments and produce
  */
@@ -38,20 +39,20 @@ const Headers = require('./headers');
  */
 
 /**
- * @typedef {Object} Handler - Cascade handler is an object with method handler
- * @prop {CreateHandleFunc} handler - Function that creates HandleFunc.
+ * @typedef {Object} Handler Cascade handler is an object with method handler
+ * @prop {CreateHandleFunc} handler Function that creates HandleFunc.
  */
 
 /**
- * @typedef {HandleFunc|Handler} HandleType - Cascade request handle function or Object
+ * @typedef {HandleFunc|Handler} HandleType Cascade request handle function or Object
  * which has method `handler`. Which returns such function
  */
 
 /**
-  * @typedef {Object} ServerOptions - Server configuration options.
-  * @prop {Array.<HandleType>} [handlers=[]] - List of request handlers.
-  * @prop {Object} [context={}] - Context object.
-  * @prop {function(Error)} [onError] - Uncaught error handler.
+  * @typedef {Object} ServerOptions Server configuration options.
+  * @prop {Array.<HandleType>} [handlers=[]] List of request handlers.
+  * @prop {Object} [context={}] Context object.
+  * @prop {function(Error)} [onError] Uncaught error handler.
   */
 
 /**
@@ -60,9 +61,9 @@ const Headers = require('./headers');
  */
 class Server {
   /**
-   * new - Static constructor.
+   * Static constructor.
    *
-   * @param {*} args - Server constructor arguments.
+   * @param {*} args Server constructor arguments.
    * @returns {Server} Server instance.
    * @static
    */
@@ -71,7 +72,7 @@ class Server {
   }
 
   /**
-   * create - Create new server instance
+   * Create new server instance
    *
    * @param  {ServerOptions} [options={}] Server options. Optional
    * @param  {...HandleType} args Request handler.
@@ -96,7 +97,7 @@ class Server {
   }
 
   /**
-   * handler - Instantiate new Plant.Server and creates http handler from it.
+   * Instantiate new Plant.Server and creates http handler from it.
    *
    * @param  {ServerOptions} [options] Server initial options.
    * @param  {...HandleType} [handlers] Server request handlers.
@@ -109,24 +110,18 @@ class Server {
   }
 
   /**
-   * @constructor
-   *
    * @param  {ServerOptions} options Server options params.
-   * @return {Server} Server instance.
+   * @constructor
    */
   constructor({handlers = [], context = {}, onError} = {}) {
-    this.handlers = [
-      httpHandler,
-      cookieHandler,
-      ...handlers.map(getHandler),
-    ];
+    this.handlers = handlers.map(getHandler);
 
     this.context = Object.assign({}, context);
     this.onError = onError;
   }
 
   /**
-   * use - Add cascade handlers.
+   * Add cascade handlers.
    *
    * @param  {String} [route] Optional route prefix.
    * @param  {...HandleType} args Cascade handlers.
@@ -212,12 +207,17 @@ class Server {
   }
 
   /**
-   * handler - Create native http request handler from Server
+   * Create native http request handler from Server
    *
    * @returns {function(http.IncomingMessage,http.ServerResponse)} Native http request handler function
    */
   handler() {
-    const cascade = and(...this.handlers);
+    const cascade = and(
+      httpHandler,
+      cookieHandler,
+      ...this.handlers
+    );
+
     const context = {...this.context};
 
     return (req, res) => {
@@ -257,4 +257,5 @@ Server.getHandler = getHandler;
 Server.Router = Router;
 Server.Request = Request;
 Server.Response = Response;
+Server.Socket = Socket;
 Server.Headers = Headers;

@@ -10,20 +10,21 @@ const isObject = require('lodash.isobject');
 const Headers = require('../headers');
 const Request = require('../request');
 const Response = require('../response');
+const Socket = require('../socket');
 
 const {as} = require('../utils/types');
 
 /**
- * @typedef {Object} NativeContext - Initial http context with native instances for req and res.
- * @prop {http.IncomingMessage} req - Request instance.
- * @prop {http.ServerResponse} res - Response instance.
+ * @typedef {Object} NativeContext Initial http context with native instances for req and res.
+ * @prop {http.IncomingMessage} req Request instance.
+ * @prop {http.ServerResponse} res Response instance.
  */
 
 /**
- * getResolvedNetworkProps - Get host, port, remote ip and encryption from
+ * Get host, port, remote ip and encryption from
  * forward http headers.
  *
- * @param  {http.IncomingMessage} req - HTTP Request.
+ * @param  {http.IncomingMessage} req HTTP Request.
  * @returns {Array<String,String,Boolean>} Return hostname, ip and encyption status as Array.
  */
 function getResolvedNetworkProps(req) {
@@ -51,7 +52,7 @@ function getResolvedNetworkProps(req) {
 }
 
 /**
- * createRequest - Create Plant Request from native http.IncomingMessage
+ * Create Plant Request from native http.IncomingMessage
  *
  * @param  {http.IncomingMessage} req Native Http request
  * @return {Request} Returns `this`.
@@ -77,7 +78,43 @@ function createRequest(req) {
 }
 
 /**
- * createResponse - Create Plant.Response instance from http.ServerResponse.
+ * Creates Plant.Socket instance from http socket object. Bind abort event
+ * listener to mark socket closed.
+ *
+ * @param  {Writable} connection Writable socket stream.
+ * @return {Socket} New socket instance.
+ */
+function createSocket(connection) {
+  const socket = new Socket({
+    onEnd() {
+      if (! connection.ended) {
+        connection.end();
+      }
+    },
+  });
+
+  let onEnd;
+  let unbind;
+
+  onEnd = () => {
+    socket.end();
+    unbind();
+  };
+
+  unbind = () => {
+    connection.removeListener('abort', onEnd);
+    connection.removeListener('end', onEnd);
+  };
+
+  connection.on('abort', onEnd);
+  connection.on('end', onEnd);
+  socket.on('destroy', unbind);
+
+  return socket;
+}
+
+/**
+ * Create Plant.Response instance from http.ServerResponse.
  *
  * @param  {http.ServerResponse} res Nodejs http ServerResponse instance.
  * @return {Response}     Plant.Response instance.
@@ -101,23 +138,32 @@ function createResponse(res) {
 function httpHandler({req, res, ...ctx}, next) {
   const inReq = createRequest(req);
   const inRes = createResponse(res);
+  const socket = createSocket(req.socket);
+
+  req.socket.setMaxListeners(Infinity);
 
   return next({
     ...ctx,
     req: inReq,
     res: inRes,
-    socket: req.socket,
+    socket,
   })
   .then(() => {
+    socket.destroy();
+
     if (inRes.body === null) {
       inRes.status(404).text('Nothing found');
     }
 
     res.statusCode = inRes.statusCode;
 
-    inRes.headers.forEach((values, name) => {
-      res.setHeader(name, values);
-    });
+    for (const header of inRes.headers.keys()) {
+      res.setHeader(header, inRes.headers.raw(header));
+    }
+
+    if (req.ended) {
+      return;
+    }
 
     const {body} = inRes;
 

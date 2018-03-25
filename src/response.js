@@ -48,10 +48,19 @@ class Response {
    * Specify whether response is successful and returns status code in
    * range of 200 and 299.
    *
-   * @return {Boolean} True when status code is in success range.
+   * @type {Boolean} True when status code is in success range.
    */
   get ok() {
     return this.statusCode > 199 && this.statusCode < 300;
+  }
+
+  /**
+   * Specify whether body is set.
+   *
+   * @type {Boolean} True if body is not null.
+   */
+  get hasBody() {
+    return this.body !== null;
   }
 
   /**

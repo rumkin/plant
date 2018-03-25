@@ -1,6 +1,6 @@
 {
   "name": "@plant/plant",
-  "version": "1.0.0",
+  "version": "1.0.0-alpha",
   "description": "Web application framework",
   "main": "src/index.js",
   "scripts": {
@@ -11,7 +11,7 @@
     "prebulish": "lint",
     "jsdoc": "jsdoc",
     "docgen": "jsdoc --configure .jsdoc.json --verbose",
-    "bench": "bash -c 'node example/hello.js &\npid=$!\nautocannon -p 1 -c 100 http://localhost:8080\nkill -9 $pid'"
+    "bench": "bash -c 'node example/hello-world.js &\npid=$!\nautocannon -p 1 -c 100 http://localhost:8080\nkill -9 $pid'"
   },
   "license": "MIT",
   "devDependencies": {

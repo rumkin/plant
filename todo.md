@@ -11,11 +11,12 @@
 - [ ] Multiple transport support.
 - [ ] Interactive mode: return function which can read from request and
       write to response simultaneously.
-- [ ] WebLog output.
 - [x] Add more examples.
 - [x] Enhance documentation.
 - [ ] Create website.
 - [ ] More tests.
+
+### Future
 
 - [ ] Output objects for files and custom responses:
     ```javascript
