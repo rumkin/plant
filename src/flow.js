@@ -34,7 +34,7 @@ function cascade(...args) {
  * @param  {function(Context)} condition - Condition function which returns bool.
  * @returns {function(...HandleType)} Handlable async queue handler creator.
  */
-function whileNot(condition) {
+function doWhile(condition) {
   return function(...handlers) {
     return conditional.bind(null, handlers, condition);
   };
@@ -44,7 +44,7 @@ async function conditional(handlers, condition, ctx, next) {
   for (const handler of handlers) {
     await handler(Object.assign({}, ctx), noop);
 
-    if (condition(ctx) === true) {
+    if (condition(ctx) === false) {
       return;
     }
   }
@@ -53,4 +53,4 @@ async function conditional(handlers, condition, ctx, next) {
 }
 
 exports.cascade = cascade;
-exports.whileNot = whileNot;
+exports.doWhile = doWhile;

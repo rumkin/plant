@@ -2,7 +2,7 @@
  * @module Plant.ServerFlow
  * @description Flow control utils for Plant Cascade Server
  */
-const {cascade, whileNot} = require('./flow.js');
+const {cascade, doWhile} = require('./flow.js');
 
 /**
  * Handlable object should countain method handler() which returns async
@@ -31,8 +31,8 @@ function getHandler(handler) {
  * @param {NativeContext} options Native context.
  * @returns {Boolean} Return true if response has body or socket closed.
  */
-function isFinished({res, socket}) {
-  return res.hasBody === true || socket.isEnded === true;
+function isNotFinished({res, socket}) {
+  return res.hasBody === false && socket.isEnded === false;
 }
 
 /**
@@ -42,7 +42,7 @@ function isFinished({res, socket}) {
  * @param  {...(function()|Handlable)} handlers Handlable async functions.
  * @return {function(object,function)} Returns function which pass context through the queue.
  */
-const whileNotFinished = whileNot(isFinished);
+const whileNotFinished = doWhile(isNotFinished);
 
 /**
  * Returns function that runs handlers until request headers are not sent.
