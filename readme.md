@@ -9,7 +9,7 @@
 
 Plant is WhatWG standards based web server, powered by ES2017, created with modular architecture in mind
 and functional design patterns on practice. It uses cascades (an isolated customizable contexts)
-to be modular and pure.
+to be modular and clear.
 
 ## 💪 Features
 
@@ -56,7 +56,7 @@ http.createServer(plant.handler())
 * [Echo](https://github.com/rumkin/plant/tree/master/example/echo.js).
 * [Cookie handling](https://github.com/rumkin/plant/tree/master/example/cookie.js).
 * [File serving](https://github.com/rumkin/plant/tree/master/example/file.js).
-* [Response Gzip compression](https://github.com/rumkin/plant/tree/master/example/gzip.js).
+* Response [Gzip compression](https://github.com/rumkin/plant/tree/master/example/gzip.js).
 * [Context separations](https://github.com/rumkin/plant/tree/master/example/context.js).
 * [Session](https://github.com/rumkin/plant/tree/master/example/session.js).
 
@@ -79,7 +79,7 @@ plant.use(async (ctx, next) => {
 });
 
 plant.use(async (ctx, next) => {
-    ctx; // -> {number: 3.15}
+    ctx; // -> {number: 3.14}
     await next(); // No context modification
 });
 ```
@@ -95,7 +95,7 @@ response body:
 
 ```javascript
 plant.use(async ({req, res}, next) => {
-    // Get request be processed
+    // Process request
     await next();
 
     // Create gzip encoder.
@@ -622,29 +622,31 @@ according to specification it will throw each time when you try to modify it.
 
 ### Headers.MODE_NONE
 ```text
-String
+String='none'
 ```
 
 _Constant_. Default Headers mode which allow any modifications.
 
 ### Headers.MODE_IMMUTABLE
 ```text
-String
+String='immutable'
 ```
 
 _Constant_. Headers mode which prevent headers from modifications.
 
 ### Headers.Headers()
 ```text
-(
-    headers:Object|Array.<Array.<String, String>>,
-    mode:String=Headers.MODE_NONE
-) -> Headers
+(headers:HeadersParam, mode:String=Headers.MODE_NONE) -> Headers
 ```
 
 Constructor accepts header values as object or entries and mode string. Request
 headers always immutable so Request.headers will always have MODE_IMMUTABLE mode
 value.
+
+#### HeadersParam Type
+```text
+Object.<String,String>|Array.<Array.<String, String>>
+```
 
 ##### Example
 
