@@ -68,7 +68,7 @@ class Request {
   }
 
   /**
-   * Check if current request has mime type in Content-Type header.
+   * Check if current request mime type in content-type header is equal `type`.
    *
    * @param  {String} type List of mime types
    * @return {Boolean} Return true if content type header contains specified `types`.
@@ -78,12 +78,28 @@ class Request {
   }
 
   /**
-   * Get request supported types
+   * Get request content type from list of types
    * @param {String[]} types List of types to choose one.
-   * @returns {String|Null} Return matched type or null if no type match found
+   * @returns {String|Null} Return matched type or null if no type matched
    */
   type(types) {
     const type = typeIs.is(this.headers.get('content-type'), types);
+
+    if (type === false) {
+      return null;
+    }
+    else {
+      return type;
+    }
+  }
+
+  /**
+   * Select which one of `types` contains in request's Accept header.
+   * @param {String[]} types List of types to choose one.
+   * @returns {String|Null} Return matched type or null if no type matched
+   */
+  accept(types) {
+    const type = typeIs.is(this.headers.get('accept'), types);
 
     if (type === false) {
       return null;

@@ -52,4 +52,34 @@ describe('Request()', function() {
       should(type).be.equal(null);
     });
   });
+
+  describe('Request.accept()', function() {
+    it('Should return "json" for "application/json" accept value', function() {
+      const req = new Request({
+        url: new URL('http://localhost/'),
+        headers: new Headers({
+          'accept': 'application/json',
+        }),
+        body: null,
+      });
+
+      const type = req.accept(['html', 'json']);
+
+      should(type).be.a.String().and.be.equal('json');
+    });
+
+    it('Should return `null` for not a "application/json" accept type', function() {
+      const req = new Request({
+        url: new URL('http://localhost/'),
+        headers: new Headers({
+          'accept': 'application/json',
+        }),
+        body: null,
+      });
+
+      const type = req.accept(['html', 'video']);
+
+      should(type).be.equal(null);
+    });
+  });
 });

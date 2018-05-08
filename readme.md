@@ -450,6 +450,28 @@ switch(req.type(['json', 'multipart'])) {
 }
 ```
 
+### Request.accept()
+```text
+(types:String[]) -> String|Null
+```
+
+Check if accept header contains one of the passed `types`. If so returns
+matching value either returns `null`.
+
+##### Example
+```javascript
+switch(req.accept(['json', 'text'])) {
+    case 'json':
+        res.json({value: 3.14159});
+        break;
+    case 'html':
+        res.text('3.14159');
+        break;
+    default:
+        res.html('<html><body>3.14159</body></html>');
+}
+```
+
 ### Response Type
 ```text
 {
