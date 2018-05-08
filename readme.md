@@ -1,5 +1,3 @@
-# 🌳 Plant
-
 [![npm](https://img.shields.io/npm/v/@plant/plant.svg?style=flat-square)](https://npmjs.com/package/@plant/plant)
 [![Travis](https://img.shields.io/travis/rumkin/plant.svg?style=flat-square)](https://travis-ci.org/rumkin/plant)
 [![npm](https://img.shields.io/npm/dw/@plant/plant.svg?style=flat-square)](https://npmjs.com/package/@plant/plant)
@@ -11,7 +9,7 @@ Plant is WhatWG standards based web server, powered by ES2017, created with modu
 and functional design patterns on practice. It uses cascades (an isolated customizable contexts)
 to be modular and clear.
 
-## 💪 Features
+## Features
 
 - Faster then Express on Hello World test **15K** vs **14K** req/sec.
 - Lightweight: **56Kb** with jsdoc comments.
