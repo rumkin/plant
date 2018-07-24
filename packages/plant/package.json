@@ -1,0 +1,61 @@
+{
+  "name": "@plant/plant",
+  "version": "1.0.0-alpha.2",
+  "description": "Web application server",
+  "main": "src/index.js",
+  "engines": {
+    "node": ">= 10"
+  },
+  "scripts": {
+    "start": "node .",
+    "test": "mocha test/index.js",
+    "lint": "npm run lint:js src/**.js",
+    "lint:js": "eslint",
+    "prepublish": "npm run lint && npm run build",
+    "docs": "jsdoc --configure .jsdoc.json --verbose",
+    "bench": "bash -c 'node example/hello-world.js &\npid=$!\nautocannon -p 1 -c 100 http://localhost:8080\nkill -9 $pid'",
+    "clean": "rm -rf dist",
+    "dist": "mkdir dist",
+    "compile": "browserify -s Plant src/server.js > dist/plant.js",
+    "minify": "uglifyjs dist/plant.js > dist/plant.min.js",
+    "build": "npm run clean && npm run dist && npm run compile && npm run minify"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "autocannon": "^2.1.0",
+    "browserify": "^16.2.2",
+    "eslint": "^4.0.0",
+    "istanbul": "^0.4.5",
+    "jsdoc": "^3.5.5",
+    "minami": "^1.2.3",
+    "mocha": "^3.4.2",
+    "node-fetch": "^2.0.0",
+    "should": "^11.2.1"
+  },
+  "dependencies": {
+    "cookie": "^0.3.1",
+    "lodash.isobject": "^3.0.2",
+    "lodash.isplainobject": "^4.0.6",
+    "lodash.isstring": "^4.0.1",
+    "path-to-regexp": "^1.7.0",
+    "type-is": "^1.6.15",
+    "uglify-es": "^3.3.9"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rumkin/plant.git"
+  },
+  "keywords": [
+    "server",
+    "web",
+    "web-server",
+    "http",
+    "http-server"
+  ],
+  "author": "rumkin",
+  "homepage": "https://github.com/rumkin/plant",
+  "bugs": "https://github.com/rumkin/plant/issues"
+}

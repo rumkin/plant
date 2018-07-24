@@ -1,18 +1,25 @@
 /**
+ * @module Plant.Server
+ * @description Implementation of Plant Server interface.
+ */
+
+/**
 * @module Plant.CommonHandleType
 * @description Common Http Request and Response handlers.
 */
+const {
+  Response,
+  Request,
+  Headers,
+  Socket,
+  getHandler,
+} = require('@plant/plant');
 
 const {Readable} = require('stream');
 const {URL} = require('url');
 const isObject = require('lodash.isobject');
 
-const Headers = require('../headers');
-const Request = require('../request');
-const Response = require('../response');
-const Socket = require('../socket');
-
-const {as} = require('../utils/types');
+const {as} = require('./utils/types');
 
 /**
  * @typedef {Object} NativeContext Initial http context with native instances for req and res.
@@ -135,7 +142,7 @@ function createResponse(res) {
  * @return {void}
  * @async
  */
-function httpHandler({req, res, ...ctx}, next) {
+function handleRequest(req, res, next) {
   const inReq = createRequest(req);
   const inRes = createResponse(res);
   const socket = createSocket(req.socket);
@@ -143,7 +150,6 @@ function httpHandler({req, res, ...ctx}, next) {
   req.socket.setMaxListeners(Infinity);
 
   return next({
-    ...ctx,
     req: inReq,
     res: inRes,
     socket,
@@ -180,6 +186,71 @@ function httpHandler({req, res, ...ctx}, next) {
       res.end(body);
     }
   });
+}
+
+/**
+ * @typedef {Object} Plant.Context Default plant context with plant's instances for req and res.
+ * @prop {Request} req Request instance.
+ * @prop {Response} res Response instance.
+ * @prop {Socket} socket Socket instance.
+ */
+
+/**
+ * @function HandleFunc
+ * @description Cascade handling function
+ * @param {Object} context Plant context object
+ * @param {function(?Object)} next Plant cascade server callback.
+ * @async
+ * @returns {Promise<void>} Handle func should modify it's arguments and produce
+ */
+
+/**
+ * @function CreateHandleFunc
+ * @description Function that creates cascade request function
+ * @param {...HandleType} [handlers] Create handle function can receive HandleType params to produce new handle function.
+ * @returns {HandleFunc}
+ */
+
+/**
+ * @typedef {Object} Handler Cascade handler is an object with method handler
+ * @prop {CreateHandleFunc} handler Function that creates HandleFunc.
+ */
+
+/**
+ * @typedef {HandleFunc|Handler} HandleType Cascade request handle function or Object
+ * which has method `handler`. Which returns such function
+ */
+
+/**
+  * @typedef {Object} ServerOptions Server configuration options.
+  * @prop {Array.<HandleType>} [handlers=[]] List of request handlers.
+  * @prop {Object} [context={}] Context object.
+  * @prop {function(Error)} [onError] Uncaught error handler.
+  */
+
+/**
+ * Create native http request handler from Server
+ *
+ * @returns {function(http.IncomingMessage,http.ServerResponse)} Native http request handler function
+ */
+function httpHandler(handler) {
+  return function (req, res) {
+    handleRequest(req, res, getHandler(handler))
+    .catch(handleRequestError.bind(this, req, res));
+  };
+}
+
+function handleRequestError(req, res, error) {
+  // Write error to res.
+  if (! res.headersSent) {
+    res.statusCode = 500;
+    res.setHeader('content-type', 'text/plain');
+    res.write('Internal server error:\n' + error.stack);
+    res.end();
+  }
+  else {
+    this.emit('error', error);
+  }
 }
 
 module.exports = httpHandler;

@@ -1,9 +1,9 @@
 /**
  * @module Plant
  */
-const {URL} = require('url');
 const typeIs = require('type-is');
 const isPlainObject = require('lodash.isplainobject');
+const isReadableStream = require('./util/stream');
 
 const Headers = require('./headers');
 
@@ -47,8 +47,8 @@ class Request {
     stream = null,
     sender = '',
   }) {
-    this.url = typeof url === 'string'
-      ? new URL(url)
+    this.url = (typeof url === 'string')
+      ? new URL(url, 'http://localhost')
       : url;
     this.method = method.toLowerCase();
     this.headers = isPlainObject(headers)
@@ -61,6 +61,10 @@ class Request {
 
     this.path = this.url.pathname.replace(/\/+/g, '/');
     this.basePath = '/';
+
+    if (stream !== null && ! isReadableStream(stream)) {
+      throw new TypeError('options.stream is not a readable stream');
+    }
 
     this.body = body;
     this.data = data;

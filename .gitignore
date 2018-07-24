@@ -5,6 +5,7 @@ docs/
 
 **/.DS_Store
 
-tmp
-local
-build
+tmp/
+local/
+build/
+dist/

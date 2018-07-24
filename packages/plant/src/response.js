@@ -2,9 +2,9 @@
  * @module Plant
  */
 
-const {Readable} = require('stream');
 const isObject = require('lodash.isobject');
 const isPlainObject = require('lodash.isplainobject');
+const isReadableStream = require('./util/stream');
 
 const Headers = require('./headers');
 
@@ -136,7 +136,7 @@ class Response {
    * @return {Response}  Returns `this`.
    */
   send(result) {
-    if (isObject(result) && (result instanceof Readable)) {
+    if (isObject(result) && isReadableStream(result)) {
       this.stream(result);
     }
     else {

@@ -1,10 +1,12 @@
 const should = require('should');
 const fs = require('fs');
 
-const {createServer, readStream} = require('./utils');
-
-const Server = require('..');
+const Server = require('@plant/plant');
 const {and, or} = Server;
+
+const {initServer, readStream} = require('./utils');
+
+const httpHandler = require('..');
 
 async function errorTrap(ctx, next) {
   try {
@@ -14,6 +16,10 @@ async function errorTrap(ctx, next) {
     console.error(err);
     throw err;
   }
+}
+
+function createServer(plant) {
+  return initServer(httpHandler(plant));
 }
 
 describe('Plant.Flow', function() {
@@ -399,7 +405,7 @@ describe('Server()', function() {
         });
       }
     );
-    plant.errorHandler((error) => {
+    plant.catch((error) => {
       console.error(error);
     });
 

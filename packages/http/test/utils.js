@@ -1,7 +1,7 @@
 const http = require('http');
 const fetch = require('node-fetch');
 
-exports.createServer = function(handler) {
+exports.initServer = function initServer(handler) {
   const server = http.createServer(handler);
 
   server.fetch = function(url, options, host = '127.0.0.1') {

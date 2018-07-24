@@ -33,20 +33,34 @@ npm i rumkin/plant
 Plant is using cascades: independent modifiable context protected from intersection.
 
 ```javascript
-const http = require('http');
-const httpHandler = require('@plant/http');
 const Plant = require('@plant/plant');
+const {Request, Response, Headers} = plant;
 
 const plant = new Plant();
 
-// Send text response
+// Configure response handlers
 plant.use('/greet', async function({res}) {
     res.body = 'Hello World';
 });
 
+const req = new Request({
+    url: '/greet',
+    method: 'GET',
+    headers: {
+        'accept': 'text/plain',
+    },
+});
+
+const res = new Response();
+
 // Build request handler
-http.createServer(httpHandler(plant))
-.listen(8080);
+const handler = plant.handler();
+
+// Handle request and response
+handler({req, res})
+.then(({res}) => {
+    res.body; // => 'Hello World'
+});
 ```
 
 ## Examples

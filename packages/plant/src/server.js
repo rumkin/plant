@@ -6,7 +6,6 @@
 const isPlainObject = require('lodash.isplainobject');
 const isString = require('lodash.isstring');
 
-const httpHandler = require('./handlers/http-handler');
 const cookieHandler = require('./handlers/cookie-handler');
 const {and, or, getHandler} = require('./server-flow');
 const Router = require('./router');
@@ -201,7 +200,7 @@ class Server {
    * @param  {function(Error)} handler Error handler
    * @returns {Server} Returns `this`.
    */
-  errorHandler(handler) {
+  catch(handler) {
     this.onError = handler;
     return this;
   }
@@ -212,37 +211,19 @@ class Server {
    * @returns {function(http.IncomingMessage,http.ServerResponse)} Native http request handler function
    */
   handler() {
+    const context = {...this.context};
     const cascade = and(
-      httpHandler,
+      (ctx, next) => {
+        if (! ctx.socket) {
+          ctx.socket = new Socket();
+        }
+        return next({...context, ...ctx});
+      },
       cookieHandler,
-      ...this.handlers
+      ...this.handlers,
     );
 
-    const context = {...this.context};
-
-    return (req, res) => {
-      cascade(Object.assign({}, context, {req, res}))
-      .catch(this.handleRequestError.bind(this, req, res));
-    };
-  }
-
-  handleRequestError(req, res, error) {
-    // Write error to res.
-    if (! res.headersSent) {
-      res.statusCode = 500;
-      res.setHeader('content-type', 'text/plain');
-      res.write('Internal server error:\n' + error.stack);
-      res.end();
-    }
-    else if (this.onError) {
-      res.end(); // End request
-      this.onError(error);
-    }
-    else {
-      res.end(); // End request
-      console.error(error);
-      throw error;
-    }
+    return cascade;
   }
 }
 

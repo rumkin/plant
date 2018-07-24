@@ -34,18 +34,17 @@ Plant is using cascades: independent modifiable context protected from intersect
 
 ```javascript
 const http = require('http');
-const httpHandler = require('@plant/http');
 const Plant = require('@plant/plant');
 
 const plant = new Plant();
 
 // Send text response
-plant.use('/greet', async function({res}) {
+plant.use('/greet', async function({res}, next) {
     res.body = 'Hello World';
 });
 
 // Build request handler
-http.createServer(httpHandler(plant))
+http.createServer(plant.handler())
 .listen(8080);
 ```
 
