@@ -2,7 +2,7 @@
  * @module Plant.Socket
  */
 
-const {EventEmitter} = require('events');
+const EventEmitter = require('eventemitter3');
 
 function noop() {}
 

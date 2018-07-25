@@ -18,8 +18,8 @@ describe('Request()', function() {
         body: null,
       });
 
-      should(req.is('html')).be.equal(true);
-      should(req.is('json')).be.equal(false);
+      should(req.is('text/html')).be.equal(true);
+      should(req.is('application/json')).be.equal(false);
     });
   });
 
@@ -28,14 +28,14 @@ describe('Request()', function() {
       const req = new Request({
         url: new URL('http://localhost/'),
         headers: new Headers({
-          'content-type': 'application/json',
+          'content-type': 'application/json;charset=utf8',
         }),
         body: null,
       });
 
-      const type = req.type(['html', 'json']);
+      const type = req.type(['text/html', 'application/json']);
 
-      should(type).be.a.String().and.be.equal('json');
+      should(type).be.a.String().and.be.equal('application/json');
     });
 
     it('Should return `null` for not a "application/json" content type', function() {

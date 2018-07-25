@@ -1,9 +1,10 @@
 /**
  * @module Plant
  */
-const typeIs = require('type-is');
+
+const {parseHeader, parseEntity} = require('./util/type-header');
 const isPlainObject = require('lodash.isplainobject');
-const isReadableStream = require('./util/stream');
+const {isReadableStream} = require('./util/stream');
 
 const Headers = require('./headers');
 
@@ -78,7 +79,9 @@ class Request {
    * @return {Boolean} Return true if content type header contains specified `types`.
    */
   is(type) {
-    return typeIs.is(this.headers.get('content-type'), [type]) !== false;
+    const entry = parseEntity(this.headers.get('content-type') || '');
+
+    return entry.type === type;
   }
 
   /**
@@ -87,14 +90,16 @@ class Request {
    * @returns {String|Null} Return matched type or null if no type matched
    */
   type(types) {
-    const type = typeIs.is(this.headers.get('content-type'), types);
+    const _types = normalizeTypes(types);
+    const {type} = parseEntity(this.headers.get('content-type'));
 
-    if (type === false) {
-      return null;
+    for (const {value, matcher} of _types) {
+      if (matcher(type) === true) {
+        return value;
+      }
     }
-    else {
-      return type;
-    }
+
+    return null;
   }
 
   /**
@@ -103,15 +108,55 @@ class Request {
    * @returns {String|Null} Return matched type or null if no type matched
    */
   accept(types) {
-    const type = typeIs.is(this.headers.get('accept'), types);
+    const _types = normalizeTypes(types);
+    const cTypes = parseHeader(this.headers.get('accept'))
+    .sort((a, b) => (a.params.q - b.params.q))
+    .map(({type}) => type);
 
-    if (type === false) {
-      return null;
+    for (const cType of cTypes) {
+      for (const {value, matcher} of _types) {
+        if (matcher(cType) === true) {
+          return value;
+        }
+      }
     }
-    else {
-      return type;
+
+    return null;
+  }
+}
+
+// Naive request groups.
+// TODO Make more flexible to match rules like */*, images/*, etc.
+const aliases = {
+  json: ['application/json'],
+  text: ['text/plain'],
+  html: ['text/html', 'text/xhtml'],
+  image: ['image/png', 'image/jpg', 'image/jpeg', 'image/gif'],
+};
+
+function normalizeTypes(types) {
+  const result = [];
+
+  for (const type of types) {
+    if (type.includes('/')) {
+      result.push({
+        value: type,
+        matcher(value) {
+          return value === type;
+        },
+      });
+    }
+    else if (aliases.hasOwnProperty(type)) {
+      result.push({
+        value: type,
+        matcher(value) {
+          return aliases[type].includes(value);
+        },
+      });
     }
   }
+
+  return result;
 }
 
 module.exports = Request;

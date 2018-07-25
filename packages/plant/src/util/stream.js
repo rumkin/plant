@@ -9,8 +9,7 @@ const isObject = require('lodash.isobject');
 function isReadableStream(value) {
   return isObject(value)
   && typeof value.on === 'function'
-  && typeof value.pipe === 'function'
-  && typeof value.end === 'function';
+  && typeof value.pipe === 'function';
 }
 
 exports.isReadableStream = isReadableStream;

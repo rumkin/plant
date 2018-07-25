@@ -4,7 +4,7 @@
 
 const isObject = require('lodash.isobject');
 const isPlainObject = require('lodash.isplainobject');
-const isReadableStream = require('./util/stream');
+const {isReadableStream} = require('./util/stream');
 
 const Headers = require('./headers');
 
