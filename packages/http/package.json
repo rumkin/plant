@@ -1,36 +1,28 @@
 {
   "name": "@plant/http",
   "version": "1.0.0",
-  "description": "Plant HTTP handler for node.js",
+  "description": "Plant web server HTTP handler for node.js",
   "main": "src/index.js",
   "scripts": {
-    "start": "node .",
     "test": "mocha test/index.js",
     "lint": "npm run lint:js src/**.js",
     "lint:js": "eslint",
-    "prebulish": "lint",
-    "jsdoc": "jsdoc",
-    "docgen": "jsdoc --configure .jsdoc.json --verbose",
-    "bench": "bash -c 'node example/hello-world.js &\npid=$!\nautocannon -p 1 -c 100 http://localhost:8080\nkill -9 $pid'"
+    "prebulish": "lint && npm docs",
+    "jsdoc": "jsdoc --configure .jsdoc.json --verbose",
+    "docs": "npm run jsdoc && rm -rf docs && mv tmp/docs/*/*/* docs && rm -rf tmp/docs"
   },
   "license": "MIT",
   "devDependencies": {
-    "autocannon": "^2.1.0",
     "eslint": "^4.0.0",
     "istanbul": "^0.4.5",
     "jsdoc": "^3.5.5",
     "minami": "^1.2.3",
-    "mocha": "^3.4.2",
+    "mocha": "^5.2.0",
     "node-fetch": "^2.0.0",
     "should": "^11.2.1"
   },
   "dependencies": {
-    "cookie": "^0.3.1",
-    "lodash.isobject": "^3.0.2",
-    "lodash.isplainobject": "^4.0.6",
-    "lodash.isstring": "^4.0.1",
-    "path-to-regexp": "^1.7.0",
-    "type-is": "^1.6.15"
+    "lodash.isobject": "^3.0.2"
   },
   "peerDependencies": {
     "@plant/plant": "1.x"
@@ -43,11 +35,10 @@
     "url": "https://github.com/rumkin/plant.git"
   },
   "keywords": [
-    "server",
+    "@plant/plant",
     "web",
-    "web-server",
     "http",
-    "http-server"
+    "handler"
   ],
   "author": "rumkin",
   "homepage": "https://github.com/rumkin/plant",

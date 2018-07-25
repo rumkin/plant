@@ -128,7 +128,7 @@ describe('Server()', function() {
     const server = createServer(Server.handler(
       errorTrap,
       async function({req, res}) {
-        if (req.is('html')) {
+        if (req.is('text/html')) {
           res.send('html');
         }
         else {
