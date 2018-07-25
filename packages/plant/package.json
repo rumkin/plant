@@ -1,6 +1,6 @@
 {
   "name": "@plant/plant",
-  "version": "1.0.0-alpha.3",
+  "version": "1.0.0-a.4",
   "description": "Web server for modern apps and PWA",
   "main": "src/index.js",
   "engines": {
@@ -13,12 +13,13 @@
     "lint:js": "eslint",
     "prepublish": "npm run lint && npm run build && npm run docs",
     "jsdoc": "jsdoc --configure .jsdoc.json --verbose",
-    "docs": "npm run jsdoc && rm -rf docs && mv tmp/docs/*/*/* docs && rm -rf tmp/docs",
+    "docs": "npm run jsdoc && rm -rf docs && mv ./tmp/docs/@plant/plant/* docs && rm -rf tmp/docs",
     "clean": "rm -rf dist",
     "dist": "mkdir dist",
     "compile": "browserify -s Plant src/server.js > dist/plant.js",
     "minify": "uglifyjs dist/plant.js > dist/plant.min.js",
-    "build": "npm run clean && npm run dist && npm run compile && npm run minify"
+    "build": "npm run clean && npm run dist && npm run compile && npm run minify",
+    "next": "npm publish --tag next"
   },
   "license": "MIT",
   "devDependencies": {
@@ -41,7 +42,8 @@
     "path-to-regexp": "^1.7.0"
   },
   "directories": {
-    "test": "test"
+    "test": "test",
+    "docs": "docs"
   },
   "repository": {
     "type": "git",

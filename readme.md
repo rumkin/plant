@@ -1,7 +1,7 @@
 [![npm](https://img.shields.io/npm/v/@plant/plant.svg?style=flat-square)](https://npmjs.com/package/@plant/plant)
 [![Travis](https://img.shields.io/travis/rumkin/plant.svg?style=flat-square)](https://travis-ci.org/rumkin/plant)
 [![npm](https://img.shields.io/npm/dw/@plant/plant.svg?style=flat-square)](https://npmjs.com/package/@plant/plant)
-![](https://img.shields.io/badge/size-56%20KiB-blue.svg?style=flat-square)
+![](https://img.shields.io/badge/size-71KiB-blue.svg?style=flat-square)
 
 ---
 
@@ -12,7 +12,7 @@ to be modular and clear.
 ## Features
 
 - Faster then Express on Hello World test **15K** vs **14K** req/sec.
-- Lightweight: **56Kb** with jsdoc comments.
+- Lightweight: **71 KiB** with jsdoc comments and 28 KiB when minified.
 - WhatWG standards based.
 
 ## Install
