@@ -1,18 +1,13 @@
 /**
- * @module Plant.Server
+ * @module Plant.HTTP
  * @description Implementation of Plant Server interface.
  */
 
-/**
-* @module Plant.CommonHandleType
-* @description Common Http Request and Response handlers.
-*/
 const {
   Response,
   Request,
   Headers,
   Socket,
-  getHandler,
 } = require('@plant/plant');
 
 const {Readable} = require('stream');
@@ -78,7 +73,7 @@ function createRequest(req) {
     url,
     headers: new Headers(req.headers, Headers.MODE_IMMUTABLE),
     stream: as(req, Readable),
-    sender: ip,
+    sender: `tcp://${ip}`,
   });
 
   return inReq;
@@ -189,7 +184,7 @@ function handleRequest(req, res, next) {
 }
 
 /**
- * @typedef {Object} Plant.Context Default plant context with plant's instances for req and res.
+ * @typedef Context Default plant context with plant's instances for req and res.
  * @prop {Request} req Request instance.
  * @prop {Response} res Response instance.
  * @prop {Socket} socket Socket instance.
@@ -222,20 +217,13 @@ function handleRequest(req, res, next) {
  */
 
 /**
-  * @typedef {Object} ServerOptions Server configuration options.
-  * @prop {Array.<HandleType>} [handlers=[]] List of request handlers.
-  * @prop {Object} [context={}] Context object.
-  * @prop {function(Error)} [onError] Uncaught error handler.
-  */
-
-/**
- * Create native http request handler from Server
+ * Create native http request handler from Plant  instance
  *
  * @returns {function(http.IncomingMessage,http.ServerResponse)} Native http request handler function
  */
-function httpHandler(handler) {
+function createRequestHandler(plant) {
   return function (req, res) {
-    handleRequest(req, res, getHandler(handler))
+    handleRequest(req, res, plant.handler())
     .catch(handleRequestError.bind(this, req, res));
   };
 }
@@ -253,4 +241,4 @@ function handleRequestError(req, res, error) {
   }
 }
 
-module.exports = httpHandler;
+module.exports = createRequestHandler;
