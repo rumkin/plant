@@ -9,9 +9,16 @@ Plant is WhatWG standards based web server, powered by ES2017, created with modu
 and functional design patterns on practice. It uses cascades (an isolated customizable contexts)
 to be modular, pure and less coupled.
 
-# Table of Contents
+---
 
-* [Features](#features).
+## Features
+
+- ⚡️ Faster then Express on Hello World test **15K** vs **14K** req/sec.
+- ☁️ Lightweight: **71 KiB** with comments and 28 KiB when minified.
+- 📐 WhatWG standards based.
+
+# Table of Content
+
 * [Install](#install).
 * [Usage](#usage).
 * [Examples](#examples).
@@ -25,14 +32,6 @@ to be modular, pure and less coupled.
     * [Headers](#headers-type).
     * [Socket](#socket-type).
 * [License](#license).
-
----
-
-## Features
-
-- Faster then Express on Hello World test **15K** vs **14K** req/sec.
-- Lightweight: **71 KiB** with comments and 28 KiB when minified.
-- WhatWG standards based.
 
 ## Install
 
