@@ -7,12 +7,31 @@
 
 Plant is WhatWG standards based web server, powered by ES2017, created with modular architecture in mind
 and functional design patterns on practice. It uses cascades (an isolated customizable contexts)
-to be modular and clear.
+to be modular, pure and less coupled.
+
+# Table of Contents
+
+* [Features](#features).
+* [Install](#install).
+* [Usage](#usage).
+* [Examples](#examples).
+    * [Gzip example](#gzip-example).
+* [API](#api).
+    * [Plant](#plant-type).
+    * [Handler](#handler-type).
+    * [Router](#router-type).
+    * [Request](#request-type).
+    * [Response](#response-type).
+    * [Headers](#headers-type).
+    * [Socket](#socket-type).
+* [License](#license).
+
+---
 
 ## Features
 
 - Faster then Express on Hello World test **15K** vs **14K** req/sec.
-- Lightweight: **71 KiB** with jsdoc comments and 28 KiB when minified.
+- Lightweight: **71 KiB** with comments and 28 KiB when minified.
 - WhatWG standards based.
 
 ## Install
@@ -23,18 +42,15 @@ Production version from NPM registry:
 npm i @plant/plant
 ```
 
-Latest dev version from github:
-```bash
-npm i rumkin/plant
-```
-
 ## Usage
 
-Plant is using cascades: independent modifiable context protected from intersection.
+Plant is abstract web server so it has no builtin transport. It depends on
+modules for http, https, ws or even rpc to provide transport layer. In this
+example https is using so it package should to be installed
+(`npm i @plant/https`).
 
 ```javascript
-const http = require('http');
-const httpHandler = require('@plant/http');
+const createServer = require('@plant/https');
 const Plant = require('@plant/plant');
 
 const plant = new Plant();
@@ -45,7 +61,7 @@ plant.use('/greet', async function({res}) {
 });
 
 // Build request handler
-http.createServer(httpHandler(plant))
+createServer(plant)
 .listen(8080);
 ```
 
@@ -53,13 +69,37 @@ http.createServer(httpHandler(plant))
 
 * [Hello World](https://github.com/rumkin/plant/tree/master/example/hello-world.js).
 * [Echo](https://github.com/rumkin/plant/tree/master/example/echo.js).
+* [Router](https://github.com/rumkin/plant/tree/master/example/router.js).
 * [Cookie handling](https://github.com/rumkin/plant/tree/master/example/cookie.js).
 * [File serving](https://github.com/rumkin/plant/tree/master/example/file.js).
 * Response [Gzip compression](https://github.com/rumkin/plant/tree/master/example/gzip.js).
 * [Context separations](https://github.com/rumkin/plant/tree/master/example/context.js).
 * [Session](https://github.com/rumkin/plant/tree/master/example/session.js).
 
-## Cascades
+### Gzip example
+
+Cascades allow to process responses before sending. For example you can gzip
+response body:
+
+```javascript
+plant.use(async ({req, res}, next) => {
+    // Process request
+    await next();
+
+    // Create gzip encoder.
+    const gzip = zlib.createGzip();
+    // Get response body
+    const {body} = res;
+    // Set Gzip encoding
+    res.headers.set('content-encoding', 'gzip');
+    // Replace body with stream
+    res.stream(gzip);
+    // Write data to gzip and close stream.
+    gzip.end(body);
+});
+```
+
+## Cascades explanation
 
 Cascades is is isolated scopes presented with Context objects. Each level
 of cascade could modify context on it's own without touching overlaying context.
@@ -86,68 +126,6 @@ plant.use(async (ctx, next) => {
 It allow to create predictable behaviour and avoid unexpected side effects to
 change. Plant itself overwrite default node.js HTTP Request and Response objects
 with Plant.Request and Plant.Response.
-
-### Gzip example
-
-Cascades allow to process responses before sending. For example you can gzip
-response body:
-
-```javascript
-plant.use(async ({req, res}, next) => {
-    // Process request
-    await next();
-
-    // Create gzip encoder.
-    const gzip = zlib.createGzip();
-    // Get response body
-    const {body} = res;
-    // Set Gzip encoding
-    res.headers.set('content-encoding', 'gzip');
-    // Replace body with stream
-    res.stream(gzip);
-    // Write data to gzip and close stream.
-    gzip.end(body);
-});
-```
-
-## Router
-
-Plant designed to be API and WebApps ready. So it provide router out from the box.
-
-```javascript
-const Plant = require('@plant/plant');
-const {Router} = Plant;
-
-const plant = new Plant();
-
-// Greeting manager
-class GreetManager {
-    constructor(user) {
-        this.user = user;
-    }
-
-    greet() {
-        return `Hello, ${this.user}`;
-    }
-}
-
-// Greeting manager router
-function greetingRouter(manager) {
-    const router = new Router();
-
-    router.get('/', ({res}) => {
-        res.body = manager.greet();
-    });
-
-    return router;
-}
-
-plant.use('/guest', greetingRouter(new GreetManager('guest')));
-plant.use('/admin', greetingRouter(new GreetManager('Admin')));
-plant.use('/world', greetingRouter(new GreetManager('World')));
-```
-
-Routers are stackable too so it's possible to combine them into complex router.
 
 ## API
 
@@ -407,9 +385,9 @@ be in immutable mode.
 #### RequestOptions
 ```text
 {
-    method:String = 'get',
+    method:String='get',
     url:String|URL,
-    headers:Object|Headers = {},
+    headers:Object|Headers={},
     sender:String,
     body:Buffer|Null=null,
     data:Object={},
@@ -792,7 +770,7 @@ Request object has `domains` property instead of `subdomains` and has *all* part
 req.domains; // -> ['com', 'github', 'api'] for api.github.com
 ```
 
-### Other custom behaviour
+### Other custom behavior
 
 Request method property value is lowercased:
 
