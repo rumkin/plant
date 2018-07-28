@@ -1,6 +1,6 @@
 {
   "name": "@plant/plant",
-  "version": "1.0.0-a.4",
+  "version": "1.0.0",
   "description": "Web server for modern apps and PWA",
   "main": "src/index.js",
   "engines": {
