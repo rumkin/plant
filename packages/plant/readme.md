@@ -5,101 +5,86 @@
 
 ---
 
-Plant is WhatWG standards based web server, powered by ES2017, created with modular architecture in mind
-and functional design patterns on practice. It uses cascades (an isolated customizable contexts)
-to be modular and clear.
+Plant is WhatWG standards based web server powered by ES2017, created with
+modular architecture and functional design patterns in mind. It uses cascades
+and contexts to be modular, pure and less coupled.
+
+Plant is transport agnostic and can work right in the browser using WebSockets
+or event PostMessage.
 
 ## Features
 
-- Faster then Express on Hello World test **15K** vs **14K** req/sec.
-- Lightweight: **71 KiB** with jsdoc comments and 28 KiB when minified.
-- WhatWG standards based.
+- 🏎 Faster then Express: **15K** vs **14K** req/sec on Hello World test.
+- ☁️ Lightweight: **71 KiB** with comments and 28 KiB when minified.
+- 📐 Standards based: uses WhatWG URL and Headers interfaces.
+
+---
+
+## Table of Content
+
+* [Install](#install).
+* [Usage](#usage).
+* [Examples](#examples).
+    * [Gzip example](#gzip-example).
+* [API](#api).
+    * [Plant](#plant-type).
+    * [Handler](#handler-type).
+    * [Router](#router-type).
+    * [Request](#request-type).
+    * [Response](#response-type).
+    * [Headers](#headers-type).
+    * [Socket](#socket-type).
+* [License](#license).
+
+---
 
 ## Install
 
-Production version from NPM registry:
+Production version:
 
 ```
 npm i @plant/plant
 ```
 
-Latest dev version from github:
-```bash
-npm i rumkin/plant
+Or development version:
+
+```
+npm i @plant/plant@next
 ```
 
 ## Usage
 
-Plant is using cascades: independent modifiable context protected from intersection.
+Plant is abstract web server so it has no builtin transport. It depends on
+modules for http, https, ws or even rpc to provide transport layer. In this
+example https is using so it package should to be installed
+(`npm i @plant/https`).
 
 ```javascript
+const createServer = require('@plant/https');
 const Plant = require('@plant/plant');
-const {Request, Response, Headers} = plant;
 
 const plant = new Plant();
 
-// Configure response handlers
+// Send text response
 plant.use('/greet', async function({res}) {
     res.body = 'Hello World';
 });
 
-const req = new Request({
-    url: '/greet',
-    method: 'GET',
-    headers: {
-        'accept': 'text/plain',
-    },
-});
-
-const res = new Response();
-
 // Build request handler
-const handler = plant.handler();
-
-// Handle request and response
-handler({req, res})
-.then(({res}) => {
-    res.body; // => 'Hello World'
-});
+createServer(plant)
+.listen(8080);
 ```
 
 ## Examples
 
 * [Hello World](https://github.com/rumkin/plant/tree/master/example/hello-world.js).
 * [Echo](https://github.com/rumkin/plant/tree/master/example/echo.js).
+* [Router](https://github.com/rumkin/plant/tree/master/example/router.js).
 * [Cookie handling](https://github.com/rumkin/plant/tree/master/example/cookie.js).
 * [File serving](https://github.com/rumkin/plant/tree/master/example/file.js).
 * Response [Gzip compression](https://github.com/rumkin/plant/tree/master/example/gzip.js).
 * [Context separations](https://github.com/rumkin/plant/tree/master/example/context.js).
 * [Session](https://github.com/rumkin/plant/tree/master/example/session.js).
-
-## Cascades
-
-Cascades is is isolated scopes presented with Context objects. Each level
-of cascade could modify context on it's own without touching overlaying context.
-
-Default context contains **req**, **res** and **socket** items. And you can
-specify your own context to underlaying cascades:
-
-```javascript
-plant.use(async function({req, res, socket}, next) => {
-    await next({}); // Set context empty
-});
-
-plant.use(async (ctx, next) => {
-    ctx; // -> {}
-    await next({number: 3.14}); // Add number to context
-});
-
-plant.use(async (ctx, next) => {
-    ctx; // -> {number: 3.14}
-    await next(); // No context modification
-});
-```
-
-It allow to create predictable behaviour and avoid unexpected side effects to
-change. Plant itself overwrite default node.js HTTP Request and Response objects
-with Plant.Request and Plant.Response.
 
 ### Gzip example
 
@@ -124,44 +109,35 @@ plant.use(async ({req, res}, next) => {
 });
 ```
 
-## Router
+## Cascades explanation
 
-Plant designed to be API and WebApps ready. So it provide router out from the box.
+Cascades are nested functions which passes context object to the deepest function.
+The flow and depth could be modified using `or` and `and` modifiers. Each level
+of cascade could modify context on it's own without touching overlaying
+or adjacent context.
+
+Default context contains **req**, **res** and **socket** properties. You can add
+your own properties, modify or delete existing:
 
 ```javascript
-const Plant = require('@plant/plant');
-const {Router} = Plant;
+plant.use(async function({req, res, socket}, next) => {
+    await next({}); // Set context empty
+});
 
-const plant = new Plant();
+plant.use(async (ctx, next) => {
+    ctx; // -> {}
+    await next({number: 3.14}); // Create new context with `number` property
+});
 
-// Greeting manager
-class GreetManager {
-    constructor(user) {
-        this.user = user;
-    }
-
-    greet() {
-        return `Hello, ${this.user}`;
-    }
-}
-
-// Greeting manager router
-function greetingRouter(manager) {
-    const router = new Router();
-
-    router.get('/', ({res}) => {
-        res.body = manager.greet();
-    });
-
-    return router;
-}
-
-plant.use('/guest', greetingRouter(new GreetManager('guest')));
-plant.use('/admin', greetingRouter(new GreetManager('Admin')));
-plant.use('/world', greetingRouter(new GreetManager('World')));
+plant.use(async (ctx, next) => {
+    ctx; // -> {number: 3.14}
+    await next(); // No context modification
+});
 ```
 
-Routers are stackable too so it's possible to combine them into complex router.
+It allow to create predictable behaviour and avoid unexpected side effects to
+change. Plant itself overwrite default node.js HTTP Request and Response objects
+with Plant.Request and Plant.Response.
 
 ## API
 
@@ -421,9 +397,9 @@ be in immutable mode.
 #### RequestOptions
 ```text
 {
-    method:String = 'get',
+    method:String='get',
     url:String|URL,
-    headers:Object|Headers = {},
+    headers:Object|Headers={},
     sender:String,
     body:Buffer|Null=null,
     data:Object={},
@@ -765,9 +741,17 @@ async function errorHandler({req, res}, next) {
 
 ---
 
+
+## Comparison
+
+Plant is mostly the same as Koa but it has its' own differences.
+
 ### Difference from Koa
 
-Plant tries to be more lightweight like connect and has simple interface like express. It uses async cascades like in Koa, but plant's context has other nature. Plant's context is customizable but isolated. It passed with `next` call:
+Plant is trying to be more lightweight like Connect and to have complete interface
+like Express. It uses async cascades like in Koa, but plant's context has other
+nature. Plant's context is plain object (not a special one) and it could be
+modified while moving through cascade but only for underlaying handlers:
 
 ```javascript
 async function sendVersion({res, v}) {
@@ -797,16 +781,19 @@ plant.use(async function({req, res}) {
 
 ### Difference from Express
 
-The first: middlewares are called handlers. Plant is an object (not a function), it has no `listen` method at all.
-Request and Response objects are not ancestors of http.IncomingMessage and http.ServerResponse.
+Well middlewares are calling handlers (because it shorter). Plant is an object
+(not a function). Plant could not listening connection itself and has no
+`listen` method for that. Request and Response objects are not ancestors of
+native Node.js's `http.IncomingMessage` and `http.ServerResponse`.
 
-Request object has `domains` property instead of `subdomains` and has *all* parts of host from tld zone:
+Request object has `domains` property instead of `subdomains` and has *all*
+parts of host from tld zone:
 
 ```javascript
 req.domains; // -> ['com', 'github', 'api'] for api.github.com
 ```
 
-### Other custom behaviour
+### Other custom behavior
 
 Request method property value is lowercased:
 
@@ -820,4 +807,4 @@ MIT.
 
 ## Copyright
 
-&copy; Rumkin 2017-2018
+&copy; Rumkin, 2017-2018.

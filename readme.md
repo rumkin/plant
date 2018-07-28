@@ -5,19 +5,22 @@
 
 ---
 
-Plant is WhatWG standards based web server, powered by ES2017, created with modular architecture in mind
-and functional design patterns on practice. It uses cascades (an isolated customizable contexts)
-to be modular, pure and less coupled.
+Plant is WhatWG standards based web server powered by ES2017, created with
+modular architecture and functional design patterns in mind. It uses cascades
+and contexts to be modular, pure and less coupled.
 
----
+Plant is transport agnostic and can work right in the browser using WebSockets
+or event PostMessage.
 
 ## Features
 
-- ⚡️ Faster then Express on Hello World test **15K** vs **14K** req/sec.
+- 🏎 Faster then Express: **15K** vs **14K** req/sec on Hello World test.
 - ☁️ Lightweight: **71 KiB** with comments and 28 KiB when minified.
-- 📐 WhatWG standards based.
+- 📐 Standards based: uses WhatWG URL and Headers interfaces.
 
-# Table of Content
+---
+
+## Table of Content
 
 * [Install](#install).
 * [Usage](#usage).
@@ -33,12 +36,20 @@ to be modular, pure and less coupled.
     * [Socket](#socket-type).
 * [License](#license).
 
+---
+
 ## Install
 
-Production version from NPM registry:
+Production version:
 
 ```
 npm i @plant/plant
+```
+
+Or development version:
+
+```
+npm i @plant/plant@next
 ```
 
 ## Usage
@@ -100,11 +111,13 @@ plant.use(async ({req, res}, next) => {
 
 ## Cascades explanation
 
-Cascades is is isolated scopes presented with Context objects. Each level
-of cascade could modify context on it's own without touching overlaying context.
+Cascades are nested functions which passes context object to the deepest function.
+The flow and depth could be modified using `or` and `and` modifiers. Each level
+of cascade could modify context on it's own without touching overlaying
+or adjacent context.
 
-Default context contains **req**, **res** and **socket** items. And you can
-specify your own context to underlaying cascades:
+Default context contains **req**, **res** and **socket** properties. You can add
+your own properties, modify or delete existing:
 
 ```javascript
 plant.use(async function({req, res, socket}, next) => {
@@ -113,7 +126,7 @@ plant.use(async function({req, res, socket}, next) => {
 
 plant.use(async (ctx, next) => {
     ctx; // -> {}
-    await next({number: 3.14}); // Add number to context
+    await next({number: 3.14}); // Create new context with `number` property
 });
 
 plant.use(async (ctx, next) => {
@@ -728,9 +741,17 @@ async function errorHandler({req, res}, next) {
 
 ---
 
+
+## Comparison
+
+Plant is mostly the same as Koa but it has its' own differences.
+
 ### Difference from Koa
 
-Plant tries to be more lightweight like connect and has simple interface like express. It uses async cascades like in Koa, but plant's context has other nature. Plant's context is customizable but isolated. It passed with `next` call:
+Plant is trying to be more lightweight like Connect and to have complete interface
+like Express. It uses async cascades like in Koa, but plant's context has other
+nature. Plant's context is plain object (not a special one) and it could be
+modified while moving through cascade but only for underlaying handlers:
 
 ```javascript
 async function sendVersion({res, v}) {
@@ -760,10 +781,13 @@ plant.use(async function({req, res}) {
 
 ### Difference from Express
 
-The first: middlewares are called handlers. Plant is an object (not a function), it has no `listen` method at all.
-Request and Response objects are not ancestors of http.IncomingMessage and http.ServerResponse.
+Well middlewares are calling handlers (because it shorter). Plant is an object
+(not a function). Plant could not listening connection itself and has no
+`listen` method for that. Request and Response objects are not ancestors of
+native Node.js's `http.IncomingMessage` and `http.ServerResponse`.
 
-Request object has `domains` property instead of `subdomains` and has *all* parts of host from tld zone:
+Request object has `domains` property instead of `subdomains` and has *all*
+parts of host from tld zone:
 
 ```javascript
 req.domains; // -> ['com', 'github', 'api'] for api.github.com
@@ -783,4 +807,4 @@ MIT.
 
 ## Copyright
 
-&copy; Rumkin 2017-2018
+&copy; Rumkin, 2017-2018.
