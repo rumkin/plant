@@ -1,8 +1,8 @@
 const should = require('should');
 const fs = require('fs');
 
-const Server = require('@plant/plant');
-const {and, or} = Server;
+const Plant = require('@plant/plant');
+const {and, or} = Plant;
 
 const {initServer, readStream} = require('./utils');
 
@@ -53,7 +53,7 @@ describe('Plant.Flow', function() {
 
 describe('Server()', function() {
   it('Should serve HTTP requests', function() {
-    const server = createServer(Server.handler(
+    const server = createServer(Plant.create(
       errorTrap,
       async function({req, res}) {
         res.send(req.headers.get('content-type'));
@@ -76,7 +76,7 @@ describe('Server()', function() {
   });
 
   it('Should return 500 response on errors', async function() {
-    const server = createServer(Server.handler(
+    const server = createServer(Plant.create(
       function() {
         throw new Error('test');
       }
@@ -94,7 +94,7 @@ describe('Server()', function() {
   });
 
   it('Should update to proxy values', function() {
-    const server = createServer(Server.handler(
+    const server = createServer(Plant.create(
       errorTrap,
       async function({req, res}) {
         res.json({
@@ -120,12 +120,12 @@ describe('Server()', function() {
     .then((result) => {
       should(result).be.instanceof(Object);
       should(result).has.ownProperty('host').which.equal('www.online');
-      should(result).has.ownProperty('sender').which.equal('127.0.0.2');
+      should(result).has.ownProperty('sender').which.equal('tcp://127.0.0.2');
     });
   });
 
   it('Should determine request mime-type', function() {
-    const server = createServer(Server.handler(
+    const server = createServer(Plant.create(
       errorTrap,
       async function({req, res}) {
         if (req.is('text/html')) {
@@ -153,7 +153,7 @@ describe('Server()', function() {
   });
 
   it('Should parse url data and hosts', function() {
-    const plant = new Server();
+    const plant = new Plant();
 
     plant.use(errorTrap);
     plant.use(async function({req, res}) {
@@ -172,7 +172,7 @@ describe('Server()', function() {
       });
     });
 
-    const server = createServer(plant.handler());
+    const server = createServer(plant);
 
     server.listen();
 
@@ -200,7 +200,7 @@ describe('Server()', function() {
   });
 
   it('Should read body', function() {
-    const server = createServer(Server.handler(
+    const server = createServer(Plant.create(
       errorTrap,
       async function({req}, next) {
         if (req.method !== 'GET') {
@@ -229,7 +229,7 @@ describe('Server()', function() {
   });
 
   it('Should send response headers', function() {
-    const server = createServer(Server.handler(
+    const server = createServer(Plant.create(
       errorTrap,
       async function({res}) {
         res.headers.set('content-type', 'application/json');
@@ -253,7 +253,7 @@ describe('Server()', function() {
   });
 
   it('Should use or handler', function() {
-    const server = createServer(Server.handler(
+    const server = createServer(Plant.create(
       errorTrap,
       or(
         async function() {},
@@ -276,7 +276,7 @@ describe('Server()', function() {
   });
 
   it('Should use `and` handler', function() {
-    const server = createServer(Server.handler(
+    const server = createServer(Plant.create(
       errorTrap,
       and(
         async function(ctx, next) {
@@ -303,7 +303,7 @@ describe('Server()', function() {
   });
 
   it('Should make turns with use(h1, h2)', function() {
-    const plant = Server.new();
+    const plant = Plant.new();
 
     plant.use(errorTrap);
 
@@ -321,7 +321,7 @@ describe('Server()', function() {
       res.text('last');
     });
 
-    const server = createServer(plant.handler());
+    const server = createServer(plant);
 
     server.listen();
 
@@ -335,7 +335,7 @@ describe('Server()', function() {
   });
 
   it('Should visit turn defined with use(h1, h2)', function() {
-    const plant = Server.new()
+    const plant = Plant.new()
     .use(errorTrap)
     .use(
       async function({req}, next) {
@@ -353,7 +353,7 @@ describe('Server()', function() {
       }
     );
 
-    const server = createServer(plant.handler());
+    const server = createServer(plant);
 
     server.listen();
 
@@ -367,7 +367,7 @@ describe('Server()', function() {
   });
 
   it('Should set cookies', function() {
-    const server = createServer(Server.handler(
+    const server = createServer(Plant.create(
       errorTrap,
       async function({res}) {
         res.setCookie('one', 1);
@@ -397,7 +397,7 @@ describe('Server()', function() {
   });
 
   it('Should get cookies', function() {
-    const plant = Server.create(
+    const plant = Plant.create(
       errorTrap,
       async function({req, res}) {
         res.json({
@@ -409,7 +409,7 @@ describe('Server()', function() {
       console.error(error);
     });
 
-    const server = createServer(plant.handler());
+    const server = createServer(plant);
 
     server.listen();
 
@@ -429,7 +429,7 @@ describe('Server()', function() {
   });
 
   it('Should output streams', function(){
-    const server = createServer(Server.handler(
+    const server = createServer(Plant.create(
       errorTrap,
       async function({res}) {
         res.send(fs.createReadStream(__filename));
