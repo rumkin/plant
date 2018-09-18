@@ -224,15 +224,8 @@ function add({i = 0, ctx}, next) {
     return next({...ctx, i: i + 1});
 }
 
-// This ...
-plant.and(add, add, add, ({i, res}) => res.send(i)); // i is 3
-
-// ... is same as call `use` serially:
-plant.use(add);
-plant.use(add);
-plant.use(add);
-plant.use(({i, res}) => res.send(i)); // i is 3
-
+// Define cascade
+plant.and(add, add, add, ({i, res}) => res.text(i)); // i is 3
 ```
 
 ### Plant.router()
@@ -453,7 +446,7 @@ switch(req.accept(['json', 'text'])) {
     case 'json':
         res.json({value: 3.14159});
         break;
-    case 'html':
+    case 'text':
         res.text('3.14159');
         break;
     default:
@@ -762,13 +755,15 @@ plant.use('/api/v1', async function(ctx, next) {
     ctx.v = 1;
     // Update ctx
     await next(ctx);
-}, sendVersion); // This will send 1
+}, sendVersion); // This will send `version: 1`
 
 plant.use('/api/v2', async function(ctx, next) {
     ctx.v = 2;
     // Update ctx
     await next(ctx);
-}, sendVersion); // This will send 2
+}, sendVersion); // This will send `version: 2`
+
+plant.use(sendVersion); // This will send `version: undefined`
 ```
 
 Also plant is using express-like response methods: text, html, json, send:
