@@ -5,6 +5,7 @@
 const {parseHeader, parseEntity} = require('./util/type-header');
 const isPlainObject = require('lodash.isplainobject');
 const {isReadableStream} = require('./util/stream');
+const {getMimeMatcher} = require('./util/mime-type-matcher');
 
 const Headers = require('./headers');
 
@@ -79,9 +80,9 @@ class Request {
    * @return {Boolean} Return true if content type header contains specified `types`.
    */
   is(type) {
-    const entry = parseEntity(this.headers.get('content-type') || '');
+    const entity = parseEntity(this.headers.get('content-type') || '');
 
-    return entry.type === type;
+    return entity.type === type;
   }
 
   /**
@@ -126,12 +127,12 @@ class Request {
 }
 
 // Naive request groups.
-// TODO Make more flexible to match rules like */*, images/*, etc.
+// Usage is: aliases.json('application/json') // -> true
 const aliases = {
-  json: ['application/json'],
-  text: ['text/plain'],
-  html: ['text/html', 'text/xhtml'],
-  image: ['image/png', 'image/jpg', 'image/jpeg', 'image/gif'],
+  json: getMimeMatcher(['application/json', 'application/json+*']),
+  text: getMimeMatcher(['text/plain']),
+  html: getMimeMatcher(['text/html', 'text/xhtml']),
+  image: getMimeMatcher(['image/*']),
 };
 
 function normalizeTypes(types) {
@@ -150,7 +151,7 @@ function normalizeTypes(types) {
       result.push({
         value: type,
         matcher(value) {
-          return aliases[type].includes(value);
+          return aliases[type](value);
         },
       });
     }

@@ -3,7 +3,7 @@
  */
 
 /**
- * @typedef TypeEntry
+ * @typedef TypeEntity
  * @prop {String} type Type entry value;
  * @prop {Object} params Type params, like `q`, `charset`, etc.
  */
@@ -14,7 +14,7 @@
  * `text/html;q=1.0, image/png;q=0.1`.
  *
  * @param  {string} header Request header.
- * @return {TypeEntry[]} Array of type objects.
+ * @return {TypeEntity[]} Array of type objects.
  */
 function parseHeader(header) {
   const entities = header.split(/\s*,\s*/);
@@ -28,7 +28,7 @@ function parseHeader(header) {
  * `application/json;charset=utf8`.
  *
  * @param  {String} entity Type entry.
- * @return {TypeEntry} returns type entry object.
+ * @return {TypeEntity} returns type entry object.
  */
 function parseEntity(entity) {
   const [type, ...tail] = entity.split(/;/);

@@ -1,6 +1,6 @@
 {
   "name": "@plant/plant",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Web server for modern apps and PWA",
   "main": "src/index.js",
   "engines": {
@@ -23,7 +23,7 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "browserify": "^16.2.2",
+    "browserify": "^16.2.3",
     "eslint": "^4.0.0",
     "istanbul": "^0.4.5",
     "jsdoc": "^3.5.5",
@@ -36,6 +36,7 @@
   "dependencies": {
     "cookie": "^0.3.1",
     "eventemitter3": "^3.1.0",
+    "lodash.escaperegexp": "^4.1.2",
     "lodash.isobject": "^3.0.2",
     "lodash.isplainobject": "^4.0.6",
     "lodash.isstring": "^4.0.1",

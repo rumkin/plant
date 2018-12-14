@@ -24,7 +24,7 @@ describe('Request()', function() {
   });
 
   describe('Request.type()', function() {
-    it('Should return "json" for "application/json" content type', function() {
+    it('Should return "application/json" for "application/json" content type', function() {
       const req = new Request({
         url: new URL('http://localhost/'),
         headers: new Headers({
@@ -38,7 +38,21 @@ describe('Request()', function() {
       should(type).be.a.String().and.be.equal('application/json');
     });
 
-    it('Should return `null` for not a "application/json" content type', function() {
+    it('Should return "json" for "application/json" content type', function() {
+      const req = new Request({
+        url: new URL('http://localhost/'),
+        headers: new Headers({
+          'content-type': 'application/json;charset=utf8',
+        }),
+        body: null,
+      });
+
+      const type = req.type(['text/html', 'json']);
+
+      should(type).be.a.String().and.be.equal('json');
+    });
+
+    it('Should return `null` for not an "application/json" content type', function() {
       const req = new Request({
         url: new URL('http://localhost/'),
         headers: new Headers({
@@ -50,6 +64,28 @@ describe('Request()', function() {
       const type = req.type(['html', 'video']);
 
       should(type).be.equal(null);
+    });
+
+    [
+      'image/gif',
+      'image/png',
+      'image/jpg',
+      'image/jpeg',
+    ]
+    .map(function (type) {
+      it('Should return "image" for "' + type + '" content type', function() {
+        const req = new Request({
+          url: new URL('http://localhost/'),
+          headers: new Headers({
+            'content-type': type,
+          }),
+          body: null,
+        });
+
+        const result = req.type(['image']);
+
+        should(result).be.a.String().and.be.equal('image');
+      });
     });
   });
 
@@ -68,7 +104,7 @@ describe('Request()', function() {
       should(type).be.a.String().and.be.equal('json');
     });
 
-    it('Should return `null` for not a "application/json" accept type', function() {
+    it('Should return `null` for not an "application/json" accept type', function() {
       const req = new Request({
         url: new URL('http://localhost/'),
         headers: new Headers({
