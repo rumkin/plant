@@ -11,7 +11,7 @@
     "test": "mocha test/index.js",
     "lint": "npm run lint:js src/**.js",
     "lint:js": "eslint",
-    "prepublish": "npm run lint && npm run build && npm run docs",
+    "prepublishOnly": "npm run lint && npm run build && npm run docs",
     "jsdoc": "jsdoc --configure .jsdoc.json --verbose",
     "docs": "npm run jsdoc && rm -rf docs && mv ./tmp/docs/@plant/plant/* docs && rm -rf tmp/docs",
     "clean": "rm -rf dist",

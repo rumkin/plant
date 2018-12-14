@@ -3,3 +3,7 @@ language: node_js
 node_js:
   - "node"
   - "8"
+branches:
+  only:
+  - master
+script: ./test.sh

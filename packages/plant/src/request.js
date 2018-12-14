@@ -6,6 +6,9 @@ const {parseHeader, parseEntity} = require('./util/type-header');
 const isPlainObject = require('lodash.isplainobject');
 const {isReadableStream} = require('./util/stream');
 const {getMimeMatcher} = require('./util/mime-type-matcher');
+const URL = (typeof this.URL === 'object')
+  ? URL
+  : require('url').URL;
 
 const Headers = require('./headers');
 
