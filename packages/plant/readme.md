@@ -360,9 +360,7 @@ router.get('/user', ({req}) => {
     domains: String[],
     path: String,
     basePath: String,
-    body: Buffer|Null,
-    data: Object,
-    stream: Stream,
+    body: ReadableStream|null,
 }
 ```
 
@@ -375,9 +373,7 @@ router.get('/user', ({req}) => {
 |domains| Domains name separated by '.' in reverse order |
 |path| Current unprocessed pathname part |
 |basePath| Pathname part processed by overlaying handler |
-|body| Request body. It is `null` by default before body reading|
-|data| Data contains values passed within body JSON or Multipart Form|
-|stream| Is Readable stream of Request body|
+|body| Request body readable stream. It is `null` by default if body not exists (GET, HEAD, OPTIONS request).|
 
 ### Request.Request()
 ```text
@@ -390,12 +386,12 @@ be in immutable mode.
 #### RequestOptions
 ```text
 {
-    method:String='get',
-    url:String|URL,
-    headers:Object|Headers={},
-    sender:String,
-    body:Buffer|Null=null,
-    data:Object={},
+    method: String='get',
+    url: String|URL,
+    headers: Object|Headers={},
+    sender: String,
+    body: ReadableStream|Null=null,
+    data: Object={},
     stream:Readable|Null=null,
 }
 ```
@@ -484,9 +480,9 @@ have mode 'none'.
 #### ResponseOptions
 ```text
 {
-    statusCode:Number=200,
-    headers:Headers|Object={},
-    body:Buffer|Stream|String|Null=null,
+    statusCode: Number=200,
+    headers: Headers|Object={},
+    body: Buffer|Stream|String|Null=null,
 }
 ```
 

@@ -6,9 +6,8 @@ const {parseHeader, parseEntity} = require('./util/type-header');
 const isPlainObject = require('lodash.isplainobject');
 const {isReadableStream} = require('./util/stream');
 const {getMimeMatcher} = require('./util/mime-type-matcher');
-const URL = (typeof this.URL === 'object')
-  ? URL
-  : require('url').URL;
+const URL = require('./web-api/url');
+const TextDecoder = require('./web-api/text-decoder');
 
 const Headers = require('./headers');
 
@@ -48,8 +47,6 @@ class Request {
     headers = {},
     url,
     body = null,
-    data = {},
-    stream = null,
     sender = '',
   }) {
     this.url = (typeof url === 'string')
@@ -67,13 +64,11 @@ class Request {
     this.path = this.url.pathname.replace(/\/+/g, '/');
     this.basePath = '/';
 
-    if (stream !== null && ! isReadableStream(stream)) {
-      throw new TypeError('options.stream is not a readable stream');
+    if (body !== null && ! isReadableStream(body)) {
+      throw new TypeError('options.body is not a readable stream');
     }
 
     this.body = body;
-    this.data = data;
-    this.stream = stream;
   }
 
   /**
@@ -127,6 +122,37 @@ class Request {
 
     return null;
   }
+
+  async text() {
+    const contentType = this.headers.get('content-type');
+    let encoding;
+    if (contentType) {
+      // get encoding...
+    }
+    else {
+      encoding = 'utf8';
+    }
+
+    const result = [];
+    const reader = this.body.getReader();
+    while (true) {
+      const {value, done} = await reader.read();
+      if (done) {
+        break;
+      }
+      result.push(value);
+    }
+    reader.releaseLock();
+
+    const decoder = new TextDecoder(encoding);
+
+    return decoder.decode(concatUint8Arrays(result));
+  }
+
+  json() {
+    return this.text()
+    .then(JSON.parse);
+  }
 }
 
 // Naive request groups.
@@ -160,6 +186,21 @@ function normalizeTypes(types) {
     }
   }
 
+  return result;
+}
+
+function concatUint8Arrays(arrays) {
+  let length = 0;
+  for (const array of arrays) {
+    length += array.length;
+  }
+  const result = new Uint8Array(length);
+  let n = 0;
+  for (const array of arrays) {
+    for (let i = 0; i < array.length; i++, n++) {
+      result[n] = array[i];
+    }
+  }
   return result;
 }
 

@@ -2,14 +2,15 @@ const should = require('should');
 const {URL} = require('url');
 
 const {Request, Headers} = require('..');
+const {ReadableStream} = require('./utils/readable-stream');
 
 describe('Request()', function() {
   it('Should be a function', function() {
     should(Request).be.Function();
   });
 
-  describe('Request.is()', function() {
-    it('Should use values from Request.headers', function() {
+  describe('Request#is()', function() {
+    it('Should use values from Request#headers', function() {
       const req = new Request({
         url: new URL('http://localhost/'),
         headers: new Headers({
@@ -23,7 +24,7 @@ describe('Request()', function() {
     });
   });
 
-  describe('Request.type()', function() {
+  describe('Request#type()', function() {
     it('Should return "application/json" for "application/json" content type', function() {
       const req = new Request({
         url: new URL('http://localhost/'),
@@ -89,7 +90,7 @@ describe('Request()', function() {
     });
   });
 
-  describe('Request.accept()', function() {
+  describe('Request#accept()', function() {
     it('Should return "json" for "application/json" accept value', function() {
       const req = new Request({
         url: new URL('http://localhost/'),
@@ -110,12 +111,43 @@ describe('Request()', function() {
         headers: new Headers({
           'accept': 'application/json',
         }),
-        body: null,
       });
 
       const type = req.accept(['html', 'video']);
 
       should(type).be.equal(null);
+    });
+  });
+
+  describe('Request#text()', function() {
+    it('Should receive data from readable stream', function() {
+      const req = new Request({
+        url: 'http://localhost/',
+        body: new ReadableStream([
+          Buffer.from('Hello', 'utf8'),
+        ]),
+      });
+
+      return req.text()
+      .then((text) => {
+        should(text).be.equal('Hello');
+      });
+    });
+  });
+
+  describe('Request#json()', function() {
+    it('Should receive Object from readable stream', function() {
+      const req = new Request({
+        url: 'http://localhost/',
+        body: new ReadableStream([
+          Buffer.from('[{"value": true}]', 'utf8'),
+        ]),
+      });
+
+      return req.json()
+      .then((json) => {
+        should(json).be.Array().and.be.deepEqual([{value: true}]);
+      });
     });
   });
 });
