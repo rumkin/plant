@@ -146,7 +146,7 @@ class Request {
 
     const decoder = new TextDecoder(encoding);
 
-    return decoder.decode(concatUint8Arrays(result));
+    return decoder.decode(concatUint8Arrays(result)).toString();
   }
 
   json() {
