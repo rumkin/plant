@@ -1,6 +1,6 @@
 # Node HTTP for Plant
 
-Plant adapter for node.js http module. It creates server listener from plant instance and https options.
+Plant adapter for native node.js http module. It creates server listener from plant instance.
 
 ## Install
 
