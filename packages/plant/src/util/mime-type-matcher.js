@@ -1,5 +1,6 @@
 const escapeRegExp = require('lodash.escaperegexp');
-
+const isString = require('lodash.isstring');
+const isRegExp = require('lodash.isregexp');
 /**
  * getMimeMatcher - create mime type matcher function wich determines weather
  * passed `type` matches `types`,
@@ -9,14 +10,14 @@ const escapeRegExp = require('lodash.escaperegexp');
  */
 function getMimeMatcher(types) {
   const matchers = types.map((type) => {
-    if (typeof type === 'string') {
+    if (isString(type)) {
       return stringMatcher(type);
     }
-    else if (type instanceof RegExp) {
+    else if (isRegExp(type)) {
       return regExpMatcher(type);
     }
     else {
-      throw new Error('Unknown type');
+      throw new TypeError('Type should be a String or a RegExp instance');
     }
   });
 
