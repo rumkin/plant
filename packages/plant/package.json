@@ -1,6 +1,6 @@
 {
   "name": "@plant/plant",
-  "version": "1.0.2",
+  "version": "2.0.0-alpha",
   "description": "Web server for modern apps and PWA",
   "main": "src/index.js",
   "engines": {
@@ -11,7 +11,7 @@
     "test": "mocha test/index.js",
     "lint": "npm run lint:js src/**.js",
     "lint:js": "eslint",
-    "prepublishOnly": "npm run lint && npm run build && npm run docs",
+    "prepublishOnly": "allow-publish-tag next && npm run lint && npm run build && npm run docs",
     "jsdoc": "jsdoc --configure .jsdoc.json --verbose",
     "docs": "npm run jsdoc && rm -rf docs && mv ./tmp/docs/@plant/plant/* docs && rm -rf tmp/docs",
     "clean": "rm -rf dist",
@@ -23,6 +23,7 @@
   },
   "license": "MIT",
   "devDependencies": {
+    "allow-publish-tag": "^1.0.0",
     "browserify": "^16.2.3",
     "eslint": "^4.0.0",
     "istanbul": "^0.4.5",
