@@ -1,0 +1,11 @@
+{
+  "private": true,
+  "devDependencies": {
+    "husky": "^1.2.1"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "./test.sh"
+    }
+  }
+}
