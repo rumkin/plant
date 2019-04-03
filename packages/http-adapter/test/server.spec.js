@@ -1,70 +1,76 @@
-const should = require('should');
-const fs = require('fs');
+/* global describe */
+/* global it */
+/* global after */
 
-const Plant = require('@plant/plant');
-const {and, or} = Plant;
+const should = require('should')
+const fs = require('fs')
+const streams = require('web-streams-polyfill/ponyfill')
 
-const {initServer, readStream} = require('./utils');
+const Plant = require('@plant/plant')
+const {and, or} = Plant
 
-const httpHandler = require('..');
+const {initServer} = require('./utils')
+const {ReadableStream} = streams
+
+const httpHandler = require('..')
 
 async function errorTrap(ctx, next) {
   try {
-    await next();
+    await next()
   }
   catch (err) {
-    console.error(err);
-    throw err;
+    console.error(err)
+    throw err
   }
 }
 
 function createServer(plant) {
-  return initServer(httpHandler(plant));
+  return initServer(httpHandler(plant))
 }
 
 describe('Plant.Flow', function() {
   describe('Cascade', function() {
     it ('should iterate over `and`', function() {
-      let round = 0;
+      let round = 0
 
       const fn = and(
         async function(ctx, next) {
-          round += 1;
-          should(round).be.equal(1);
+          round += 1
+          should(round).be.equal(1)
 
-          await next();
+          await next()
 
-          should(round).be.equal(3);
+          should(round).be.equal(3)
         },
         async function(ctx, next) {
-          round += 1;
-          should(round).be.equal(2);
+          round += 1
+          should(round).be.equal(2)
 
-          await next();
+          await next()
 
-          round += 1;
+          round += 1
         }
-      );
+      )
 
-      return fn(null, null);
-    });
-  });
-});
+      return fn(null, null)
+    })
+  })
+})
 
 describe('Server()', function() {
   it('Should serve HTTP requests', function() {
     const server = createServer(Plant.create(
       errorTrap,
       async function({req, res}) {
-        res.send(req.headers.get('content-type'));
+        res.send(req.headers.get('content-type'))
       }
-    ));
+    ))
 
-    server.listen();
+    server.listen()
 
     after(function() {
-      server.close();
-    });
+      server.close()
+    })
 
     return server.fetch('/', {
       headers: {
@@ -72,43 +78,43 @@ describe('Server()', function() {
       },
     })
     .then((res) => res.text())
-    .then((result) => should(result).be.equal('text/plain'));
-  });
+    .then((result) => should(result).be.equal('text/plain'))
+  })
 
   it('Should return 500 response on errors', async function() {
     const server = createServer(Plant.create(
       function() {
-        throw new Error('test');
+        throw new Error('test')
       }
-    ));
+    ))
 
-    server.listen();
+    server.listen()
 
     after(function() {
-      server.close();
-    });
+      server.close()
+    })
 
-    const res = await server.fetch('/');
+    const res = await server.fetch('/')
 
-    should(res.status).be.equal(500);
-  });
+    should(res.status).be.equal(500)
+  })
 
   it('Should update to proxy values', function() {
     const server = createServer(Plant.create(
       errorTrap,
       async function({req, res}) {
         res.json({
-          sender: req.sender,
+          peer: req.peer,
           host: req.url.hostname,
-        });
+        })
       }
-    ));
+    ))
 
-    server.listen();
+    server.listen()
 
     after(function() {
-      server.close();
-    });
+      server.close()
+    })
 
     return server.fetch('/', {
       headers: {
@@ -118,30 +124,30 @@ describe('Server()', function() {
     })
     .then((res) => res.json())
     .then((result) => {
-      should(result).be.instanceof(Object);
-      should(result).has.ownProperty('host').which.equal('www.online');
-      should(result).has.ownProperty('sender').which.equal('tcp://127.0.0.2');
-    });
-  });
+      should(result).be.instanceof(Object)
+      should(result).has.ownProperty('host').which.equal('www.online')
+      should(result).has.ownProperty('peer').which.equal('tcp://127.0.0.2')
+    })
+  })
 
   it('Should determine request mime-type', function() {
     const server = createServer(Plant.create(
       errorTrap,
       async function({req, res}) {
         if (req.is('text/html')) {
-          res.send('html');
+          res.send('html')
         }
         else {
-          res.send(req.headers.get('content-type'));
+          res.send(req.headers.get('content-type'))
         }
       }
-    ));
+    ))
 
-    server.listen();
+    server.listen()
 
     after(function() {
-      server.close();
-    });
+      server.close()
+    })
 
     return server.fetch('/', {
       headers: {
@@ -149,15 +155,15 @@ describe('Server()', function() {
       },
     })
     .then((res) => res.text())
-    .then((result) => should(result).be.equal('html'));
-  });
+    .then((result) => should(result).be.equal('html'))
+  })
 
   it('Should parse url data and hosts', function() {
-    const plant = new Plant();
+    const plant = new Plant()
 
-    plant.use(errorTrap);
+    plant.use(errorTrap)
     plant.use(async function({req, res}) {
-      const {url} = req;
+      const {url} = req
 
       res.json({
         method: req.method,
@@ -169,16 +175,16 @@ describe('Server()', function() {
         query: {
           json: req.url.searchParams.get('json'),
         },
-      });
-    });
+      })
+    })
 
-    const server = createServer(plant);
+    const server = createServer(plant)
 
-    server.listen();
+    server.listen()
 
     after(function() {
-      server.close();
-    });
+      server.close()
+    })
 
     return server.fetch('/request?json=1', {
       headers: {
@@ -196,61 +202,72 @@ describe('Server()', function() {
       query: {
         json: '1',
       },
-    }));
-  });
+    }))
+  })
 
   it('Should read body', function() {
     const server = createServer(Plant.create(
       errorTrap,
       async function({req}, next) {
         if (req.method !== 'GET') {
-          req.body = await readStream(req.stream);
+          const reader = req.body.getReader()
+          const chunks = []
+
+          while (true) {
+            const {value, done} = await reader.read()
+            if (done) {
+              break
+            }
+            chunks.push(value)
+          }
+
+          req.data = Buffer.concat(chunks)
         }
 
-        await next();
+        await next()
       },
       async function({req, res}) {
-        res.send(req.body);
+        res.send(req.data)
       }
-    ));
+    ))
 
-    server.listen();
+    server.listen()
 
     after(function() {
-      server.close();
-    });
+      server.close()
+    })
 
     return server.fetch('/', {
       method: 'POST',
       body: 'test',
     })
     .then((res) => res.text())
-    .then((result) => should(result).be.equal('test'));;
-  });
+    .then((result) => should(result).be.equal('test'))
+  })
 
   it('Should send response headers', function() {
     const server = createServer(Plant.create(
       errorTrap,
       async function({res}) {
-        res.headers.set('content-type', 'application/json');
-        res.send(JSON.stringify(null));
+        res.headers.set('content-type', 'application/json')
+        res.send(JSON.stringify(null))
       }
-    ));
+    ))
 
-    server.listen();
+    server.listen()
 
     after(function() {
-      server.close();
-    });
+      server.close()
+    })
 
     return server.fetch('/')
     .then((res) => {
-      should(res.headers.get('content-type')).is.equal('application/json');
-      return res;
+      should(res.headers.get('content-type')).is.equal('application/json')
+      return res
     })
     .then((res) => res.json())
-    .then((result) => should(result).be.equal(null));
-  });
+    .then((result) => should(result).be.equal(null))
+  })
 
   it('Should use or handler', function() {
     const server = createServer(Plant.create(
@@ -259,80 +276,80 @@ describe('Server()', function() {
         async function() {},
         async function() {},
         async function({res}) {
-          res.text('last');
+          res.text('last')
         }
       )
-    ));
+    ))
 
-    server.listen();
+    server.listen()
 
     after(function() {
-      server.close();
-    });
+      server.close()
+    })
 
     return server.fetch('/')
     .then((res) => res.text())
-    .then((result) => should(result).be.equal('last'));
-  });
+    .then((result) => should(result).be.equal('last'))
+  })
 
   it('Should use `and` handler', function() {
     const server = createServer(Plant.create(
       errorTrap,
       and(
         async function(ctx, next) {
-          await next();
+          await next()
         },
         async function(ctx, next) {
-          await next();
+          await next()
         },
         async function({res}) {
-          res.text('last');
+          res.text('last')
         }
       )
-    ));
+    ))
 
-    server.listen();
+    server.listen()
 
     after(function() {
-      server.close();
-    });
+      server.close()
+    })
 
     return server.fetch('/')
     .then((res) => res.text())
-    .then((result) => should(result).be.equal('last'));
-  });
+    .then((result) => should(result).be.equal('last'))
+  })
 
   it('Should make turns with use(h1, h2)', function() {
-    const plant = Plant.new();
+    const plant = Plant.new()
 
-    plant.use(errorTrap);
+    plant.use(errorTrap)
 
     plant.use(
       async function({req}, next) {
         if (req.path === '/turn') {
-          return await next();
+          return await next()
         }
       },
       async function({res}) {
-        res.text('turn');
+        res.text('turn')
       }
     )
     .use(async function({res}) {
-      res.text('last');
-    });
+      res.text('last')
+    })
 
-    const server = createServer(plant);
+    const server = createServer(plant)
 
-    server.listen();
+    server.listen()
 
     after(function() {
-      server.close();
-    });
+      server.close()
+    })
 
     return server.fetch('/')
     .then((res) => res.text())
-    .then((result) => should(result).be.equal('last'));
-  });
+    .then((result) => should(result).be.equal('last'))
+  })
 
   it('Should visit turn defined with use(h1, h2)', function() {
     const plant = Plant.new()
@@ -340,61 +357,61 @@ describe('Server()', function() {
     .use(
       async function({req}, next) {
         if (req.path === '/turn') {
-          return await next();
+          return await next()
         }
       },
       async function({res}) {
-        res.text('turn');
+        res.text('turn')
       }
     )
     .use(
       async function({res}) {
-        res.text('last');
+        res.text('last')
       }
-    );
+    )
 
-    const server = createServer(plant);
+    const server = createServer(plant)
 
-    server.listen();
+    server.listen()
 
     after(function() {
-      server.close();
-    });
+      server.close()
+    })
 
     return server.fetch('/turn')
     .then((res) => res.text())
-    .then((result) => should(result).be.equal('turn'));
-  });
+    .then((result) => should(result).be.equal('turn'))
+  })
 
   it('Should set cookies', function() {
     const server = createServer(Plant.create(
       errorTrap,
       async function({res}) {
-        res.setCookie('one', 1);
-        res.setCookie('two', 2);
-        res.end();
+        res.setCookie('one', 1)
+        res.setCookie('two', 2)
+        res.end()
       }
-    ));
+    ))
 
-    server.listen();
+    server.listen()
 
     after(function() {
-      server.close();
-    });
+      server.close()
+    })
 
     return server.fetch('/')
     .then(({status, headers}) => {
       // Check header
-      should(status).be.equal(200);
+      should(status).be.equal(200)
 
       // Check set-cookie headers
-      const cookies = headers.raw()['set-cookie'];
+      const cookies = headers.raw()['set-cookie']
       should(cookies).be.deepEqual([
         'one=1; Path=/',
         'two=2; Path=/',
-      ]);
-    });
-  });
+      ])
+    })
+  })
 
   it('Should get cookies', function() {
     const plant = Plant.create(
@@ -402,20 +419,16 @@ describe('Server()', function() {
       async function({req, res}) {
         res.json({
           cookie: req.cookies.test,
-        });
+        })
       }
-    );
-    plant.catch((error) => {
-      console.error(error);
-    });
+    )
 
-    const server = createServer(plant);
-
-    server.listen();
+    const server = createServer(plant)
+    server.listen()
 
     after(function() {
-      server.close();
-    });
+      server.close()
+    })
 
     return server.fetch('/', {
       headers: {
@@ -424,32 +437,84 @@ describe('Server()', function() {
     })
     .then((res) => res.json())
     .then((body) => {
-      should(body).has.ownProperty('cookie').which.is.equal('1');
-    });
-  });
+      should(body).has.ownProperty('cookie').which.is.equal('1')
+    })
+  })
 
-  it('Should output streams', function(){
+  it('Should output streams', function() {
     const server = createServer(Plant.create(
       errorTrap,
       async function({res}) {
-        res.send(fs.createReadStream(__filename));
+        res.send(new ReadableStream({
+          start(controller) {
+            const fileStream = fs.createReadStream(__filename)
+            fileStream.on('data', (chunk) => {
+              controller.enqueue(chunk)
+            })
+            fileStream.on('end', () => {
+              controller.close()
+            })
+          },
+        }))
       }
-    ));
+    ))
 
-    server.listen();
+    server.listen()
 
     after(function() {
-      server.close();
-    });
-
-    return server.fetch('/')
-    .then((res) => {
-      should(res.status).be.equal(200);
-      return res;
+      server.close()
     })
-    .then((res) => res.text())
-    .then((body) => {
-      should(body).be.equal(fs.readFileSync(__filename, 'utf8'));
-    });
-  });
-});
+
+    return Promise.race([
+      new Promise((resolve, reject) => {
+        server.on('error', (error) => {
+          server.close()
+          reject(error)
+        })
+      }),
+      server.fetch('/')
+      .then((res) => {
+        should(res.status).be.equal(200)
+        return res
+      })
+      .then((res) => res.text())
+      .then((body) => {
+        should(body).be.equal(fs.readFileSync(__filename, 'utf8'))
+      }),
+    ])
+    .finally(() => server.close())
+  })
+
+  it('Should filtrate httpReq', () => {
+    const server = createServer(Plant.create(
+      errorTrap,
+      async function({res, httpReq}) {
+        res.send(typeof httpReq === 'undefined')
+      }
+    ))
+
+    server.listen()
+
+    after(function() {
+      server.close()
+    })
+
+    return Promise.race([
+      new Promise((resolve, reject) => {
+        server.on('error', reject)
+      }),
+      server.fetch('/')
+      .then((res) => {
+        should(res.status).be.equal(200)
+        return res
+      })
+      .then((res) => res.text())
+      .then((body) => {
+        should(body).be.equal('true')
+      }),
+    ])
+    .finally(() => {
+      server.close()
+    })
+  })
+})

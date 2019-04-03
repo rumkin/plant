@@ -2,7 +2,7 @@
  * @module Plant.Socket
  */
 
-const EventEmitter = require('eventemitter3');
+const EventEmitter = require('eventemitter3')
 
 function noop() {}
 
@@ -19,10 +19,10 @@ class Socket extends EventEmitter {
    * @constructor
    */
   constructor({onEnd = noop} = {}) {
-    super();
+    super()
 
-    this._isEnded = false;
-    this._end = onEnd;
+    this._isEnded = false
+    this._end = onEnd
   }
 
   /**
@@ -31,7 +31,7 @@ class Socket extends EventEmitter {
    * @return {Boolean} True if socket could not write.
    */
   get isEnded() {
-    return this._isEnded;
+    return this._isEnded
   }
 
   /**
@@ -41,16 +41,16 @@ class Socket extends EventEmitter {
    */
   end() {
     if (this._isEnded) {
-      return;
+      return
     }
 
-    this._isEnded = true;
-    this._end();
+    this._isEnded = true
+    this._end()
   }
 
   destroy() {
-    this.emit('destroy');
+    this.emit('destroy')
   }
 }
 
-module.exports = Socket;
+module.exports = Socket

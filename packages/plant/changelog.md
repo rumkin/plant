@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### v2.0
+
+- `Request.body` is a Web API ReadableStream.
+- `Request.sender` renamed to `Request.peer`.
+- `Response.stream()` accepts ReadableStream only.
+
 ### v1.0.0
 
 - Updated:
@@ -8,7 +14,7 @@
         - `body` - Buffer or null,
         - `data` - Object of values from `Request.body`,
         - `stream` - Readable stream.
-    - Request's `ip` property renamed to sender. Now it's a URI which identify request sender.
+    - Request's `ip` property renamed to peer. Now it's a URI which identify request sender.
     - Request's `url` property now is an object returned by `url.parse()`.
 - Removed:
     - `Request.query` property. Use `Request.url.query` instead.

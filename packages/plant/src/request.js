@@ -1,15 +1,15 @@
+/* global URL TextDecoder */
 /**
  * @module Plant
  */
 
-const {parseHeader, parseEntity} = require('./util/type-header');
-const isPlainObject = require('lodash.isplainobject');
-const {isReadableStream} = require('./util/stream');
-const {getMimeMatcher} = require('./util/mime-type-matcher');
-const URL = require('./web-api/url');
-const TextDecoder = require('./web-api/text-decoder');
+const isPlainObject = require('lodash.isplainobject')
 
-const Headers = require('./headers');
+const {parseHeader, parseEntity} = require('./util/type-header')
+const {isReadableStream} = require('./util/stream')
+const {getMimeMatcher} = require('./util/mime-type-matcher')
+
+const Headers = require('./headers')
 
 /**
  * @typedef {Object} RequestOptions
@@ -19,7 +19,7 @@ const Headers = require('./headers');
  * @prop {Buffer|Null} body=null Request body.
  * @prop {Object} data={} Request data extracted from the body.
  * @prop {Readable} stream=null Request body stream.
- * @prop {string} sender Request sender URI.
+ * @prop {string} peer Request peer URI.
  */
 
 /**
@@ -29,12 +29,12 @@ const Headers = require('./headers');
  * @prop {String} method='get' - Request method.
  * @prop {URL} url - Wahtwg URL object.
  * @prop {Headers} headers - Whatwg request headers (in immmutable mode).
- * @prop {String} sender - Sender URI. Usually IP.
+ * @prop {String} peer - Sender URI. Usually IP.
  * @prop {String[]} domains - Full domains of server splitted by dot `.`.
  * @prop {String} path - Current processing pathname without basePath
  * @prop {String} basePath - Current base url pathname.
  * @prop {Buffer|Null} body - Request body as buffer. Null until received.
- * @prop {Object} data - Request data. It can be parsed JSON value or multipart data value.
+ * @prop {Object} data=null - Request data. It can be parsed JSON value or multipart data value.
  * @prop {Readable} stream - Request body read stream.
  */
 class Request {
@@ -47,28 +47,29 @@ class Request {
     headers = {},
     url,
     body = null,
-    sender = '',
+    peer = '',
   }) {
     this.url = (typeof url === 'string')
       ? new URL(url, 'http://localhost')
-      : url;
-    this.method = method.toLowerCase();
+      : url
+    this.method = method.toLowerCase()
     this.headers = isPlainObject(headers)
       ? new Headers(headers, Headers.MODE_IMMUTABLE)
-      : headers;
+      : headers
     this.domains = /\.\d+$/.test(this.url.hostname)
       ? []
-      : this.url.hostname.split('.').reverse();
-    this.sender = sender;
+      : this.url.hostname.split('.').reverse()
+    this.peer = peer
 
-    this.path = this.url.pathname.replace(/\/+/g, '/');
-    this.basePath = '/';
+    this.path = this.url.pathname.replace(/\/+/g, '/')
+    this.basePath = '/'
 
     if (body !== null && ! isReadableStream(body)) {
-      throw new TypeError('options.body is not a readable stream');
+      throw new TypeError('options.body is not a readable stream')
     }
 
-    this.body = body;
+    this.body = body
+    this.data = null
   }
 
   /**
@@ -78,9 +79,9 @@ class Request {
    * @return {Boolean} Return true if content type header contains specified `types`.
    */
   is(type) {
-    const entity = parseEntity(this.headers.get('content-type') || '');
+    const entity = parseEntity(this.headers.get('content-type') || '')
 
-    return entity.type === type;
+    return entity.type === type
   }
 
   /**
@@ -89,16 +90,16 @@ class Request {
    * @returns {String|Null} Return matched type or null if no type matched
    */
   type(types) {
-    const _types = normalizeTypes(types);
-    const {type} = parseEntity(this.headers.get('content-type'));
+    const _types = normalizeTypes(types)
+    const {type} = parseEntity(this.headers.get('content-type'))
 
     for (const {value, matcher} of _types) {
       if (matcher(type) === true) {
-        return value;
+        return value
       }
     }
 
-    return null;
+    return null
   }
 
   /**
@@ -107,51 +108,51 @@ class Request {
    * @returns {String|Null} Return matched type or null if no type matched
    */
   accept(types) {
-    const _types = normalizeTypes(types);
+    const _types = normalizeTypes(types)
     const cTypes = parseHeader(this.headers.get('accept'))
     .sort((a, b) => (a.params.q - b.params.q))
-    .map(({type}) => type);
+    .map(({type}) => type)
 
     for (const cType of cTypes) {
       for (const {value, matcher} of _types) {
         if (matcher(cType) === true) {
-          return value;
+          return value
         }
       }
     }
 
-    return null;
+    return null
   }
 
   async text() {
-    const contentType = this.headers.get('content-type');
-    let encoding;
+    const contentType = this.headers.get('content-type')
+    let encoding
     if (contentType) {
       // get encoding...
     }
     else {
-      encoding = 'utf8';
+      encoding = 'utf8'
     }
 
-    const result = [];
-    const reader = this.body.getReader();
+    const result = []
+    const reader = this.body.getReader()
     while (true) {
-      const {value, done} = await reader.read();
+      const {value, done} = await reader.read()
       if (done) {
-        break;
+        break
       }
-      result.push(value);
+      result.push(value)
     }
-    reader.releaseLock();
+    reader.releaseLock()
 
-    const decoder = new TextDecoder(encoding);
+    const decoder = new TextDecoder(encoding)
 
-    return decoder.decode(concatUint8Arrays(result)).toString();
+    return decoder.decode(concatUint8Arrays(result)).toString()
   }
 
   json() {
     return this.text()
-    .then(JSON.parse);
+    .then(JSON.parse)
   }
 }
 
@@ -162,46 +163,46 @@ const aliases = {
   text: getMimeMatcher(['text/plain']),
   html: getMimeMatcher(['text/html', 'text/xhtml']),
   image: getMimeMatcher(['image/*']),
-};
+}
 
 function normalizeTypes(types) {
-  const result = [];
+  const result = []
 
   for (const type of types) {
     if (type.includes('/')) {
       result.push({
         value: type,
         matcher(value) {
-          return value === type;
+          return value === type
         },
-      });
+      })
     }
     else if (aliases.hasOwnProperty(type)) {
       result.push({
         value: type,
         matcher(value) {
-          return aliases[type](value);
+          return aliases[type](value)
         },
-      });
+      })
     }
   }
 
-  return result;
+  return result
 }
 
 function concatUint8Arrays(arrays) {
-  let length = 0;
+  let length = 0
   for (const array of arrays) {
-    length += array.length;
+    length += array.length
   }
-  const result = new Uint8Array(length);
-  let n = 0;
+  const result = new Uint8Array(length)
+  let n = 0
   for (const array of arrays) {
     for (let i = 0; i < array.length; i++, n++) {
-      result[n] = array[i];
+      result[n] = array[i]
     }
   }
-  return result;
+  return result
 }
 
-module.exports = Request;
+module.exports = Request

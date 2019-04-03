@@ -2,11 +2,11 @@
  * @module Plant
  */
 
-const isObject = require('lodash.isobject');
-const isPlainObject = require('lodash.isplainobject');
-const {isReadableStream} = require('./util/stream');
+const isObject = require('lodash.isobject')
+const isPlainObject = require('lodash.isplainobject')
 
-const Headers = require('./headers');
+const {isReadableStream} = require('./util/stream')
+const Headers = require('./headers')
 
 /**
  * @class
@@ -29,19 +29,19 @@ class Response {
    * @constructor
    */
   constructor({statusCode = 200, headers = new Headers(), body = null} = {}) {
-    this.statusCode = statusCode;
+    this.statusCode = statusCode
 
     if (isPlainObject(headers)) {
-      this.headers = new Headers(headers);
+      this.headers = new Headers(headers)
     }
     else if (headers.mode === Headers.MODE_IMMUTABLE) {
-      throw new Error(`Invalid headers mode: ${headers.mode}`);
+      throw new Error(`Invalid headers mode: ${headers.mode}`)
     }
     else {
-      this.headers = headers;
+      this.headers = headers
     }
 
-    this.body = body;
+    this.body = body
   }
 
   /**
@@ -51,7 +51,7 @@ class Response {
    * @type {Boolean} True when status code is in success range.
    */
   get ok() {
-    return this.statusCode > 199 && this.statusCode < 300;
+    return this.statusCode > 199 && this.statusCode < 300
   }
 
   /**
@@ -60,7 +60,7 @@ class Response {
    * @type {Boolean} True if body is not null.
    */
   get hasBody() {
-    return this.body !== null;
+    return this.body !== null
   }
 
   /**
@@ -70,8 +70,8 @@ class Response {
    * @return {Response} Return `this`.
    */
   status(status) {
-    this.statusCode = status;
-    return this;
+    this.statusCode = status
+    return this
   }
 
   /**
@@ -81,10 +81,10 @@ class Response {
    * @return {Response} Return `this`.
    */
   json(result) {
-    this.body = JSON.stringify(result);
-    this.headers.set('content-type', 'application/json');
+    this.body = JSON.stringify(result)
+    this.headers.set('content-type', 'application/json')
 
-    return this;
+    return this
   }
 
   /**
@@ -94,10 +94,10 @@ class Response {
    * @return {Response} Returns `this`
    */
   text(result) {
-    this.headers.set('content-type', 'text/plain');
-    this.body = result;
+    this.headers.set('content-type', 'text/plain')
+    this.body = result
 
-    return this;
+    return this
   }
 
   /**
@@ -107,10 +107,10 @@ class Response {
    * @return {Response} Returns `this`
    */
   html(result) {
-    this.headers.set('content-type', 'text/html');
-    this.body = result;
+    this.headers.set('content-type', 'text/html')
+    this.body = result
 
-    return this;
+    return this
   }
 
   /**
@@ -120,30 +120,30 @@ class Response {
    * @return {Response}  Returns `this`.
    */
   stream(stream) {
-    if (typeof stream.pipe !== 'function') {
-      throw new TypeError('Not a Stream');
+    if (! isReadableStream(stream)) {
+      throw new TypeError('Not a ReadableStream')
     }
 
-    this.body = stream;
+    this.body = stream
 
-    return this;
+    return this
   }
 
   /**
    * send - Detect response type and set proper body value.
    *
-   * @param  {String|Readable} result Result body.
+   * @param  {String|ReadableStream} body Result body.
    * @return {Response}  Returns `this`.
    */
-  send(result) {
-    if (isObject(result) && isReadableStream(result)) {
-      this.stream(result);
+  send(body) {
+    if (isObject(body) && isReadableStream(body)) {
+      this.body = body
     }
     else {
-      this.body = String(result);
+      this.body = String(body)
     }
 
-    return this;
+    return this
   }
 
   /**
@@ -152,8 +152,8 @@ class Response {
    * @return {Response}  Returns `this`.
    */
   end() {
-    this.body = '';
-    return this;
+    this.body = ''
+    return this
   }
 
   /**
@@ -163,12 +163,12 @@ class Response {
    * @return {Response} returns `this`.
    */
   redirect(url) {
-    this.statusCode = 302;
-    this.headers.set('location', url);
-    this.body = '';
+    this.statusCode = 302
+    this.headers.set('location', url)
+    this.body = ''
 
-    return this;
+    return this
   }
 }
 
-module.exports = Response;
+module.exports = Response

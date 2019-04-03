@@ -356,7 +356,7 @@ router.get('/user', ({req}) => {
     url: URL,
     method: String,
     headers: Headers,
-    sender: String,
+    peer: String,
     domains: String[],
     path: String,
     basePath: String,
@@ -369,7 +369,7 @@ router.get('/user', ({req}) => {
 |url| Url is a WhatWG [URL](https://nodejs.org/dist/latest-v9.x/docs/api/url.html#url_class_url) |
 |method| Lowercased HTTP method |
 |headers| WhatWG Headers object |
-|sender| Request sender URI. Usually it is an client IP address |
+|peer| Request peer URI. Usually it is an client IP address |
 |domains| Domains name separated by '.' in reverse order |
 |path| Current unprocessed pathname part |
 |basePath| Pathname part processed by overlaying handler |
@@ -389,10 +389,8 @@ be in immutable mode.
     method: String='get',
     url: String|URL,
     headers: Object|Headers={},
-    sender: String,
+    peer: String,
     body: ReadableStream|Null=null,
-    data: Object={},
-    stream:Readable|Null=null,
 }
 ```
 
@@ -457,7 +455,7 @@ switch(req.accept(['json', 'text'])) {
     hasBody: Boolean,
     statusCode: Number,
     headers: Headers,
-    body: Buffer|Stream|String|Null,
+    body: Blob|BufferSource|ReadableStream|String|Null,
 }
 ```
 
@@ -794,8 +792,4 @@ req.method; // -> 'get'
 
 ## License
 
-MIT.
-
-## Copyright
-
-&copy; Rumkin, 2017-2018.
+MIT &copy; [Rumkin](https://rumk.in)

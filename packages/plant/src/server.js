@@ -3,16 +3,16 @@
  * @description Implementation of Plant Server interface.
  */
 
-const isPlainObject = require('lodash.isplainobject');
-const isString = require('lodash.isstring');
+const isPlainObject = require('lodash.isplainobject')
+const isString = require('lodash.isstring')
 
-const cookieHandler = require('./handlers/cookie-handler');
-const {and, or, getHandler} = require('./server-flow');
-const Router = require('./router');
-const Response = require('./response');
-const Request = require('./request');
-const Socket = require('./socket');
-const Headers = require('./headers');
+const cookieHandler = require('./handlers/cookie-handler')
+const {and, or, getHandler} = require('./server-flow')
+const Router = require('./router')
+const Response = require('./response')
+const Request = require('./request')
+const Socket = require('./socket')
+const Headers = require('./headers')
 
 /**
  * @typedef {Object} Plant.Context Default plant context with plant's instances for req and res.
@@ -51,7 +51,6 @@ const Headers = require('./headers');
   * @typedef {Object} ServerOptions Server configuration options.
   * @prop {Array.<HandleType>} [handlers=[]] List of request handlers.
   * @prop {Object} [context={}] Context object.
-  * @prop {function(Error)} [onError] Uncaught error handler.
   */
 
 /**
@@ -67,7 +66,7 @@ class Server {
    * @static
    */
   static new(...args) {
-    return new this(...args);
+    return new this(...args)
   }
 
   /**
@@ -79,20 +78,20 @@ class Server {
    * @static
    */
   static create(...args) {
-    let options;
-    let handlers;
+    let options
+    let handlers
 
     if (isPlainObject(args[0])) {
-      options = args[0];
-      handlers = args.slice(1);
+      options = args[0]
+      handlers = args.slice(1)
     }
     else {
-      options = {};
-      handlers = args;
+      options = {}
+      handlers = args
     }
 
     return this.new(options)
-    .use(...handlers);
+    .use(...handlers)
   }
 
   /**
@@ -105,18 +104,17 @@ class Server {
    */
   static handler(...args) {
     return this.create(...args)
-    .handler();
+    .handler()
   }
 
   /**
    * @param  {ServerOptions} options Server options params.
    * @constructor
    */
-  constructor({handlers = [], context = {}, onError} = {}) {
-    this.handlers = handlers.map(getHandler);
+  constructor({handlers = [], context = {}} = {}) {
+    this.handlers = handlers.map(getHandler)
 
-    this.context = Object.assign({}, context);
-    this.onError = onError;
+    this.context = Object.assign({}, context)
   }
 
   /**
@@ -127,10 +125,10 @@ class Server {
    * @return {Server} return `this`.
    */
   use(...args) {
-    let handlers;
+    let handlers
 
     if (isString(args[0])) {
-      const route = args[0];
+      const route = args[0]
 
       handlers = [
         or(
@@ -139,22 +137,22 @@ class Server {
             ...args.slice(1).map(getHandler),
           ),
         ),
-      ];
+      ]
     }
     else if (args.length > 1) {
       handlers = [or(
         and(
           ...args.map(getHandler)
         )
-      )];
+      )]
     }
     else {
-      handlers = args.map(getHandler);
+      handlers = args.map(getHandler)
     }
 
-    this.handlers = [...this.handlers, ...handlers];
+    this.handlers = [...this.handlers, ...handlers]
 
-    return this;
+    return this
   }
 
   /**
@@ -165,9 +163,9 @@ class Server {
    */
   or(...handlers) {
     if (handlers.length) {
-      this.use(or(...handlers));
+      this.use(or(...handlers))
     }
-    return this;
+    return this
   }
 
   /**
@@ -178,10 +176,10 @@ class Server {
    */
   and(...handlers) {
     if (handlers.length) {
-      this.use(and(...handlers));
+      this.use(and(...handlers))
     }
 
-    return this;
+    return this
   }
 
   /**
@@ -191,18 +189,7 @@ class Server {
    * @return {Server} Returns `this`.
    */
   router(routes) {
-    return this.use(Router.handler(routes));
-  }
-
-  /**
-   * Set uncaught error handler.
-   *
-   * @param  {function(Error)} handler Error handler
-   * @returns {Server} Returns `this`.
-   */
-  catch(handler) {
-    this.onError = handler;
-    return this;
+    return this.use(Router.handler(routes))
   }
 
   /**
@@ -211,32 +198,32 @@ class Server {
    * @returns {function(http.IncomingMessage,http.ServerResponse)} Native http request handler function
    */
   handler() {
-    const context = {...this.context};
+    const context = {...this.context}
     const cascade = and(
       (ctx, next) => {
         if (! ctx.socket) {
-          ctx.socket = new Socket();
+          ctx.socket = new Socket()
         }
-        return next({...context, ...ctx});
+        return next({...context, ...ctx})
       },
       cookieHandler,
       ...this.handlers,
-    );
+    )
 
-    return cascade;
+    return cascade
   }
 }
 
-module.exports = Server;
+module.exports = Server
 
 // Expose cascade server flow controls
-Server.and = and;
-Server.or = or;
-Server.getHandler = getHandler;
+Server.and = and
+Server.or = or
+Server.getHandler = getHandler
 
 // Expose core classes
-Server.Router = Router;
-Server.Request = Request;
-Server.Response = Response;
-Server.Socket = Socket;
-Server.Headers = Headers;
+Server.Router = Router
+Server.Request = Request
+Server.Response = Response
+Server.Socket = Socket
+Server.Headers = Headers

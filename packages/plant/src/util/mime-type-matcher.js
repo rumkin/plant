@@ -1,4 +1,4 @@
-const escapeRegExp = require('lodash.escaperegexp');
+const escapeRegExp = require('lodash.escaperegexp')
 
 /**
  * getMimeMatcher - create mime type matcher function wich determines weather
@@ -10,24 +10,24 @@ const escapeRegExp = require('lodash.escaperegexp');
 function getMimeMatcher(types) {
   const matchers = types.map((type) => {
     if (typeof type === 'string') {
-      return stringMatcher(type);
+      return stringMatcher(type)
     }
     else if (type instanceof RegExp) {
-      return regExpMatcher(type);
+      return regExpMatcher(type)
     }
     else {
-      throw new Error('Unknown type');
+      throw new Error('Unknown type')
     }
-  });
+  })
 
   return function(value) {
     for (const matcher of matchers) {
       if (matcher(value)) {
-        return true;
+        return true
       }
     }
-    return false;
-  };
+    return false
+  }
 }
 
 /**
@@ -40,12 +40,12 @@ function getMimeMatcher(types) {
  */
 function stringMatcher(origin) {
   if (origin.includes('*')) {
-    return regExpMatcher(toRegExp(origin, '[^\/]+'));
+    return regExpMatcher(toRegExp(origin, '[^\/]+'))
   }
 
   return function(value) {
-    return value === origin;
-  };
+    return value === origin
+  }
 }
 
 /**
@@ -56,8 +56,8 @@ function stringMatcher(origin) {
  */
 function regExpMatcher(regexp) {
   return function(value) {
-    return regexp.test(value);
-  };
+    return regexp.test(value)
+  }
 }
 
 /**
@@ -69,9 +69,9 @@ function regExpMatcher(regexp) {
  * @return {RegExp}      Regular expression.
  */
 function toRegExp(mask, replacer = '.+?') {
-  const re = mask.split('*').map(escapeRegExp).join(replacer);
+  const re = mask.split('*').map(escapeRegExp).join(replacer)
 
-  return new RegExp('^' + re + '$');
+  return new RegExp('^' + re + '$')
 }
 
-exports.getMimeMatcher = getMimeMatcher;
+exports.getMimeMatcher = getMimeMatcher

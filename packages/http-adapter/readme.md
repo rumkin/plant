@@ -44,17 +44,24 @@ http.createServer(httpHandler(plant))
 
 ## API
 
-### createRequestHandler()
+### `createRequestHandler()`
 ```text
-(plant:Plant) -> (req:http.Request, res: http.Response) -> void
+(plant:Plant, intermediate: Handler) -> HttpRequestListener
 ```
 
-Return native HTTP server request handler.
+Return native HTTP server request handler, which pass request through
+`intermediate` handlers and then pass to the `plant`. Intermediate handlers
+have access to both HTTP (`httpReq`, `httpRes`) and Plant (`req`, `res`)
+requests and responses.
+
+### `HttpRequestListener()`
+```text
+(req: http.Request, res: http.Response) -> void
+```
+
+This is standard request listener from Node.js HTTP built-in module.
+
 
 ## License
 
-MIT.
-
-## Copyright
-
-&copy; Rumkin 2017-2018
+MIT &copy; [Rumkin](https://rumk.in)

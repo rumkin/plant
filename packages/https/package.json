@@ -1,12 +1,13 @@
 {
   "name": "@plant/https",
-  "version": "0.1.0",
+  "version": "0.2.0-alpha",
   "description": "Plant node.js HTTP module's server handler",
   "main": "index.js",
   "scripts": {
-    "test": "NODE_TLS_REJECT_UNAUTHORIZED=0 mocha test.spec.js",
+    "test": "mocha test.spec.js",
     "jsdoc": "jsdoc --configure .jsdoc.json --verbose",
-    "docs": "npm run jsdoc && rm -rf docs && mv tmp/docs/*/*/* docs && rm -rf tmp/docs"
+    "docs": "npm run jsdoc && rm -rf docs && mv tmp/docs/*/*/* docs && rm -rf tmp/docs",
+    "ssl-cert": "openssl req -newkey rsa:2048 -nodes -keyout var/key.pem -x509 -days 365 -out var/cert.pem"
   },
   "repository": {
     "type": "git",
@@ -20,10 +21,10 @@
   "author": "Rumkin <dev@rumk.in> (https://rumk.in/)",
   "license": "MIT",
   "dependencies": {
-    "@plant/http-adapter": "^0.1.0"
+    "@plant/http-adapter": "0.2.0"
   },
   "devDependencies": {
-    "@plant/plant": "^1.0.0-a.4",
+    "@plant/plant": "^2.0.0-beta",
     "jsdoc": "^3.5.5",
     "minami": "^1.2.3",
     "mocha": "^5.2.0",

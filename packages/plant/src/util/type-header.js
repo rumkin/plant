@@ -4,7 +4,7 @@
 
 /**
  * @typedef TypeEntity
- * @prop {String} type Type entry value;
+ * @prop {String} type Type entry value
  * @prop {Object} params Type params, like `q`, `charset`, etc.
  */
 
@@ -17,29 +17,29 @@
  * @return {TypeEntity[]} Array of type objects.
  */
 function parseHeader(header) {
-  const entities = header.split(/\s*,\s*/);
+  const entities = header.split(/\s*,\s*/)
 
-  return entities.map(parseEntity);
+  return entities.map(parseEntity)
 }
 
 /**
  * parseEntity - parse singe header type entry. Type entry is a string which
  * contains key value pairs separated with semicolon. Example:
- * `application/json;charset=utf8`.
+ * `application/jsoncharset=utf8`.
  *
  * @param  {String} entity Type entry.
  * @return {TypeEntity} returns type entry object.
  */
 function parseEntity(entity) {
-  const [type, ...tail] = entity.split(/;/);
+  const [type, ...tail] = entity.split(/;/)
 
-  const params = getParams(tail);
+  const params = getParams(tail)
 
   if (params.q) {
-    params.q = parseFloat(params.q);
+    params.q = parseFloat(params.q)
   }
 
-  return {type, params};
+  return {type, params}
 }
 
 /**
@@ -55,8 +55,8 @@ function getParams(params) {
   .reduce((result, [name, value]) => ({
     ...result,
     [name]: value,
-  }), {});
+  }), {})
 }
 
-exports.parseHeader = parseHeader;
-exports.parseEntity = parseEntity;
+exports.parseHeader = parseHeader
+exports.parseEntity = parseEntity

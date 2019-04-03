@@ -35,8 +35,4 @@ This handler connect Plant and native Node's HTTP server. Modules @plant/http an
 
 ## License
 
-MIT.
-
-## Copyright
-
-&copy; Rumkin, 2017-2018.
+MIT &copy; [Rumkin](https://rumk.in)

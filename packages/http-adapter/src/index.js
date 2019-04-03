@@ -8,13 +8,13 @@ const {
   Request,
   Headers,
   Socket,
-} = require('@plant/plant');
+  and,
+} = require('@plant/plant')
+const streams = require('web-streams-polyfill/ponyfill')
+const {URL} = require('url')
+const isObject = require('lodash.isobject')
 
-const {Readable} = require('stream');
-const {URL} = require('url');
-const isObject = require('lodash.isobject');
-
-const {as} = require('./utils/types');
+const {ReadableStream} = streams
 
 /**
  * @typedef {Object} NativeContext Initial http context with native instances for req and res.
@@ -30,27 +30,27 @@ const {as} = require('./utils/types');
  * @returns {Array<String,String,Boolean>} Return hostname, ip and encyption status as Array.
  */
 function getResolvedNetworkProps(req) {
-  const {remoteAddress} = req.connection;
-  let ip = remoteAddress;
-  let host = req.headers['host'];
-  let encrypted = req.connection.encrypted;
+  const {remoteAddress} = req.connection
+  let ip = remoteAddress
+  let host = req.headers['host']
+  let encrypted = req.connection.encrypted
 
   if (remoteAddress === '::ffff:127.0.0.1') {
-    const xForwardedFor = req.headers['x-forwarded-for'];
-    const xForwardedHost = req.headers['x-forwarded-host'];
+    const xForwardedFor = req.headers['x-forwarded-for']
+    const xForwardedHost = req.headers['x-forwarded-host']
 
     if (xForwardedFor) {
-      ip = xForwardedFor;
+      ip = xForwardedFor
     }
 
     if (xForwardedHost) {
-      host = xForwardedHost;
+      host = xForwardedHost
     }
 
-    encrypted = req.headers['x-forwarded-proto'] === '1';
+    encrypted = req.headers['x-forwarded-proto'] === '1'
   }
 
-  return [host, ip, encrypted];
+  return [host, ip, encrypted]
 }
 
 /**
@@ -60,23 +60,36 @@ function getResolvedNetworkProps(req) {
  * @return {Request} Returns `this`.
  */
 function createRequest(req) {
-  const [host, ip, encrypted] = getResolvedNetworkProps(req);
+  const [host, ip, encrypted] = getResolvedNetworkProps(req)
   const protocol = encrypted
     ? 'https'
-    : 'http';
+    : 'http'
 
-  const url = new URL(`${protocol}://${host}${req.url}`);
-  const method = req.method.toLowerCase();
+  const url = new URL(`${protocol}://${host}${req.url}`)
+  const method = req.method.toLowerCase()
 
   const inReq = new Request({
     method,
     url,
     headers: new Headers(req.headers, Headers.MODE_IMMUTABLE),
-    stream: as(req, Readable),
-    sender: `tcp://${ip}`,
-  });
+    peer: `tcp://${ip}`,
+    body: new ReadableStream({
+      start(controller) {
+        req.resume()
+        req.on('data', (chunk) => {
+          controller.enqueue(chunk)
+        })
+        req.on('end', () => {
+          controller.close()
+        })
+      },
+      cancel() {
+        req.drain()
+      },
+    }),
+  })
 
-  return inReq;
+  return inReq
 }
 
 /**
@@ -90,29 +103,29 @@ function createSocket(connection) {
   const socket = new Socket({
     onEnd() {
       if (! connection.ended) {
-        connection.end();
+        connection.end()
       }
     },
-  });
+  })
 
-  let onEnd;
-  let unbind;
+  let onEnd
+  let unbind
 
   onEnd = () => {
-    socket.end();
-    unbind();
-  };
+    socket.end()
+    unbind()
+  }
 
   unbind = () => {
-    connection.removeListener('abort', onEnd);
-    connection.removeListener('end', onEnd);
-  };
+    connection.removeListener('abort', onEnd)
+    connection.removeListener('end', onEnd)
+  }
 
-  connection.on('abort', onEnd);
-  connection.on('end', onEnd);
-  socket.on('destroy', unbind);
+  connection.on('abort', onEnd)
+  connection.on('end', onEnd)
+  socket.on('destroy', unbind)
 
-  return socket;
+  return socket
 }
 
 /**
@@ -126,61 +139,78 @@ function createResponse(res) {
     status: res.statusCode,
     headers: new Headers(res.headers),
     body: null,
-  });
+  })
 }
 
 /**
  * httpHandler - Shim between nodejs HTTP and Plant HTTP Interface
  *
- * @param  {HttpContex} context - Default HTTP context.
+ * @param  {http.IncomingMessage} httpReq - Http client request
+ * @param  {http.ServerResponse} httpRes - Http server response
  * @param  {function} next Default Plant's next method
  * @return {void}
  * @async
  */
-function handleRequest(req, res, next) {
-  const inReq = createRequest(req);
-  const inRes = createResponse(res);
-  const socket = createSocket(req.socket);
+function handleRequest(httpReq, httpRes, next) {
+  const req = createRequest(httpReq)
+  const res = createResponse(httpRes)
+  const socket = createSocket(httpReq.socket)
 
-  req.socket.setMaxListeners(Infinity);
+  httpReq.socket.setMaxListeners(Infinity)
 
   return next({
-    req: inReq,
-    res: inRes,
+    req,
+    res,
+    httpReq,
+    httpRes,
     socket,
   })
-  .then(() => {
-    socket.destroy();
+  .then(async () => {
+    socket.destroy()
 
-    if (inRes.body === null) {
-      inRes.status(404).text('Nothing found');
+    if (res.body === null) {
+      res.status(404).text('Nothing found')
     }
 
-    res.statusCode = inRes.statusCode;
+    httpRes.statusCode = res.statusCode
 
-    for (const header of inRes.headers.keys()) {
-      res.setHeader(header, inRes.headers.raw(header));
+    for (const header of res.headers.keys()) {
+      httpRes.setHeader(header, res.headers.raw(header))
     }
 
-    if (req.ended) {
-      return;
+    if (httpReq.ended) {
+      return
     }
 
-    const {body} = inRes;
+    const {body} = res
 
     if (isObject(body)) {
-      if (typeof body.pipe === 'function') {
-        res.flushHeaders();
-        body.pipe(res);
+      // TODO Replace with Web Stream API
+      if (typeof body.getReader === 'function') {
+        if (body.locked) {
+          throw new Error('Body is locked')
+        }
+        httpRes.flushHeaders()
+
+        const reader = body.getReader()
+        while (true) {
+          const {value, done} = await reader.read()
+          // eslint-disable-next-line max-depth
+          if (done) {
+            break
+          }
+          httpRes.write(value)
+        }
+        httpRes.end()
       }
       else {
-        throw new TypeError('Invalid body type');
+        throw new TypeError('Invalid body type')
       }
     }
     else {
-      res.end(body);
+      httpRes.end(body)
     }
-  });
+  })
 }
 
 /**
@@ -219,26 +249,46 @@ function handleRequest(req, res, next) {
 /**
  * Create native http request handler from Plant  instance
  *
+ * @param {Plant} plant - Plant server instance.
+ * @param {Handler[]} handlers – Intermediate handlers
  * @returns {function(http.IncomingMessage,http.ServerResponse)} Native http request handler function
  */
-function createRequestHandler(plant) {
+function createRequestHandler(plant, handlers = []) {
+  const filtrateContext = without(['httpReq', 'httpRes'])
+  const handler = and(
+    ...handlers,
+    (ctx, next) => next(filtrateContext(ctx)),
+    plant,
+  )
+
   return function (req, res) {
-    handleRequest(req, res, plant.handler())
-    .catch(handleRequestError.bind(this, req, res));
-  };
+    handleRequest(req, res, handler)
+    .catch(handleRequestError.bind(this, req, res))
+  }
 }
 
 function handleRequestError(req, res, error) {
   // Write error to res.
   if (! res.headersSent) {
-    res.statusCode = 500;
-    res.setHeader('content-type', 'text/plain');
-    res.write('Internal server error:\n' + error.stack);
-    res.end();
+    res.statusCode = 500
+    res.setHeader('content-type', 'text/plain')
+    res.write('Internal server error:\n' + error.stack)
   }
   else {
-    this.emit('error', error);
+    this.emit('error', error)
+  }
+
+  res.end()
+}
+
+function without(keys) {
+  return function(value) {
+    const newValue = {...value}
+    for (const key of keys) {
+      delete newValue[key]
+    }
+    return newValue
   }
 }
 
-module.exports = createRequestHandler;
+module.exports = createRequestHandler

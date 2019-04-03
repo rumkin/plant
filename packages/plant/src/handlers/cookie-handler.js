@@ -3,7 +3,7 @@
 * @description Common Http Request and Response handlers.
 */
 
-const cookie = require('cookie');
+const cookie = require('cookie')
 
 /**
  * Adds methods to set cookies and current cookie data object.
@@ -18,22 +18,22 @@ function addCookieSupport(req, res) {
     .reduce((all, header) => ({
       ...all,
       ...cookie.parse(header),
-    }), {});
-    req.registeredCookies = Object.getOwnPropertyNames(req.cookies);
+    }), {})
+    req.registeredCookies = Object.getOwnPropertyNames(req.cookies)
   }
   else {
-    req.cookies = {};
-    req.registeredCookies = [];
+    req.cookies = {}
+    req.registeredCookies = []
   }
 
   // Set new cookie value
-  res.setCookie = responseSetCookie;
+  res.setCookie = responseSetCookie
 
   // Remove cookie by name
-  res.clearCookie = responseClearCookie;
+  res.clearCookie = responseClearCookie
 
   // Remove all cookies
-  res.clearCookies = responseClearCookies;
+  res.clearCookies = responseClearCookies
 }
 
 /**
@@ -45,12 +45,12 @@ function addCookieSupport(req, res) {
  * @return {Response} Returns `this`.
  */
 function responseSetCookie(name, value, options) {
-  const opts = Object.assign({path: '/'}, options);
-  const header = cookie.serialize(name, String(value), opts);
+  const opts = Object.assign({path: '/'}, options)
+  const header = cookie.serialize(name, String(value), opts)
 
-  this.headers.append('set-cookie', header);
+  this.headers.append('set-cookie', header)
 
-  return this;
+  return this
 }
 
 /**
@@ -61,12 +61,12 @@ function responseSetCookie(name, value, options) {
  * @return {Response} Returns `this`.
  */
 function responseClearCookie(name, options) {
-  const opts = Object.assign({expires: new Date(0), path: '/'}, options);
-  const header = cookie.serialize(name, '', opts);
+  const opts = Object.assign({expires: new Date(0), path: '/'}, options)
+  const header = cookie.serialize(name, '', opts)
 
-  this.headers.append('set-cookie', header);
+  this.headers.append('set-cookie', header)
 
-  return this;
+  return this
 }
 
 /**
@@ -77,10 +77,10 @@ function responseClearCookie(name, options) {
  */
 function responseClearCookies(options) {
   this.registeredCookies.forEach((cookieName) => {
-    this.clearCookie(cookieName, options);
-  });
+    this.clearCookie(cookieName, options)
+  })
 
-  return this;
+  return this
 }
 
 /**
@@ -91,8 +91,8 @@ function responseClearCookies(options) {
  * @returns {void} Returns nothing.
  */
 function cookieHandler({req, res}, next) {
-  addCookieSupport(req, res);
-  return next();
+  addCookieSupport(req, res)
+  return next()
 }
 
-module.exports = cookieHandler;
+module.exports = cookieHandler

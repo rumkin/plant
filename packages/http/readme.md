@@ -25,8 +25,4 @@ createServer(plant).listen(8080);
 
 ## License
 
-MIT.
-
-## Copyright
-
-&copy; Rumkin, 2018.
+MIT &copy; [Rumkin](https://rumk.in)

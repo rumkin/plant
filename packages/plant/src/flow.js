@@ -12,20 +12,20 @@ function noop() {}
  */
 function cascade(...args) {
   const resolver = (initialCtx) => {
-    let ctx = initialCtx;
+    let ctx = initialCtx
 
     async function next(handlers, newCtx) {
-      ctx = newCtx || ctx;
+      ctx = newCtx || ctx
 
       if (handlers.length) {
-        return handlers[0](Object.assign({}, ctx), next.bind(null, handlers.slice(1)));
+        return handlers[0](Object.assign({}, ctx), next.bind(null, handlers.slice(1)))
       }
     }
 
-    return next(args, ctx);
-  };
+    return next(args, ctx)
+  }
 
-  return resolver;
+  return resolver
 }
 
 /**
@@ -34,23 +34,23 @@ function cascade(...args) {
  * @param  {function(Context)} condition - Condition function which returns bool.
  * @returns {function(...HandleType)} Handlable async queue handler creator.
  */
-function doWhile(condition) {
+function whileLoop(condition) {
   return function(...handlers) {
-    return conditional.bind(null, handlers, condition);
-  };
+    return conditional.bind(null, handlers, condition)
+  }
 }
 
 async function conditional(handlers, condition, ctx, next) {
   for (const handler of handlers) {
-    await handler(Object.assign({}, ctx), noop);
+    await handler(Object.assign({}, ctx), noop)
 
     if (condition(ctx) === false) {
-      return;
+      return
     }
   }
 
-  await next();
+  await next()
 }
 
-exports.cascade = cascade;
-exports.doWhile = doWhile;
+exports.cascade = cascade
+exports.whileLoop = whileLoop

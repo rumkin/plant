@@ -2,7 +2,7 @@
  * @module Plant.ServerFlow
  * @description Flow control utils for Plant Cascade Server
  */
-const {cascade, doWhile} = require('./flow.js');
+const {cascade, whileLoop} = require('./flow.js')
 
 /**
  * Handlable object should countain method handler() which returns async
@@ -18,10 +18,10 @@ const {cascade, doWhile} = require('./flow.js');
  */
 function getHandler(handler) {
   if (typeof handler !== 'function') {
-    return handler.handler();
+    return handler.handler()
   }
   else {
-    return handler;
+    return handler
   }
 }
 
@@ -32,7 +32,7 @@ function getHandler(handler) {
  * @returns {Boolean} Return true if response has body or socket closed.
  */
 function isNotFinished({res, socket}) {
-  return res.hasBody === false && socket.isEnded === false;
+  return res.hasBody === false && socket.isEnded === false
 }
 
 /**
@@ -42,7 +42,7 @@ function isNotFinished({res, socket}) {
  * @param  {...(function()|Handlable)} handlers Handlable async functions.
  * @return {function(object,function)} Returns function which pass context through the queue.
  */
-const whileNotFinished = doWhile(isNotFinished);
+const whileNotFinished = whileLoop(isNotFinished)
 
 /**
  * Returns function that runs handlers until request headers are not sent.
@@ -51,8 +51,8 @@ const whileNotFinished = doWhile(isNotFinished);
  * @returns {function(object, function())} Returns function to pass value into handlers.
  */
 const or = function(...args) {
-  return whileNotFinished(...args.map(getHandler));
-};
+  return whileNotFinished(...args.map(getHandler))
+}
 
 /**
  * Returns function that runs handlers in depth.
@@ -61,9 +61,9 @@ const or = function(...args) {
  * @returns {function(object)} Returns function to pass value into handlers.
  */
 const and = function(...args) {
-  return cascade(...args.map(getHandler));
-};
+  return cascade(...args.map(getHandler))
+}
 
-exports.or = or;
-exports.and = and;
-exports.getHandler = getHandler;
+exports.or = or
+exports.and = and
+exports.getHandler = getHandler

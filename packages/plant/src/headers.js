@@ -6,11 +6,11 @@
 /**
  * @const {String} MODE_NONE - None mode flag. This mode allow Headers modification.
  */
-const MODE_NONE = 'none';
+const MODE_NONE = 'none'
 /**
  * @const {String} MODE_IMMUTABLE - Immutable mode falg. This mode deny Headers modification.
  */
-const MODE_IMMUTABLE = 'immutable';
+const MODE_IMMUTABLE = 'immutable'
 
 /**
  * @typedef {ObjectInitials|ArrayInitials} HeadersInitials - Initial values for Headers. Could be object of strings or entires list.
@@ -35,17 +35,17 @@ class Headers {
    */
   constructor(initials = [], mode = MODE_NONE) {
     if (! Array.isArray(initials)) {
-      initials = Object.entries(initials);
+      initials = Object.entries(initials)
     }
 
-    this._headers = new Map(initials.map(([key, value]) => ([key, [value]])));
-    this._mode = mode;
+    this._headers = new Map(initials.map(([key, value]) => ([key, [value]])))
+    this._mode = mode
 
     if (mode !== MODE_NONE) {
       this.set =
       this.append =
       this.delete =
-      this.wrongMode;
+      this.wrongMode
     }
   }
 
@@ -55,7 +55,7 @@ class Headers {
    * @return {String} Should returns MODE_NONE or MODE_IMMUTABLE value.
    */
   get mode() {
-    return this._mode;
+    return this._mode
   }
 
   /**
@@ -67,10 +67,10 @@ class Headers {
    * @throws {Error} Throws if current mode is immutable.
    */
   set(_name, _value) {
-    const name = normalizedName(_name);
-    const value = normalizedValue(_value);
+    const name = normalizedName(_name)
+    const value = normalizedValue(_value)
 
-    this._headers.set(name, [value]);
+    this._headers.set(name, [value])
   }
 
   /**
@@ -82,14 +82,14 @@ class Headers {
    * @throws {Error} Throws if current mode is immutable.
    */
   append(_name, _value) {
-    const name = normalizedName(_name);
-    const value = normalizedValue(_value);
+    const name = normalizedName(_name)
+    const value = normalizedValue(_value)
 
     if (this._headers.has(name)) {
-      this._headers.get(name).push(value);
+      this._headers.get(name).push(value)
     }
     else {
-      this._headers.set(name, [value]);
+      this._headers.set(name, [value])
     }
   }
 
@@ -103,7 +103,7 @@ class Headers {
   delete(_name) {
     this._headers.delete(
       normalizedName(_name)
-    );
+    )
   }
 
   /**
@@ -111,11 +111,11 @@ class Headers {
    *
    * @example
    *
-   *  headers.set('accept', 'text/plain');
-   *  headers.has('accept');
+   *  headers.set('accept', 'text/plain')
+   *  headers.has('accept')
    *  // > true
-   *  headers.delete('accept');
-   *  headers.has('accept');
+   *  headers.delete('accept')
+   *  headers.has('accept')
    *  // > false
    * @param  {String} _name Header name
    * @return {Boolean} Returns true if one or more header values is set.
@@ -123,7 +123,7 @@ class Headers {
   has(_name) {
     return this._headers.has(
       normalizedName(_name)
-    );
+    )
   }
 
   /**
@@ -132,23 +132,23 @@ class Headers {
    *
    * @example
    *
-   *  headers.set('accept', 'text/plain');
-   *  headers.get('accept');
+   *  headers.set('accept', 'text/plain')
+   *  headers.get('accept')
    *  // > "text/plain"
-   *  headers.append('accept', 'text/html');
-   *  headers.get('accept');
+   *  headers.append('accept', 'text/html')
+   *  headers.get('accept')
    *  // > "text/plain, text/html"
    *
    * @param  {String} _name Header name
    * @return {String} Concatenated header values.
    */
   get(_name) {
-    const name = normalizedName(_name);
+    const name = normalizedName(_name)
     if (! this._headers.has(name)) {
-      return '';
+      return ''
     }
 
-    return this._headers.get(name).join(', ');
+    return this._headers.get(name).join(', ')
   }
 
   /**
@@ -157,7 +157,7 @@ class Headers {
    * @return {Iterable.<String>} Iterator of header names.
    */
   keys() {
-    return this._headers.keys();
+    return this._headers.keys()
   }
 
   /**
@@ -168,7 +168,7 @@ class Headers {
   values() {
     return Array.from(this._headers.values())
     .map((value) => value.join(', '))
-    [Symbol.iterator]();
+    [Symbol.iterator]()
   }
 
   /**
@@ -179,7 +179,7 @@ class Headers {
   entries() {
     return Array.from(this._headers.entries())
     .map(([name, value]) => [name, value.join(', ')])
-    [Symbol.iterator]();
+    [Symbol.iterator]()
   }
 
   /**
@@ -191,8 +191,8 @@ class Headers {
    */
   forEach(fn, thisArg = this) {
     this._headers.forEach((values, key) => {
-      fn(values.join(', '), key, thisArg);
-    }, thisArg);
+      fn(values.join(', '), key, thisArg)
+    }, thisArg)
   }
 
   /**
@@ -203,7 +203,7 @@ class Headers {
    * @private
    */
   wrongMode() {
-    throw new TypeError(`Headers mode is ${this.mode}`);
+    throw new TypeError(`Headers mode is ${this.mode}`)
   }
 
   /**
@@ -215,16 +215,16 @@ class Headers {
    */
   raw(name) {
     if (this.has(name)) {
-      return this._headers.get(name);
+      return this._headers.get(name)
     }
     else {
-      return [];
+      return []
     }
   }
 }
 
-Headers.MODE_NONE = MODE_NONE;
-Headers.MODE_IMMUTABLE = MODE_IMMUTABLE;
+Headers.MODE_NONE = MODE_NONE
+Headers.MODE_IMMUTABLE = MODE_IMMUTABLE
 
 /**
  * Normalize HTTP Field name
@@ -234,17 +234,17 @@ Headers.MODE_IMMUTABLE = MODE_IMMUTABLE;
  * @throws {TypeError} If string contains unsupported characters
  */
 function normalizedName(_name) {
-  let name = _name;
+  let name = _name
 
   if (typeof name !== 'string') {
-    name = String(name);
+    name = String(name)
   }
 
   if (/[^a-z0-9\-#$%&'*+.\^_`|~\r\n]/i.test(name)) {
-    throw new TypeError('Invalid character in header field name');
+    throw new TypeError('Invalid character in header field name')
   }
 
-  return name.toLowerCase();
+  return name.toLowerCase()
 }
 
 /**
@@ -256,17 +256,17 @@ function normalizedName(_name) {
  */
 function normalizedValue(_value) {
 
-  let value = _value;
+  let value = _value
 
   if (typeof value !== 'string') {
-    value = String(value);
+    value = String(value)
   }
 
   if (/\r|\n/.test(value)) {
-    throw new TypeError('Invalid newline character in header field value');
+    throw new TypeError('Invalid newline character in header field value')
   }
 
-  return value;
+  return value
 }
 
-module.exports = Headers;
+module.exports = Headers

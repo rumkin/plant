@@ -3,11 +3,11 @@
 * @description Plant Server router
 */
 
-const pathToRegexp = require('path-to-regexp');
-const isPlainObject = require('lodash.isplainobject');
-const isString = require('lodash.isstring');
+const pathToRegexp = require('path-to-regexp')
+const isPlainObject = require('lodash.isplainobject')
+const isString = require('lodash.isstring')
 
-const {or, and, getHandler} = require('./server-flow.js');
+const {or, and, getHandler} = require('./server-flow.js')
 
 /**
  * @class
@@ -22,7 +22,7 @@ class Router {
    * @static
    */
   static new(...args) {
-    return new this(...args);
+    return new this(...args)
   }
 
   /**
@@ -33,30 +33,30 @@ class Router {
    * @static
    */
   static handler(routes) {
-    const router = this.new();
+    const router = this.new()
 
     if (isPlainObject(routes)) {
       Object.getOwnPropertyNames(routes)
       .forEach((key) => {
-        const [method, route] = key.split(' ');
-        let handlers = routes[key];
+        const [method, route] = key.split(' ')
+        let handlers = routes[key]
 
         if (! Array.isArray(handlers)) {
-          handlers = [handlers];
+          handlers = [handlers]
         }
-        router.addRoute(method, route, ...handlers);
-      });
+        router.addRoute(method, route, ...handlers)
+      })
     }
     else {
-      routes(router);
+      routes(router)
     }
 
-    return router.handler();
+    return router.handler()
   }
 
   constructor() {
-    this.pre = [];
-    this.handlers = [];
+    this.pre = []
+    this.handlers = []
   }
 
   /**
@@ -70,12 +70,12 @@ class Router {
    */
   addRoute(_method, route, ...handlers) {
     if (_method) {
-      let methods;
+      let methods
       if (Array.isArray(_method)) {
-        methods = _method;
+        methods = _method
       }
       else {
-        methods = _method.split(/\s+/);
+        methods = _method.split(/\s+/)
       }
 
       for (const method of methods) {
@@ -83,7 +83,7 @@ class Router {
           method: method.toLowerCase(),
           route,
           handlers: handlers.map(getHandler),
-        });
+        })
       }
     }
     else {
@@ -91,9 +91,9 @@ class Router {
         method: null,
         route,
         handlers: handlers.map(getHandler),
-      });
+      })
     }
-    return this;
+    return this
   }
 
   /**
@@ -103,20 +103,20 @@ class Router {
    * @return {Router} Returns `this`.
    */
   use(...args) {
-    let route;
-    let handlers;
+    let route
+    let handlers
 
     if (isString(args[0])) {
-      route = args[0];
-      handlers = args.slice(1);
+      route = args[0]
+      handlers = args.slice(1)
     }
     else {
-      route = '/*';
-      handlers = args;
+      route = '/*'
+      handlers = args
     }
 
-    this.addRoute('all', route, ...handlers);
-    return this;
+    this.addRoute('all', route, ...handlers)
+    return this
   }
 
   /**
@@ -126,7 +126,7 @@ class Router {
    * @return {Router} Returns `this`.
    */
   before(...handlers) {
-    this.pre = [...this.pre, ...handlers.map(getHandler)];
+    this.pre = [...this.pre, ...handlers.map(getHandler)]
   }
 
   /**
@@ -137,7 +137,7 @@ class Router {
    * @returns {void} No return value.
    */
   route(route, ...handlers) {
-    this.addRoute(null, route, ...handlers);
+    this.addRoute(null, route, ...handlers)
   }
 
   /**
@@ -152,7 +152,7 @@ class Router {
         ...this.pre,
         ...handlers,
       )
-    ));
+    ))
   }
 
   /**
@@ -239,12 +239,12 @@ class Router {
   'delete',
   'options',
 ].forEach((name) => {
-  const method = name.toUpperCase();
+  const method = name.toUpperCase()
 
   Router.prototype[name] = function(route, ...handlers) {
-    return this.addRoute(method, route, ...handlers);
-  };
-});
+    return this.addRoute(method, route, ...handlers)
+  }
+})
 
 /**
  * Creates route matcher. Wraps request object.
@@ -254,26 +254,26 @@ class Router {
  * @return {HandleFunc} Route handler.
  */
 function getRouteMatcher(method, route) {
-  const matcher = createParamsMatcher(route);
+  const matcher = createParamsMatcher(route)
 
   return async function(ctx, next){
-    const {req} = ctx;
+    const {req} = ctx
 
     if (req.method !== method && method !== 'all') {
-      return;
+      return
     }
 
-    const params = matcher(req.path);
+    const params = matcher(req.path)
 
     if (! params) {
-      return;
+      return
     }
 
-    const inReq = Object.create(req);
-    inReq.params = Object.assign({}, req.params, params);
+    const inReq = Object.create(req)
+    inReq.params = Object.assign({}, req.params, params)
 
-    await next(Object.assign({}, ctx, {req: inReq}));
-  };
+    await next(Object.assign({}, ctx, {req: inReq}))
+  }
 }
 
 /**
@@ -283,26 +283,26 @@ function getRouteMatcher(method, route) {
  * @return {HandleFunc} Request handler with url matching.
  */
 function getSubrouteMatcher(route) {
-  const matcher = createParamsMatcher(route.replace(/\/*$/, '/*'));
+  const matcher = createParamsMatcher(route.replace(/\/*$/, '/*'))
 
   return async function(ctx, next){
-    const {req} = ctx;
-    const url = req.path;
+    const {req} = ctx
+    const url = req.path
 
-    const params = matcher(url);
+    const params = matcher(url)
 
     if (! params) {
-      return;
+      return
     }
 
-    const inReq = Object.create(req);
-    inReq.params = Object.assign({}, req.params, params);
+    const inReq = Object.create(req)
+    inReq.params = Object.assign({}, req.params, params)
 
-    inReq.path = '/' + params[0];
-    inReq.basePath = req.basePath + url.slice(0, -params[0].length);
+    inReq.path = '/' + params[0]
+    inReq.basePath = req.basePath + url.slice(0, -params[0].length)
 
-    await next(Object.assign({}, ctx, {req: inReq}));
-  };
+    await next(Object.assign({}, ctx, {req: inReq}))
+  }
 }
 
 /**
@@ -312,27 +312,27 @@ function getSubrouteMatcher(route) {
  * @return {function(String)} Route matcher function.
  */
 function createParamsMatcher(route) {
-  const keys = [];
-  const re = pathToRegexp(route, keys);
+  const keys = []
+  const re = pathToRegexp(route, keys)
 
   return function(url) {
-    const matches = re.exec(url);
+    const matches = re.exec(url)
 
     if (! matches) {
-      return null;
+      return null
     }
 
-    const params = {};
+    const params = {}
 
     matches.slice(1)
     .forEach((match, i) => {
-      params[keys[i].name] = match;
-    });
+      params[keys[i].name] = match
+    })
 
-    return params;
-  };
+    return params
+  }
 }
 
-module.exports = Router;
-Router.getRouteMatcher = getRouteMatcher;
-Router.getSubrouteMatcher = getSubrouteMatcher;
+module.exports = Router
+Router.getRouteMatcher = getRouteMatcher
+Router.getSubrouteMatcher = getSubrouteMatcher

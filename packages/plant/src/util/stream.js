@@ -1,4 +1,4 @@
-const isObject = require('lodash.isobject');
+const isObject = require('lodash.isobject')
 /**
  * isReadableStream - specify weather passed `value` has readable stream object
  * methods on, pipe and end.
@@ -12,7 +12,7 @@ function isReadableStream(value) {
   && typeof value.cancel === 'function'
   && typeof value.tee === 'function'
   && typeof value.pipeTo === 'function'
-  && typeof value.pipeThrough === 'function';
+  && typeof value.pipeThrough === 'function'
 }
 
-exports.isReadableStream = isReadableStream;
+exports.isReadableStream = isReadableStream
