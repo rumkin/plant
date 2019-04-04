@@ -14,7 +14,7 @@ const Headers = require('./headers')
 /**
  * @typedef {Object} RequestOptions
  * @prop {String} method='GET' Request HTTP method.
- * @prop {URL} url - Whatwg URL object.
+ * @prop {URL} url - WebAPI URL object.
  * @prop {Headers|Object.<String,String>} headers={} - Request headers.
  * @prop {ReadableStream|Null} body=null Request body.
  * @prop {Object} data={} Request data extracted from the body.
@@ -27,7 +27,7 @@ const Headers = require('./headers')
  *
  * @prop {String} method='GET' - Request method.
  * @prop {URL} url - Wahtwg URL object.
- * @prop {Headers} headers - Whatwg request headers (in immmutable mode).
+ * @prop {Headers} headers - WebAPI request headers (in immmutable mode).
  * @prop {String[]} domains - Full domains of server splitted by dot `.`.
  * @prop {String} path - Current processing pathname without basePath
  * @prop {String} basePath - Current base url pathname.

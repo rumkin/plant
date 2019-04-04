@@ -1,6 +1,6 @@
 /**
  * @module Http.Headers
- * @description WhatWG Headers implementation.
+ * @description WebAPI Headers implementation.
  */
 
 /**
@@ -24,7 +24,7 @@ const MODE_IMMUTABLE = 'immutable'
 
 /**
  * @class
- * @classdesc WhatWG Headers implementation.
+ * @classdesc WebAPI Headers implementation.
  */
 class Headers {
   /**

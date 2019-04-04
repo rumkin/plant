@@ -5,7 +5,7 @@
 
 ---
 
-Plant is WhatWG standards based web server powered by ES2017, created with
+Plant is WebAPI standards based web server powered by ES2017, created with
 modular architecture and functional design patterns in mind. It uses cascades
 and contexts to be modular, pure and less coupled.
 
@@ -16,7 +16,7 @@ or event PostMessage.
 
 - 🏎 Faster then Express: **15K** vs **14K** req/sec on Hello World test.
 - ☁️ Lightweight: **71 KiB** with comments and 28 KiB when minified.
-- 📐 Standards based: uses WhatWG URL and Headers interfaces.
+- 📐 Standards based: uses WebAPI URL and Headers interfaces.
 
 ---
 
@@ -399,9 +399,9 @@ Values extracted from parsed path places into `params`.
 
 |Property|Description|
 |:-------|:----------|
-|url| Url is a WhatWG [URL](https://nodejs.org/dist/latest-v9.x/docs/api/url.html#url_class_url) |
+|url| Url is a WebAPI [URL](https://nodejs.org/dist/latest-v9.x/docs/api/url.html#url_class_url) |
 |method| HTTP method |
-|headers| WhatWG Headers object |
+|headers| WebAPI Headers object |
 |peer| Request peer URI. Usually it is an client IP address |
 |domains| Domains name separated by '.' in reverse order |
 |body| Request body readable stream. It is `null` by default if body not exists (GET, HEAD, OPTIONS request).|
@@ -495,7 +495,7 @@ switch(req.accept(['json', 'text'])) {
 |ok| True if statusCode is in range of 200 and 299|
 |hasBody| True if body is not null. Specify is response should be sent|
 |statusCode| Status code. `200` By default|
-|headers| Response headers as WhatWG Headers object|
+|headers| Response headers as WebAPI Headers object|
 |body| Response body. Default is `null`|
 
 ### Response.Response()
@@ -503,7 +503,7 @@ switch(req.accept(['json', 'text'])) {
 (options:ResponseOptions) -> Request
 ```
 
-Creates and configure response options. Headers passed as WhatWG instance should
+Creates and configure response options. Headers passed as WebAPI instance should
 have mode 'none'.
 
 #### ResponseOptions
@@ -626,7 +626,7 @@ Set empty body.
 |:-------|:----------|
 |mode|Headers mutability mode|
 
-Plant is using [WhatWG Headers](https://developer.mozilla.org/en-US/docs/Web/API/Headers) for Request and Response.
+Plant is using [WebAPI Headers](https://developer.mozilla.org/en-US/docs/Web/API/Headers) for Request and Response.
 
 ```javascript
 // Request headers

@@ -9,7 +9,7 @@
 ### v1.0.0
 
 - Updated:
-    - `Response.headers` and `Request.headers` now are WhatWG Headers objects.
+    - `Response.headers` and `Request.headers` now are WebAPI Headers objects.
     - Request body param renamed and separated by destination:
         - `body` - Buffer or null,
         - `data` - Object of values from `Request.body`,
