@@ -1,24 +1,16 @@
-const should = require('should');
+/* global describe it URL */
+const should = require('should')
 
-const Plant = require('..');
-const {and, or, Request, Response} = Plant;
-
-// function readStream(stream) {
-//   return new Promise((resolve, reject) => {
-//     const chunks = [];
-//     stream.on('data', (chunk) => chunks.push(chunk));
-//     stream.on('error', reject);
-//     stream.on('end', () => resolve(Buffer.concat(chunks)));
-//   });
-// }
+const Plant = require('..')
+const {Request, Response} = Plant
 
 async function errorTrap(ctx, next) {
   try {
-    await next();
+    await next()
   }
   catch (err) {
-    console.error(err);
-    throw err;
+    console.error(err)
+    throw err
   }
 }
 
@@ -29,25 +21,25 @@ describe('Plant()', function() {
     const handler = Plant.handler(
       errorTrap,
       async function({req, res}) {
-        res.headers.set('content-type', req.headers.get('accept'));
-        res.body = req.url.pathname;
+        res.headers.set('content-type', req.headers.get('accept'))
+        res.body = req.url.pathname
       }
-    );
+    )
 
     const req = new Request({
-      url: '/index.html',
+      url: new URL('http://localhost/index.html'),
       method: 'GET',
       headers: {
         'accept': 'text/plain',
       },
-    });
+    })
 
-    const res = new Response();
+    const res = new Response()
 
     return handler({req, res})
     .then(() => {
-      should(res.headers.get('content-type')).be.equal('text/plain');
-      should(res.body).be.equal('/index.html');
-    });
-  });
-});
+      should(res.headers.get('content-type')).be.equal('text/plain')
+      should(res.body).be.equal('/index.html')
+    })
+  })
+})

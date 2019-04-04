@@ -4,10 +4,12 @@
  */
 
 const {
+  Peer,
   Response,
   Request,
   Headers,
   Socket,
+  URI,
   and,
 } = require('@plant/plant')
 const streams = require('web-streams-polyfill/ponyfill')
@@ -30,8 +32,9 @@ const {ReadableStream} = streams
  * @returns {Array<String,String,Boolean>} Return hostname, ip and encyption status as Array.
  */
 function getResolvedNetworkProps(req) {
-  const {remoteAddress} = req.connection
-  let ip = remoteAddress
+  const {remoteAddress, remotePort} = req.connection
+  let address = remoteAddress
+  let port = remotePort
   let host = req.headers['host']
   let encrypted = req.connection.encrypted
 
@@ -40,7 +43,8 @@ function getResolvedNetworkProps(req) {
     const xForwardedHost = req.headers['x-forwarded-host']
 
     if (xForwardedFor) {
-      ip = xForwardedFor
+      address = xForwardedFor
+      port = '0' // forwarded port is unknown
     }
 
     if (xForwardedHost) {
@@ -50,7 +54,7 @@ function getResolvedNetworkProps(req) {
     encrypted = req.headers['x-forwarded-proto'] === '1'
   }
 
-  return [host, ip, encrypted]
+  return [host, {address, port}, encrypted]
 }
 
 /**
@@ -59,8 +63,7 @@ function getResolvedNetworkProps(req) {
  * @param  {http.IncomingMessage} req Native Http request
  * @return {Request} Returns `this`.
  */
-function createRequest(req) {
-  const [host, ip, encrypted] = getResolvedNetworkProps(req)
+function createRequest(req, {host, encrypted}) {
   const protocol = encrypted
     ? 'https'
     : 'http'
@@ -72,7 +75,6 @@ function createRequest(req) {
     method,
     url,
     headers: new Headers(req.headers, Headers.MODE_IMMUTABLE),
-    peer: `tcp://${ip}`,
     body: new ReadableStream({
       start(controller) {
         req.resume()
@@ -152,17 +154,26 @@ function createResponse(res) {
  * @async
  */
 function handleRequest(httpReq, httpRes, next) {
-  const req = createRequest(httpReq)
+  const [host, remote, encrypted] = getResolvedNetworkProps(httpReq)
+  const req = createRequest(httpReq, {host, encrypted})
   const res = createResponse(httpRes)
   const socket = createSocket(httpReq.socket)
+  const peer = new Peer({
+    uri: new URI({
+      protocol: 'tcp:',
+      hostname: remote.address,
+      post: remote.port,
+    }),
+  })
 
   httpReq.socket.setMaxListeners(Infinity)
 
   return next({
-    req,
-    res,
     httpReq,
     httpRes,
+    req,
+    res,
+    peer,
     socket,
   })
   .then(async () => {

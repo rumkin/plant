@@ -1,33 +1,34 @@
-const should = require('should');
+/* global describe it */
+const should = require('should')
 
-const Server = require('..');
-const {and} = Server;
+const Server = require('..')
+const {and} = Server
 
 describe('Plant.Flow', function() {
   describe('Cascade', function() {
     it ('should iterate over `and`', function() {
-      let round = 0;
+      let round = 0
 
       const fn = and(
         async function(ctx, next) {
-          round += 1;
-          should(round).be.equal(1);
+          round += 1
+          should(round).be.equal(1)
 
-          await next();
+          await next()
 
-          should(round).be.equal(3);
+          should(round).be.equal(3)
         },
         async function(ctx, next) {
-          round += 1;
-          should(round).be.equal(2);
+          round += 1
+          should(round).be.equal(2)
 
-          await next();
+          await next()
 
-          round += 1;
+          round += 1
         }
-      );
+      )
 
-      return fn(null, null);
-    });
-  });
-});
+      return fn(null, null)
+    })
+  })
+})

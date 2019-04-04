@@ -80,7 +80,7 @@ class Router {
 
       for (const method of methods) {
         this.handlers.push({
-          method: method.toLowerCase(),
+          method: method.toUpperCase(),
           route,
           handlers: handlers.map(getHandler),
         })
@@ -250,58 +250,74 @@ class Router {
  * Creates route matcher. Wraps request object.
  *
  * @param  {String} method Http method name.
- * @param  {String} route  Route URL or pattern.
+ * @param  {String} routePath  Route URL or pattern.
  * @return {HandleFunc} Route handler.
  */
-function getRouteMatcher(method, route) {
-  const matcher = createParamsMatcher(route)
+function getRouteMatcher(method, routePath) {
+  const matcher = createParamsMatcher(routePath)
 
   return async function(ctx, next){
-    const {req} = ctx
+    const {req, route} = ctx
 
     if (req.method !== method && method !== 'all') {
       return
     }
 
-    const params = matcher(req.path)
+    const params = matcher(route.path)
 
     if (! params) {
       return
     }
 
-    const inReq = Object.create(req)
-    inReq.params = Object.assign({}, req.params, params)
+    const subRoute = new Route({
+      path: route.path,
+      basePath: route.basePath,
+      params: {
+        ...route.params,
+        ...params,
+      },
+    })
 
-    await next(Object.assign({}, ctx, {req: inReq}))
+    await next({
+      ...ctx,
+      route: subRoute,
+    })
   }
 }
 
 /**
  * Get subrouter matcher. Wraps request object.
  *
- * @param  {String} route Route URL or pattern.
+ * @param  {String} routePath Route URL or pattern.
  * @return {HandleFunc} Request handler with url matching.
  */
-function getSubrouteMatcher(route) {
-  const matcher = createParamsMatcher(route.replace(/\/*$/, '/*'))
+function getSubrouteMatcher(routePath) {
+  const matcher = createParamsMatcher(routePath.replace(/\/*$/, '/*'))
 
   return async function(ctx, next){
-    const {req} = ctx
-    const url = req.path
+    const {route} = ctx
 
-    const params = matcher(url)
+    const params = matcher(route.path)
 
     if (! params) {
       return
     }
 
-    const inReq = Object.create(req)
-    inReq.params = Object.assign({}, req.params, params)
+    const subRoute = new Route({
+      path: '/' + params[0],
+      basePath: route.basePath + route.path.slice(1, -params[0].length),
+      params: {
+        ...route.params,
+        ...params,
+      },
+    })
 
-    inReq.path = '/' + params[0]
-    inReq.basePath = req.basePath + url.slice(0, -params[0].length)
-
-    await next(Object.assign({}, ctx, {req: inReq}))
+    await next(
+      {
+        ...ctx,
+        route: subRoute,
+      },
+    )
   }
 }
 
@@ -333,6 +349,33 @@ function createParamsMatcher(route) {
   }
 }
 
+class Route {
+  static fromRequest(req) {
+    return new this({
+      path: req.url.pathname,
+      basePath: '/',
+      params: {},
+    })
+  }
+
+  constructor({path = '/', basePath = '/', params = {}} = {}) {
+    this.path = path
+    this.basePath = basePath
+    this.params = params
+  }
+
+  clone() {
+    const copy = new this.constructor({
+      path: this.path,
+      basePath: this.basePath,
+      params: {...this.params},
+    })
+
+    return copy
+  }
+}
+
 module.exports = Router
+Router.Route = Route
 Router.getRouteMatcher = getRouteMatcher
 Router.getSubrouteMatcher = getSubrouteMatcher

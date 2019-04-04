@@ -1,7 +1,8 @@
-var
-tmp
-example
-docs
+var/
+tmp/
+example/
+docs/
+test/
 
 .jsdoc.json
 .editorconfig

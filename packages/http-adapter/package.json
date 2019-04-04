@@ -27,7 +27,7 @@
     "web-streams-polyfill": "^2.0.2"
   },
   "peerDependencies": {
-    "@plant/plant": "1.x"
+    "@plant/plant": "2.x"
   },
   "directories": {
     "test": "test"

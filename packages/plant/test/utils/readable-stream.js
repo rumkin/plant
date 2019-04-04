@@ -1,45 +1,45 @@
 class ReadableStreamMock {
   constructor(values) {
-    this.values = values;
-    this.reader = null;
+    this.values = values
+    this.reader = null
   }
 
   get locked() {
-    return this.reader !== null;
+    return this.reader !== null
   }
 
   getReader() {
     if (this.locked) {
-      throw new Error('Stream is locked');
+      throw new Error('Stream is locked')
     }
 
-    const values = this.values.slice();
+    const values = this.values.slice()
     this.reader = {
       read: async () => {
         if (values.length) {
           return {
             value: values.shift(),
             done: false,
-          };
+          }
         }
         else {
-          this.reader = null;
+          this.reader = null
           return {
-            value: undefined,
+            value: void 0,
             done: true,
-          };
+          }
         }
       },
       cancel: () => {
-        this.cancel();
+        this.cancel()
       },
       releaseLock: () => {
-        this.reader = null;
-        values.splice(0, values.length);
+        this.reader = null
+        values.splice(0, values.length)
       },
-    };
+    }
 
-    return this.reader;
+    return this.reader
   }
 
   pipeTo() {}
@@ -48,9 +48,9 @@ class ReadableStreamMock {
 
   cancel() {
     if (this.reader) {
-      this.reader.releaseLock();
+      this.reader.releaseLock()
     }
   }
 }
 
-exports.ReadableStream = ReadableStreamMock;
+exports.ReadableStream = ReadableStreamMock

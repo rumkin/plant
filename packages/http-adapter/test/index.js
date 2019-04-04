@@ -1,1 +1,1 @@
-require('./server.spec')
+require('./http-adapter.spec')

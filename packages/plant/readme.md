@@ -29,11 +29,13 @@ or event PostMessage.
 * [API](#api).
     * [Plant](#plant-type).
     * [Handler](#handler-type).
+    * [Peer](#peer-type).
     * [Router](#router-type).
     * [Request](#request-type).
     * [Response](#response-type).
     * [Headers](#headers-type).
     * [Socket](#socket-type).
+    * [URI](#uri-type).
 * [License](#license).
 
 ---
@@ -85,29 +87,6 @@ createServer(plant)
 * Response [Gzip compression](https://github.com/rumkin/plant/tree/master/example/gzip.js).
 * [Context separations](https://github.com/rumkin/plant/tree/master/example/context.js).
 * [Session](https://github.com/rumkin/plant/tree/master/example/session.js).
-
-### Gzip example
-
-Cascades allow to process responses before sending. For example you can gzip
-response body:
-
-```javascript
-plant.use(async ({req, res}, next) => {
-    // Process request
-    await next();
-
-    // Create gzip encoder.
-    const gzip = zlib.createGzip();
-    // Get response body
-    const {body} = res;
-    // Set Gzip encoding
-    res.headers.set('content-encoding', 'gzip');
-    // Replace body with stream
-    res.stream(gzip);
-    // Write data to gzip and close stream.
-    gzip.end(body);
-});
-```
 
 ## Cascades explanation
 
@@ -284,6 +263,30 @@ router.get('/', ({res}) => {
 server.use(router.handler());
 ```
 
+### Peer Type
+```text
+{
+    uri: URI
+}
+```
+
+This type represents other side of request connection. It could be user or
+proxy. It could be non unique for each request if the peer has sent
+several requests using the same connection.
+
+For local TCP connection it could look like this:
+
+```javascript
+new Peer({
+    uri: new URI({
+        protocol: 'tcp:',
+        hostname: '127.0.0.1',
+        port: 12345,
+    })
+})
+```
+
+
 ### Router Type
 
 Router allow to group url-dependent functions and extract params from URL.
@@ -367,7 +370,7 @@ router.get('/user', ({req}) => {
 |Property|Description|
 |:-------|:----------|
 |url| Url is a WhatWG [URL](https://nodejs.org/dist/latest-v9.x/docs/api/url.html#url_class_url) |
-|method| Lowercased HTTP method |
+|method| HTTP method |
 |headers| WhatWG Headers object |
 |peer| Request peer URI. Usually it is an client IP address |
 |domains| Domains name separated by '.' in reverse order |
@@ -726,6 +729,26 @@ async function errorHandler({req, res}, next) {
 };
 ```
 
+## URI Type
+
+URI is an object that represents URI in plant. While URL requires protocols
+to be registered by IANA WebAPI URL wouldn't parse strings with custom scheme like
+`tcp://127.0.0.1:12345/` and `127.0.0.1:12345` became a pathname.
+Thus we use URI, which doesn't mean to be an URL, but presents network
+identifier correct. Plant doesn't provide parser and URI should be generated
+manually.
+
+This is how Plant represents TCP address of the HTTP peer:
+
+```javascript
+new URI({
+    protocol: 'tcp:',
+    hostname: 'localhost',
+    port: '12345',
+    pathname: '/',
+})
+```
+
 ---
 
 
@@ -775,6 +798,8 @@ Well middlewares are calling handlers (because it shorter). Plant is an object
 `listen` method for that. Request and Response objects are not ancestors of
 native Node.js's `http.IncomingMessage` and `http.ServerResponse`.
 
+### Domains instead of subdomains
+
 Request object has `domains` property instead of `subdomains` and has *all*
 parts of host from tld zone:
 
@@ -782,13 +807,10 @@ parts of host from tld zone:
 req.domains; // -> ['com', 'github', 'api'] for api.github.com
 ```
 
-### Other custom behavior
+### No extension
 
-Request method property value is lowercased:
-
-```javascript
-req.method; // -> 'get'
-```
+Plant doesn't extends Request or Response object with new methods. It's using
+context which be modified and extended with new behavior.
 
 ## License
 

@@ -8,11 +8,13 @@ const isString = require('lodash.isstring')
 
 const cookieHandler = require('./handlers/cookie-handler')
 const {and, or, getHandler} = require('./server-flow')
+const Headers = require('./headers')
+const Peer = require('./peer')
 const Router = require('./router')
 const Response = require('./response')
 const Request = require('./request')
 const Socket = require('./socket')
-const Headers = require('./headers')
+const URI = require('./uri')
 
 /**
  * @typedef {Object} Plant.Context Default plant context with plant's instances for req and res.
@@ -204,6 +206,7 @@ class Server {
         if (! ctx.socket) {
           ctx.socket = new Socket()
         }
+        ctx.route = Router.Route.fromRequest(ctx.req)
         return next({...context, ...ctx})
       },
       cookieHandler,
@@ -222,8 +225,10 @@ Server.or = or
 Server.getHandler = getHandler
 
 // Expose core classes
+Server.Headers = Headers
+Server.Peer = Peer
 Server.Router = Router
 Server.Request = Request
 Server.Response = Response
 Server.Socket = Socket
-Server.Headers = Headers
+Server.URI = URI

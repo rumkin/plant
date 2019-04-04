@@ -1,4 +1,4 @@
-/* global URL TextDecoder */
+/* global TextDecoder */
 /**
  * @module Plant
  */
@@ -13,12 +13,11 @@ const Headers = require('./headers')
 
 /**
  * @typedef {Object} RequestOptions
- * @prop {String} method='get' Request HTTP method.
- * @prop {URL|String} url - Whatwg URL object or full url string.
+ * @prop {String} method='GET' Request HTTP method.
+ * @prop {URL} url - Whatwg URL object.
  * @prop {Headers|Object.<String,String>} headers={} - Request headers.
- * @prop {Buffer|Null} body=null Request body.
+ * @prop {ReadableStream|Null} body=null Request body.
  * @prop {Object} data={} Request data extracted from the body.
- * @prop {Readable} stream=null Request body stream.
  * @prop {string} peer Request peer URI.
  */
 
@@ -26,16 +25,14 @@ const Headers = require('./headers')
  * @class
  * @classdesc Plant Request representation object
  *
- * @prop {String} method='get' - Request method.
+ * @prop {String} method='GET' - Request method.
  * @prop {URL} url - Wahtwg URL object.
  * @prop {Headers} headers - Whatwg request headers (in immmutable mode).
- * @prop {String} peer - Sender URI. Usually IP.
  * @prop {String[]} domains - Full domains of server splitted by dot `.`.
  * @prop {String} path - Current processing pathname without basePath
  * @prop {String} basePath - Current base url pathname.
  * @prop {Buffer|Null} body - Request body as buffer. Null until received.
  * @prop {Object} data=null - Request data. It can be parsed JSON value or multipart data value.
- * @prop {Readable} stream - Request body read stream.
  */
 class Request {
   /**
@@ -47,29 +44,23 @@ class Request {
     headers = {},
     url,
     body = null,
-    peer = '',
+    data = null,
   }) {
-    this.url = (typeof url === 'string')
-      ? new URL(url, 'http://localhost')
-      : url
-    this.method = method.toLowerCase()
+    this.url = url
+    this.method = method.toUpperCase()
     this.headers = isPlainObject(headers)
       ? new Headers(headers, Headers.MODE_IMMUTABLE)
       : headers
     this.domains = /\.\d+$/.test(this.url.hostname)
       ? []
       : this.url.hostname.split('.').reverse()
-    this.peer = peer
-
-    this.path = this.url.pathname.replace(/\/+/g, '/')
-    this.basePath = '/'
 
     if (body !== null && ! isReadableStream(body)) {
       throw new TypeError('options.body is not a readable stream')
     }
 
     this.body = body
-    this.data = null
+    this.data = data
   }
 
   /**
@@ -153,6 +144,18 @@ class Request {
   json() {
     return this.text()
     .then(JSON.parse)
+  }
+
+  clone() {
+    const copy = new this.constructor({
+      method: this.method,
+      url: this.url,
+      headers: this.headers,
+      body: this.body,
+      data: this.data,
+    })
+
+    return copy
   }
 }
 

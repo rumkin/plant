@@ -28,36 +28,7 @@ function createServer(plant) {
   return initServer(httpHandler(plant))
 }
 
-describe('Plant.Flow', function() {
-  describe('Cascade', function() {
-    it ('should iterate over `and`', function() {
-      let round = 0
-
-      const fn = and(
-        async function(ctx, next) {
-          round += 1
-          should(round).be.equal(1)
-
-          await next()
-
-          should(round).be.equal(3)
-        },
-        async function(ctx, next) {
-          round += 1
-          should(round).be.equal(2)
-
-          await next()
-
-          round += 1
-        }
-      )
-
-      return fn(null, null)
-    })
-  })
-})
-
-describe('Server()', function() {
+describe('HttpAdapter()', function() {
   it('Should serve HTTP requests', function() {
     const server = createServer(Plant.create(
       errorTrap,
@@ -102,9 +73,9 @@ describe('Server()', function() {
   it('Should update to proxy values', function() {
     const server = createServer(Plant.create(
       errorTrap,
-      async function({req, res}) {
+      async function({req, res, peer}) {
         res.json({
-          peer: req.peer,
+          peer: peer.uri.toString(),
           host: req.url.hostname,
         })
       }
@@ -126,7 +97,7 @@ describe('Server()', function() {
     .then((result) => {
       should(result).be.instanceof(Object)
       should(result).has.ownProperty('host').which.equal('www.online')
-      should(result).has.ownProperty('peer').which.equal('tcp://127.0.0.2')
+      should(result).has.ownProperty('peer').which.equal('tcp://127.0.0.2/')
     })
   })
 
@@ -171,7 +142,7 @@ describe('Server()', function() {
         host: url.hostname,
         port: url.port,
         domains: req.domains,
-        url: req.path,
+        pathname: req.url.pathname,
         query: {
           json: req.url.searchParams.get('json'),
         },
@@ -193,12 +164,12 @@ describe('Server()', function() {
     })
     .then((res) => res.json())
     .then((result) => should(result).be.deepEqual({
-      method: 'get',
+      method: 'GET',
       protocol: 'http:',
       host: 'some.custom.host.test',
       port: '',
       domains: ['test', 'host', 'custom', 'some'],
-      url: '/request',
+      pathname: '/request',
       query: {
         json: '1',
       },
@@ -355,8 +326,8 @@ describe('Server()', function() {
     const plant = Plant.new()
     .use(errorTrap)
     .use(
-      async function({req}, next) {
-        if (req.path === '/turn') {
+      async function({route}, next) {
+        if (route.path === '/turn') {
           return await next()
         }
       },

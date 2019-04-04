@@ -1,98 +1,107 @@
-const should = require('should');
+/* global describe it URL */
+const should = require('should')
 
-const {Router, Request, Response, Socket, and} = require('..');
+const {Router, Request, Response, Socket, Peer, URI, and} = require('..')
+const {Route} = Router
+
+function createContext(url) {
+  const socket = new Socket()
+
+  const req = new Request({
+    url: new URL(url),
+  })
+
+  const route = Route.fromRequest(req)
+  const peer = new Peer({
+    uri: new URI({
+      protocol: 'process:',
+      hostname: process.pid,
+    }),
+  })
+
+  return {req, route, socket, peer}
+}
 
 describe('Router()', function(){
   it('Should get params from req.url', async function() {
-    const router = new Router();
+    const router = new Router()
 
-    router.get('/users/:id', async function({req, res}) {
-      res.send(req.params.id);
-    });
+    router.get('/users/:id', async function({res, route}) {
+      res.send(route.params.id)
+    })
 
-    const socket = new Socket();
+    const res = new Response()
+    const ctx = createContext('http://localhost:8080/users/1')
+    await and(router.handler())({
+      ...ctx,
+      res,
+    })
 
-    const req = new Request({
-      url: 'http://localhost:8080/users/1',
-    });
-
-    const res = new Response();
-
-    await and(router.handler())({req, res, socket});
-
-    should(res.body).be.a.String().and.equal('1');
-  });
+    should(res.body).be.a.String().and.equal('1')
+  })
 
   it('should define several method handlers with addRoute()', async function() {
-    const router = new Router();
+    const router = new Router()
 
     router.addRoute(['post', 'get'], '/users/', async function({res}) {
-      res.send('1');
-    });
+      res.send('1')
+    })
 
-    const socket = new Socket();
+    const res = new Response()
+    const ctx = createContext('http://localhost:8080/users')
+    await and(router.handler())({
+      ...ctx,
+      res,
+    })
 
-    const req = new Request({
-      url: 'http://localhost:8080/users',
-    });
-    const res = new Response();
-
-    await and(router.handler())({req, res, socket});
-
-    should(res.body).be.a.String().and.equal('1');
-  });
+    should(res.body).be.a.String().and.equal('1')
+  })
 
   it('should use subrouter', async function() {
-    const router = new Router();
+    const router = new Router()
 
     router.route('/users/', Router.handler({
-      'GET /:id': async function({req, res}) {
-        res.send(req.params.id);
+      'GET /:id': async function({res, route}) {
+        res.send(route.params.id)
       },
-    }));
+    }))
 
-    const socket = new Socket();
+    const res = new Response()
+    const ctx = createContext('http://localhost:8080/users/2')
+    await and(router.handler())({
+      ...ctx,
+      res,
+    })
 
-    const req = new Request({
-      url: 'http://localhost:8080/users/2',
-    });
-
-    const res = new Response();
-
-    await and(router.handler())({req, res, socket});
-
-    should(res.body).be.a.String().and.equal('2');
-  });
+    should(res.body).be.a.String().and.equal('2')
+  })
 
   it('should use nested subrouters', async function() {
-    const router1 = new Router();
-    const router2 = new Router();
-    const router3 = new Router();
+    const router1 = new Router()
+    const router2 = new Router()
+    const router3 = new Router()
 
-    router3.get('/param/:param', async function({req, res}) {
+    router3.get('/param/:param', async function({req, res, route}) {
       res.json({
-        ...req.params,
+        ...route.params,
         raw: req.url.searchParams.has('raw'),
-      });
-    });
+      })
+    })
 
-    router2.route('/users/:user/', router3);
-    router1.route('/api/', router2);
+    router2.route('/users/:user/', router3)
+    router1.route('/api/', router2)
 
-    const socket = new Socket();
+    const res = new Response()
+    const ctx = createContext('http://localhost:8080/api/users/3/param/id?raw')
+    await and(router1.handler())({
+      ...ctx,
+      res,
+    })
 
-    const req = new Request({
-      url: 'http://localhost:8080/api/users/3/param/id?raw',
-    });
+    const result = JSON.parse(res.body)
 
-    const res = new Response();
-
-    await and(router1.handler())({req, res, socket});
-
-    const result = JSON.parse(res.body);
-
-    should(result).has.ownProperty('user').which.is.equal('3');
-    should(result).has.ownProperty('param').which.is.equal('id');
-    should(result).has.ownProperty('raw').which.is.equal(true);
-  });
-});
+    should(result).has.ownProperty('user').which.is.equal('3')
+    should(result).has.ownProperty('param').which.is.equal('id')
+    should(result).has.ownProperty('raw').which.is.equal(true)
+  })
+})
