@@ -1,12 +1,12 @@
-const http = require('http');
-const Plant = require('..');
+const http = require('http')
+const Plant = require('..')
 
-const plant = new Plant();
+const plant = new Plant()
 
 plant.use(async ({req, res}) => {
-  // Send text response
-  res.body = req.stream;
-});
+  // Set request input stream as response body
+  res.body = req.body
+})
 
 http.createServer(plant.handler())
-.listen(8080);
+.listen(8080)

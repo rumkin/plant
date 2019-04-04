@@ -20,7 +20,7 @@ or event PostMessage.
 
 ---
 
-## Table of Content
+## Table of Contents
 
 * [Install](#install).
 * [Usage](#usage).
@@ -62,7 +62,7 @@ example https is using so it package should to be installed
 (`npm i @plant/https`).
 
 ```javascript
-const createServer = require('@plant/https');
+const createServer = require('@plant/http');
 const Plant = require('@plant/plant');
 
 const plant = new Plant();
@@ -87,6 +87,16 @@ createServer(plant)
 * Response [Gzip compression](https://github.com/rumkin/plant/tree/master/example/gzip.js).
 * [Context separations](https://github.com/rumkin/plant/tree/master/example/context.js).
 * [Session](https://github.com/rumkin/plant/tree/master/example/session.js).
+
+## Context
+
+The first handler always receives context with the properties:
+
+* `req` – [Request](#request-type) instance.
+* `res` – [Response](#response-type) instance.
+* `peer` – [Peer](#peer-type) representing other connection party.
+* `socket` – [Socket](#socket-type) is abstract socket, representing connection.
+* `route` – [Router.Route](#route-type) holds routing state.
 
 ## Cascades explanation
 
@@ -114,7 +124,7 @@ plant.use(async (ctx, next) => {
 });
 ```
 
-It allow to create predictable behaviour and avoid unexpected side effects to
+It allow to create predictable behavior and avoid unexpected side effects to
 change. Plant itself overwrite default node.js HTTP Request and Response objects
 with Plant.Request and Plant.Response.
 
@@ -352,6 +362,26 @@ router.get('/user', ({req}) => {
 });
 ```
 
+### Route Type
+
+```text
+{
+    path: string
+    basePath: string,
+    params: {[key: string]: string}
+}
+```
+
+Route holds router state. It has two properties `path` and `basePath`
+which are parsed and unparsed parts of the request url pathname respectively.
+Values extracted from parsed path places into `params`.
+
+|Property|Description|
+|:-------|:----------|
+|path| Current unprocessed pathname part |
+|basePath| Pathname part processed by overlaying handler |
+|params   |Params extracted from path   |
+
 ### Request Type
 
 ```text
@@ -374,8 +404,6 @@ router.get('/user', ({req}) => {
 |headers| WhatWG Headers object |
 |peer| Request peer URI. Usually it is an client IP address |
 |domains| Domains name separated by '.' in reverse order |
-|path| Current unprocessed pathname part |
-|basePath| Pathname part processed by overlaying handler |
 |body| Request body readable stream. It is `null` by default if body not exists (GET, HEAD, OPTIONS request).|
 
 ### Request.Request()
