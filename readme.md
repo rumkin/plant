@@ -12,6 +12,25 @@ Plant is WebAPI (WebAPI) standards based web server powered by ES2017, created w
 modular architecture and functional design patterns in mind. It uses cascades
 and contexts to be modular, pure and less coupled.
 
+```javascript
+const createServer = require('@plant/http');
+const Plant = require('@plant/plant');
+const Router = require('@plant/router');
+
+const plant = new Plant()
+const router = new Router()
+
+router.get('/greet', async function({res}) {
+    res.body = 'Hello World'
+})
+
+plant.use(router)
+
+// Build request handler
+createServer(plant)
+.listen(8080);
+```
+
 ## [Plant HTTP](packages/http) `@plant/http`
 
 [NPM](https://npmjs.com/package/@plant/http) |
