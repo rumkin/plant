@@ -1,6 +1,6 @@
 {
   "name": "@plant/flow",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Async flow library for Plant server",
   "main": "./src/index.js",
   "devDependencies": {
@@ -10,7 +10,7 @@
     "allow-publish-tag": "^1.0.1"
   },
   "scripts": {
-    "prepublishOnly": "allow-publish-tag next && npm test",
+    "prepublishOnly": "npm test",
     "test": "testup run test/**.spec.js"
   }
 }
