@@ -1,4 +1,6 @@
-![Plant logo](docs/cover.png)
+<p align="center">
+    <img alt="Plant logo" src="docs/cover.png" width="300"/>
+</p>
 
 # [Plant](packages/plant) `@plant/plant`
 
