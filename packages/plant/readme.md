@@ -182,7 +182,7 @@ plant.use('/a', ({res}) => res.text('n param not passed'));
 
 ### Plant.or()
 ```text
-(...handlers: Handler) -> Router
+(...handlers: Handler) -> Plant
 ```
 
 Add handlers in parallel. Plant will iterate over handler until response body is set.
@@ -216,34 +216,6 @@ function add({i = 0, ctx}, next) {
 plant.and(add, add, add, ({i, res}) => res.text(i)); // i is 3
 ```
 
-### Plant.router()
-
-```text
-(route:Router, routes:RouterOptions) -> Plant
-```
-
-Route method initialize new router with `params` and add it into cascade.
-
-##### Example
-
-```javascript
-// Few useful handlers
-function handleGetUser({req, res}) { /* get user and return response */ }
-function handleUpdateUser({req, res}) {/* update user and return response */}
-
-// Configure with routes mapping.
-plant.router({
-    'get /users/:id': handleGetUser,
-    'put /users/:id': handleUpdateUser,
-});
-
-// Configure with factory function
-plant.router((router) => {
-    router.get('/users/:id', handleGetUser);
-    router.put('/users/:id', handleUpdateUser);
-});
-```
-
 ### Plant.handler()
 
 ```text
@@ -264,6 +236,8 @@ http.createServer(plant.handler())
 This type specify cascadable function or object which has method to create such function.
 
 ```javascript
+const Router = require('@plant/router');
+
 const router = new Router();
 router.get('/', ({res}) => {
     res.body = 'Hello';
