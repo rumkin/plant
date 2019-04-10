@@ -16,7 +16,7 @@ async function errorTrap(ctx, next) {
 
 // TODO Rewrite tests.
 
-describe('Plant()', function() {
+describe('Server()', function() {
   it('Should serve requests', function() {
     const handler = Plant.handler(
       errorTrap,

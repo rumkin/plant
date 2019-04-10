@@ -8,7 +8,7 @@ const escapeRegExp = require('lodash.escaperegexp')
  * @return {function(String):Boolean} Type matcher function.
  */
 function getMimeMatcher(types) {
-  const matchers = types.map((type) => {
+  const matchers = types.map(function(type) {
     if (typeof type === 'string') {
       return stringMatcher(type)
     }

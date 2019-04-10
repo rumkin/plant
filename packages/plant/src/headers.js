@@ -38,7 +38,9 @@ class Headers {
       initials = Object.entries(initials)
     }
 
-    this._headers = new Map(initials.map(([key, value]) => ([key, [value]])))
+    this._headers = new Map(initials.map(function([key, value]) {
+      return ([key, [value]])
+    }))
     this._mode = mode
 
     if (mode !== MODE_NONE) {
@@ -167,7 +169,9 @@ class Headers {
    */
   values() {
     return Array.from(this._headers.values())
-    .map((value) => value.join(', '))
+    .map(function (value) {
+      return value.join(', ')
+    })
     [Symbol.iterator]()
   }
 
@@ -178,7 +182,9 @@ class Headers {
    */
   entries() {
     return Array.from(this._headers.entries())
-    .map(([name, value]) => [name, value.join(', ')])
+    .map(function ([name, value]) {
+      return [name, value.join(', ')]
+    })
     [Symbol.iterator]()
   }
 
@@ -190,7 +196,7 @@ class Headers {
    * @returns {void} Returns no value.
    */
   forEach(fn, thisArg = this) {
-    this._headers.forEach((values, key) => {
+    this._headers.forEach(function(values, key) {
       fn(values.join(', '), key, thisArg)
     }, thisArg)
   }

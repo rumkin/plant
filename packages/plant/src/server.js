@@ -3,14 +3,13 @@
  * @description Implementation of Plant Server interface.
  */
 
+const {and, or, getHandler} = require('@plant/flow')
 const isPlainObject = require('lodash.isplainobject')
-const isString = require('lodash.isstring')
 
 const cookieHandler = require('./handlers/cookie-handler')
-const {and, or, getHandler} = require('./server-flow')
+
 const Headers = require('./headers')
 const Peer = require('./peer')
-const Router = require('./router')
 const Response = require('./response')
 const Request = require('./request')
 const Socket = require('./socket')
@@ -106,7 +105,7 @@ class Server {
    */
   static handler(...args) {
     return this.create(...args)
-    .handler()
+    .getHandler()
   }
 
   /**
@@ -129,24 +128,8 @@ class Server {
   use(...args) {
     let handlers
 
-    if (isString(args[0])) {
-      const route = args[0]
-
-      handlers = [
-        or(
-          and(
-            Router.getSubrouteMatcher(route),
-            ...args.slice(1).map(getHandler),
-          ),
-        ),
-      ]
-    }
-    else if (args.length > 1) {
-      handlers = [or(
-        and(
-          ...args.map(getHandler)
-        )
-      )]
+    if (args.length > 1) {
+      handlers = [or(and(...args))]
     }
     else {
       handlers = args.map(getHandler)
@@ -185,49 +168,30 @@ class Server {
   }
 
   /**
-   * Add request handling router.
-   *
-   * @param  {Object|Router} routes Request handling router.
-   * @return {Server} Returns `this`.
-   */
-  router(routes) {
-    return this.use(Router.handler(routes))
-  }
-
-  /**
    * Create native http request handler from Server
    *
    * @returns {function(http.IncomingMessage,http.ServerResponse)} Native http request handler function
    */
-  handler() {
+  getHandler() {
     const context = {...this.context}
-    const cascade = and(
-      (ctx, next) => {
+    return and(
+      function (ctx, next) {
         if (! ctx.socket) {
           ctx.socket = new Socket()
         }
-        ctx.route = Router.Route.fromRequest(ctx.req)
         return next({...context, ...ctx})
       },
       cookieHandler,
       ...this.handlers,
     )
-
-    return cascade
   }
 }
 
 module.exports = Server
 
-// Expose cascade server flow controls
-Server.and = and
-Server.or = or
-Server.getHandler = getHandler
-
 // Expose core classes
 Server.Headers = Headers
 Server.Peer = Peer
-Server.Router = Router
 Server.Request = Request
 Server.Response = Response
 Server.Socket = Socket

@@ -51,11 +51,15 @@ function parseEntity(entity) {
  * @access private
  */
 function getParams(params) {
-  return params.map((param) => param.split('='))
-  .reduce((result, [name, value]) => ({
-    ...result,
-    [name]: value,
-  }), {})
+  return params.map(function (param) {
+    return param.split('=')
+  })
+  .reduce(function (result, [name, value]) {
+    return {
+      ...result,
+      [name]: value,
+    }
+  }, {})
 }
 
 exports.parseHeader = parseHeader

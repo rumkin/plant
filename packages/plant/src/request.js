@@ -101,8 +101,12 @@ class Request {
   accept(types) {
     const _types = normalizeTypes(types)
     const cTypes = parseHeader(this.headers.get('accept'))
-    .sort((a, b) => (a.params.q - b.params.q))
-    .map(({type}) => type)
+    .sort(function (a, b) {
+      return (a.params.q - b.params.q)
+    })
+    .map(function ({type}) {
+      return type
+    })
 
     for (const cType of cTypes) {
       for (const {value, matcher} of _types) {

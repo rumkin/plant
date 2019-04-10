@@ -15,10 +15,12 @@ const cookie = require('cookie')
 function addCookieSupport(req, res) {
   if (req.headers.has('cookie')) {
     req.cookies = req.headers.raw('cookie')
-    .reduce((all, header) => ({
-      ...all,
-      ...cookie.parse(header),
-    }), {})
+    .reduce(function (all, header) {
+      return {
+        ...all,
+        ...cookie.parse(header),
+      }
+    }, {})
     req.registeredCookies = Object.getOwnPropertyNames(req.cookies)
   }
   else {
@@ -76,9 +78,9 @@ function responseClearCookie(name, options) {
  * @return {Response} Returns `this`.
  */
 function responseClearCookies(options) {
-  this.registeredCookies.forEach((cookieName) => {
+  this.registeredCookies.forEach(function (cookieName) {
     this.clearCookie(cookieName, options)
-  })
+  }, this)
 
   return this
 }
