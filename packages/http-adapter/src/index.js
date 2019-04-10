@@ -3,6 +3,7 @@
  * @description Implementation of Plant Server interface.
  */
 
+const {and} = require('@plant/flow')
 const {
   Peer,
   Response,
@@ -10,7 +11,6 @@ const {
   Headers,
   Socket,
   URI,
-  and,
 } = require('@plant/plant')
 const streams = require('web-streams-polyfill/ponyfill')
 const {URL} = require('url')

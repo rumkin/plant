@@ -240,56 +240,6 @@ describe('HttpAdapter()', function() {
     .then((result) => should(result).be.equal(null))
   })
 
-  it('Should use or handler', function() {
-    const server = createServer(Plant.create(
-      errorTrap,
-      or(
-        async function() {},
-        async function() {},
-        async function({res}) {
-          res.text('last')
-        }
-      )
-    ))
-
-    server.listen()
-
-    after(function() {
-      server.close()
-    })
-
-    return server.fetch('/')
-    .then((res) => res.text())
-    .then((result) => should(result).be.equal('last'))
-  })
-
-  it('Should use `and` handler', function() {
-    const server = createServer(Plant.create(
-      errorTrap,
-      and(
-        async function(ctx, next) {
-          await next()
-        },
-        async function(ctx, next) {
-          await next()
-        },
-        async function({res}) {
-          res.text('last')
-        }
-      )
-    ))
-
-    server.listen()
-
-    after(function() {
-      server.close()
-    })
-
-    return server.fetch('/')
-    .then((res) => res.text())
-    .then((result) => should(result).be.equal('last'))
-  })
-
   it('Should make turns with use(h1, h2)', function() {
     const plant = Plant.new()
 
@@ -326,8 +276,8 @@ describe('HttpAdapter()', function() {
     const plant = Plant.new()
     .use(errorTrap)
     .use(
-      async function({route}, next) {
-        if (route.path === '/turn') {
+      async function({req}, next) {
+        if (req.url.pathname === '/turn') {
           return await next()
         }
       },

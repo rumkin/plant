@@ -1,6 +1,6 @@
 {
   "name": "@plant/http-adapter",
-  "version": "0.2.0-beta",
+  "version": "0.2.0-rc1",
   "description": "Plant web server node.js HTTP adapter",
   "main": "src/index.js",
   "scripts": {
@@ -27,7 +27,8 @@
     "web-streams-polyfill": "^2.0.2"
   },
   "peerDependencies": {
-    "@plant/plant": "2.x"
+    "@plant/flow": "^1.0.0",
+    "@plant/plant": "^2.0.0"
   },
   "directories": {
     "test": "test"
