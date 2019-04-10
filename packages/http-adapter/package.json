@@ -7,13 +7,14 @@
     "test": "mocha test/index.js",
     "lint": "npm run lint:js src/**.js",
     "lint:js": "eslint",
-    "prebulish": "lint && npm docs",
+    "prebulish": "allow-publish-tag next && lint && npm docs",
     "jsdoc": "jsdoc --configure .jsdoc.json --verbose",
     "docs": "npm run jsdoc && rm -rf docs && mv tmp/docs/*/*/* docs && rm -rf tmp/docs"
   },
   "license": "MIT",
   "devDependencies": {
     "@plant/plant": "^1.0.0-a.4",
+    "allow-publish-tag": "^1.0.1",
     "eslint": "^4.0.0",
     "istanbul": "^0.4.5",
     "jsdoc": "^3.5.5",
