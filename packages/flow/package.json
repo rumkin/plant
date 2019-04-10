@@ -1,0 +1,16 @@
+{
+  "name": "@plant/flow",
+  "version": "1.0.0",
+  "description": "Async flow library for Plant server",
+  "main": "./src/index.js",
+  "devDependencies": {
+    "@testup/cli": "^0.3.0",
+    "@testup/console-reporter": "^0.1.1",
+    "@testup/core": "^0.1.2",
+    "allow-publish-tag": "^1.0.1"
+  },
+  "scripts": {
+    "prepublishOnly": "allow-publish-tag next && npm test",
+    "test": "testup run test/**.spec.js"
+  }
+}
