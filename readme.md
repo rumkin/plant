@@ -6,7 +6,7 @@
 ![](https://img.shields.io/badge/size-71KiB-blue.svg?style=flat-square)
 
 [NPM](https://npmjs.com/package/@plant/plant) ·
-[Package](packages/plant) · [Readme](packages/plant/readme.md)
+[Source](packages/plant) · [Readme](packages/plant/readme.md)
 
 Plant is WebAPI (WebAPI) standards based web server powered by ES2017, created with
 modular architecture and functional design patterns in mind. It uses cascades
@@ -31,24 +31,31 @@ createServer(plant)
 .listen(8080);
 ```
 
+## [Plant Router](packages/router) `@plant/router`
+
+[NPM](https://npmjs.com/package/@plant/router) ·
+[Source](packages/router) · [Readme](packages/router/readme.md)
+
+Plant standalone router.
+
 ## [Plant HTTP](packages/http) `@plant/http`
 
 [NPM](https://npmjs.com/package/@plant/http) ·
-[Package](packages/http) · [Readme](packages/http/readme.md)
+[Source](packages/http) · [Readme](packages/http/readme.md)
 
 Plant adapter for native node.js http module. It creates server listener from plant instance.
 
 ## [Plant HTTPS](packages/https) `@plant/https`
 
 [NPM](https://npmjs.com/package/@plant/https) ·
-[Package](packages/https) · [Readme](packages/https/readme.md)
+[Source](packages/https) · [Readme](packages/https/readme.md)
 
 Plant adapter for native node.js https module. It creates server listener from plant instance and https options.
 
 ## [Plant HTTP Adapter](packages/http-adapter) `@plant/http-adapter`
 
 [NPM](https://npmjs.com/package/@plant/http-adapter) ·
-[Package](packages/http-adapter) · [Readme](packages/http-adapter/readme.md)
+[Source](packages/http-adapter) · [Readme](packages/http-adapter/readme.md)
 
 This handler connect Plant and native Node's HTTP server. Modules @plant/http and @plant/https are using it under the hood.
 
