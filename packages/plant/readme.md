@@ -67,7 +67,7 @@ const Plant = require('@plant/plant');
 const plant = new Plant();
 
 // Send text response
-plant.use('/greet', async function({res}) {
+plant.use(async function({res}) {
     res.body = 'Hello World';
 });
 
