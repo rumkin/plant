@@ -1,3 +1,5 @@
+[PLant logo](docs/cover.png)
+
 # [Plant](packages/plant) `@plant/plant`
 
 [![npm](https://img.shields.io/npm/v/@plant/plant.svg?style=flat-square)](https://npmjs.com/package/@plant/plant)
