@@ -10,7 +10,7 @@
 [NPM](https://npmjs.com/package/@plant/plant) ·
 [Source](packages/plant) · [Readme](packages/plant/readme.md)
 
-Plant is WebAPI (WebAPI) standards based web server powered by ES2017, created with
+Plant is WebAPI standards based web server powered by ES2017, created with
 modular architecture and functional design patterns in mind. It uses cascades
 and contexts to be modular, pure and less coupled.
 
