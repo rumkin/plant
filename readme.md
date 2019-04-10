@@ -1,4 +1,4 @@
-[PLant logo](docs/cover.png)
+![Plant logo](docs/cover.png)
 
 # [Plant](packages/plant) `@plant/plant`
 
