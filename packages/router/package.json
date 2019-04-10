@@ -10,6 +10,7 @@
     "path-to-regexp": "^1.7.0"
   },
   "devDependencies": {
+    "allow-publish-tag": "^1.0.1",
     "mocha": "^6.1.2",
     "should": "^13.2.3"
   },
