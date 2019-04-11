@@ -175,11 +175,12 @@ class Server {
   getHandler() {
     const context = {...this.context}
     return and(
-      function (ctx, next) {
+      async function (ctx, next) {
         if (! ctx.socket) {
           ctx.socket = new Socket()
         }
-        return next({...context, ...ctx})
+        await next({...context, ...ctx})
+        return ctx
       },
       cookieHandler,
       ...this.handlers,

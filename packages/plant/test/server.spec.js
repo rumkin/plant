@@ -14,8 +14,6 @@ async function errorTrap(ctx, next) {
   }
 }
 
-// TODO Rewrite tests.
-
 describe('Server()', function() {
   it('Should serve requests', function() {
     const handler = Plant.handler(
@@ -40,6 +38,22 @@ describe('Server()', function() {
     .then(() => {
       should(res.headers.get('content-type')).be.equal('text/plain')
       should(res.body).be.equal('/index.html')
+    })
+  })
+
+  it('Should return initial context', () => {
+    const plant = new Plant()
+
+    const req = new Request({
+      url: new URL('http://localhost/index.html'),
+    })
+
+    const res = new Response()
+
+    return plant.getHandler()({req, res})
+    .then((result) => {
+      should(result.req).be.equal(req)
+      should(result.res).be.equal(res)
     })
   })
 })
