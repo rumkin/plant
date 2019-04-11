@@ -256,24 +256,40 @@ class Router {
 function getRouteMatcher(method, routePath) {
   const matcher = createParamsMatcher(routePath)
 
-  return async function(ctx, next){
-    const {req, route} = ctx
+  return async function(ctx, next) {
+    let path
+    let basePath
+    let params
+
+    if (! ctx.route) {
+      path = ctx.req.url.pathname
+      basePath = '/'
+      params = {}
+    }
+    else {
+      const {route} = ctx
+      path = route.path
+      basePath = route.basePath
+      params = route.params
+    }
+
+    const {req} = ctx
 
     if (req.method !== method && method !== 'all') {
       return
     }
-    const params = matcher(route.path + '/')
+    const nextParams = matcher(path + '/')
 
-    if (! params) {
+    if (! nextParams) {
       return
     }
 
     const subRoute = new RouteState({
-      path: route.path,
-      basePath: route.basePath,
+      path,
+      basePath,
       params: {
-        ...route.params,
         ...params,
+        ...nextParams,
       },
     })
 
@@ -292,22 +308,36 @@ function getRouteMatcher(method, routePath) {
  */
 function getSubrouteMatcher(routePath) {
   const matcher = createParamsMatcher(routePath.replace(/\/*$/, '/*'))
-  // const matcher = createParamsMatcher(routePath)
 
   return async function(ctx, next){
-    const {route} = ctx
-    const params = matcher(route.path)
+    let path
+    let basePath
+    let params
 
-    if (! params) {
+    if (! ctx.route) {
+      path = ctx.req.url.pathname
+      basePath = '/'
+      params = {}
+    }
+    else {
+      const {route} = ctx
+      path = route.path
+      basePath = route.basePath
+      params = route.params
+    }
+
+    const nextParams = matcher(path)
+
+    if (! nextParams) {
       return
     }
 
     const subRoute = new RouteState({
-      path: '/' + params[0],
-      basePath: route.basePath + route.path.slice(1, -params[0].length),
+      path: '/' + nextParams[0],
+      basePath: basePath + path.slice(1, -nextParams[0].length),
       params: {
-        ...route.params,
         ...params,
+        ...nextParams,
       },
     })
 

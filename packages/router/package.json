@@ -1,6 +1,6 @@
 {
   "name": "@plant/router",
-  "version": "1.0.0-rc1",
+  "version": "1.0.0-rc2",
   "description": "Router for plant server",
   "main": "src/index.js",
   "dependencies": {

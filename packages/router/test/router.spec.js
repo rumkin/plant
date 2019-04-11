@@ -5,7 +5,6 @@ const {and} = require('@plant/flow')
 const {Request, Response, Socket, Peer, URI} = require('@plant/plant')
 
 const Router = require('..')
-const {RouteState} = Router
 
 function createContext(url) {
   const socket = new Socket()
@@ -14,7 +13,6 @@ function createContext(url) {
     url: new URL(url),
   })
 
-  const route = RouteState.fromRequest(req)
   const peer = new Peer({
     uri: new URI({
       protocol: 'process:',
@@ -22,7 +20,7 @@ function createContext(url) {
     }),
   })
 
-  return {req, route, socket, peer}
+  return {req, socket, peer}
 }
 
 describe('Router()', function(){
