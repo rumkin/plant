@@ -280,11 +280,9 @@ new Peer({
     url: URL,
     method: String,
     headers: Headers,
-    peer: String,
     domains: String[],
-    path: String,
-    basePath: String,
     body: ReadableStream|null,
+    buffer: ArrayBuffer|null,
 }
 ```
 
@@ -293,9 +291,9 @@ new Peer({
 |url| Url is a WebAPI [URL](https://nodejs.org/dist/latest-v9.x/docs/api/url.html#url_class_url) |
 |method| HTTP method |
 |headers| WebAPI Headers object |
-|peer| Request peer URI. Usually it is an client IP address |
 |domains| Domains name separated by '.' in reverse order |
 |body| Request body readable stream. It is `null` by default if body not exists (GET, HEAD, OPTIONS request).|
+|buffer| If body has been read already this property will contain a buffer |
 
 ### Request.Request()
 ```text
@@ -308,10 +306,9 @@ be in immutable mode.
 #### RequestOptions
 ```text
 {
-    method: String='get',
-    url: String|URL,
+    method: String='GET',
+    url: URL,
     headers: Object|Headers={},
-    peer: String,
     body: ReadableStream|Null=null,
 }
 ```
@@ -354,13 +351,13 @@ switch(req.type(['json', 'multipart'])) {
 ```
 
 Check if accept header contains one of the passed `types`. If so returns
-matching value either returns `null`.
+matching value otherwise returns `null`.
 
 ##### Example
 ```javascript
 switch(req.accept(['json', 'text'])) {
     case 'json':
-        res.json({value: 3.14159});
+        res.json({result: 3.14159});
         break;
     case 'text':
         res.text('3.14159');
@@ -370,22 +367,60 @@ switch(req.accept(['json', 'text'])) {
 }
 ```
 
+### `Request.arrayBuffer()`
+```
+() -> Promise<Uint8Array,Error>
+```
+
+Read request body and returns it as an Uint8Array.
+
+### `Request.blob()`
+```
+() -> Promise<Blob,Error>
+```
+> ⚠️ Not implemented yet
+
+Read request body and returns it as a [Blob](https://developer.mozilla.org/en-US/docs/Web/API/Body/blob).
+
+### `Request.formData()`
+```
+() -> Promise<FormData,Error>
+```
+> ⚠️ Not implemented yet
+
+Read request body and returns it as a [FormData](https://developer.mozilla.org/en-US/docs/Web/API/FormData).
+
+### `Request.json()`
+```
+() -> Promise<*,Error>
+```
+
+Read request body and parse it as JSON.
+
+### `Request.text()`
+```
+() -> Promise<string,Error>
+```
+
+Read request body and returns it as a string.
+
+
 ### Response Type
 ```text
 {
     ok: Boolean,
     hasBody: Boolean,
-    statusCode: Number,
+    status: Number,
     headers: Headers,
-    body: Blob|BufferSource|ReadableStream|String|Null,
+    body: Blob|ArrayBuffer|ReadableStream|String|Null,
 }
 ```
 
 |Property|Description|
 |:-------|:----------|
-|ok| True if statusCode is in range of 200 and 299|
+|ok| True if status is in range of 200 and 299|
 |hasBody| True if body is not null. Specify is response should be sent|
-|statusCode| Status code. `200` By default|
+|status| Status code. `200` By default|
 |headers| Response headers as WebAPI Headers object|
 |body| Response body. Default is `null`|
 
@@ -400,23 +435,23 @@ have mode 'none'.
 #### ResponseOptions
 ```text
 {
-    statusCode: Number=200,
+    status: Number=200,
     headers: Headers|Object={},
-    body: Buffer|Stream|String|Null=null,
+    body: Buffer|ReadableStream|String|Null=null,
 }
 ```
 
-### Response.status()
+### Response.setStatus()
 ```text
-(statusCode:number) -> Response
+(status:number) -> Response
 ```
 
-Set response `statusCode` property.
+Set response `status` property.
 
 ##### Example
 
 ```javascript
-res.status(200)
+res.setStatus(200)
 .send('Hello');
 ```
 
@@ -454,6 +489,10 @@ res.json({number: 3.14159});
 ```
 
 Send text as response. Set `text/plain` content type.
+
+### Response.formData()
+
+> ⚠️ Not implemented yet.
 
 ##### Example
 
@@ -651,8 +690,8 @@ async function errorHandler({req, res}, next) {
 ## URI Type
 
 URI is an object that represents URI in plant. While URL requires protocols
-to be registered by IANA WebAPI URL wouldn't parse strings with custom scheme like
-`tcp://127.0.0.1:12345/` and `127.0.0.1:12345` became a pathname.
+to be registered by IANA, WebAPI URL wouldn't parse strings with custom scheme like
+`tcp://127.0.0.1:12345/` (`127.0.0.1:12345` became a part of pathname).
 Thus we use URI, which doesn't mean to be an URL, but presents network
 identifier correct. Plant doesn't provide parser and URI should be generated
 manually.
@@ -668,6 +707,7 @@ new URI({
 })
 ```
 
+This implementation will be enhanced with parser in the next versions.
 ---
 
 

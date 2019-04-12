@@ -3,7 +3,15 @@
  * @classdesc This is a URI object representation
  */
 class URI {
-  constructor({
+  constructor(uri) {
+    if (typeof uri === 'string') {
+      throw new Error('URI parsing not implemented yet')
+    }
+
+    this.setParams(uri)
+  }
+
+  setParams({
     protocol = '',
     username = '',
     password = '',
@@ -21,6 +29,8 @@ class URI {
     this.pathname = pathname
     this.query = query
     this.fragment = fragment
+
+    return this
   }
 
   get host() {

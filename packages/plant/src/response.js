@@ -12,14 +12,14 @@ const Headers = require('./headers')
  * @class
  * @classdesc Plant Response
  *
- * @prop {Number} statusCode - Response status code
+ * @prop {Number} status - Response status code
  * @prop {Headers} headers - Response headers
  * @prop {Null|Buffer|String|Readable} body - Response body.
  */
 class Response {
   /**
    * @typedef {Object} ResponseOptions Options for Response constructor.
-   * @param {Number} statusCode=200 Response status code.
+   * @param {Number} status=200 Response status code.
    * @param {Headers|Object} [headers] Response headers.
    * @param {String|Buffer|Readable|Null} body=null Response body.
    */
@@ -28,8 +28,8 @@ class Response {
    * @throws {Error} If passed headers has immutable mode.
    * @constructor
    */
-  constructor({statusCode = 200, headers = new Headers(), body = null} = {}) {
-    this.statusCode = statusCode
+  constructor({status = 200, headers = new Headers(), body = null} = {}) {
+    this.status = status
 
     if (isPlainObject(headers)) {
       this.headers = new Headers(headers)
@@ -51,7 +51,7 @@ class Response {
    * @type {Boolean} True when status code is in success range.
    */
   get ok() {
-    return this.statusCode > 199 && this.statusCode < 300
+    return this.status > 199 && this.status < 300
   }
 
   /**
@@ -64,13 +64,13 @@ class Response {
   }
 
   /**
-   * status - Set response status
+   * setStatus - Set response status
    *
    * @param  {Number} status Response status code
    * @return {Response} Return `this`.
    */
-  status(status) {
-    this.statusCode = status
+  setStatus(status) {
+    this.status = status
     return this
   }
 
@@ -163,7 +163,7 @@ class Response {
    * @return {Response} returns `this`.
    */
   redirect(url) {
-    this.statusCode = 302
+    this.status = 302
     this.headers.set('location', url)
     this.body = ''
 

@@ -44,7 +44,6 @@ class Request {
     headers = {},
     url,
     body = null,
-    data = null,
   }) {
     this.url = url
     this.method = method.toUpperCase()
@@ -60,7 +59,8 @@ class Request {
     }
 
     this.body = body
-    this.data = data
+    this.bodyUsed = false
+    this.buffer = null
   }
 
   /**
@@ -121,12 +121,24 @@ class Request {
 
   async text() {
     const contentType = this.headers.get('content-type')
-    let encoding
+    let encoding = 'utf8'
     if (contentType) {
-      // get encoding...
+      const charset = charsetFromContentType(contentType)
+
+      if (charset) {
+        encoding = charset
+      }
     }
-    else {
-      encoding = 'utf8'
+
+    const buffer = await this.arrayBuffer()
+    const decoder = new TextDecoder(encoding)
+
+    return decoder.decode(buffer).toString()
+  }
+
+  async arrayBuffer() {
+    if (this.bodyUsed) {
+      return this.buffer
     }
 
     const result = []
@@ -139,10 +151,10 @@ class Request {
       result.push(value)
     }
     reader.releaseLock()
+    this.buffer = concatUint8Arrays(result)
+    this.bodyUsed = true
 
-    const decoder = new TextDecoder(encoding)
-
-    return decoder.decode(concatUint8Arrays(result)).toString()
+    return this.buffer
   }
 
   json() {
@@ -150,14 +162,19 @@ class Request {
     .then(JSON.parse)
   }
 
+  // blob() {}
+
+  // formData() {}
+
   clone() {
     const copy = new this.constructor({
       method: this.method,
       url: this.url,
       headers: this.headers,
       body: this.body,
-      data: this.data,
     })
+
+    copy.buffer = this.buffer
 
     return copy
   }
@@ -210,6 +227,22 @@ function concatUint8Arrays(arrays) {
     }
   }
   return result
+}
+
+function charsetFromContentType(contentType) {
+  const parts = contentType.split(/;\s+/)
+
+  if (parts.length < 2) {
+    return null
+  }
+
+  const charset = parts[1]
+
+  if (! charset.startsWith('charset=')) {
+    return null
+  }
+
+  return charset.slice(8).trim()
 }
 
 module.exports = Request
