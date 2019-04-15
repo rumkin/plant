@@ -54,8 +54,7 @@ plant.use(({res}) => {
     res.body = 'Hello, World!'
 })
 
-createServer(plant)
-.listen(8080);
+createServer(plant).listen(8080)
 ```
 
 ## [Plant HTTPS](packages/https) `@plant/https`
@@ -73,7 +72,7 @@ const Plant = require('@plant/plant');
 const plant = new Plant();
 plant.use(({res, ssl}) => {
     const peerCert = ssl.getPeerCertificate()
-    
+
     res.body = 'Hello, World!'
 })
 
@@ -81,7 +80,7 @@ createServer(plant, {
     key: Buffer.from('...'),
     cert: Buffer.from('...'),
 })
-.listen(8080);
+.listen(8080)
 ```
 
 ## [Plant HTTP Adapter](packages/http-adapter) `@plant/http-adapter`
