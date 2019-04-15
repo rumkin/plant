@@ -17,7 +17,6 @@ modular architecture and functional design patterns in mind. It uses cascades
 and contexts to be modular, pure and less coupled.
 
 ```javascript
-const createServer = require('@plant/http');
 const Plant = require('@plant/plant');
 const Router = require('@plant/router');
 
@@ -29,10 +28,6 @@ router.get('/greet', async function({res}) {
 })
 
 plant.use(router)
-
-// Build request handler
-createServer(plant)
-.listen(8080);
 ```
 
 ## [Plant Router](packages/router) `@plant/router`
@@ -49,12 +44,45 @@ Plant standalone router.
 
 Plant adapter for native node.js http module. It creates server listener from plant instance.
 
+```javascript
+// Build request handler
+const createServer = require('@plant/http');
+const Plant = require('@plant/plant');
+
+const plant = new Plant();
+plant.use(({res}) => {
+    res.body = 'Hello, World!'
+})
+
+createServer(plant)
+.listen(8080);
+```
+
 ## [Plant HTTPS](packages/https) `@plant/https`
 
 [NPM](https://npmjs.com/package/@plant/https) ·
 [Source](packages/https) · [Readme](packages/https/readme.md)
 
 Plant adapter for native node.js https module. It creates server listener from plant instance and https options.
+
+```javascript
+// Build request handler
+const createServer = require('@plant/https');
+const Plant = require('@plant/plant');
+
+const plant = new Plant();
+plant.use(({res, ssl}) => {
+    const peerCert = ssl.getPeerCertificate()
+    
+    res.body = 'Hello, World!'
+})
+
+createServer(plant, {
+    key: Buffer.from('...'),
+    cert: Buffer.from('...'),
+})
+.listen(8080);
+```
 
 ## [Plant HTTP Adapter](packages/http-adapter) `@plant/http-adapter`
 
