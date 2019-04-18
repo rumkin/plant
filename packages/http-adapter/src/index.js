@@ -180,7 +180,7 @@ function handleRequest(httpReq, httpRes, next) {
     socket.destroy()
 
     if (res.body === null) {
-      res.status(404).text('Nothing found')
+      res.setStatus(404).text('Nothing found')
     }
 
     httpRes.statusCode = res.statusCode
@@ -282,8 +282,10 @@ function handleRequestError(req, res, error) {
   // Write error to res.
   if (! res.headersSent) {
     res.statusCode = 500
+    const message = 'Internal server error:\n' + error.message
     res.setHeader('content-type', 'text/plain')
-    res.write('Internal server error:\n' + error.stack)
+    res.setHeader('content-length', message.length)
+    res.write(message)
   }
   else {
     this.emit('error', error)
