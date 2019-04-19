@@ -13,6 +13,7 @@ const Headers = require('./headers')
  * @classdesc Plant Response
  *
  * @prop {Number} status - Response status code
+ * @prop {URL} url - Response URL
  * @prop {Headers} headers - Response headers
  * @prop {Null|Buffer|String|Readable} body - Response body.
  */
@@ -20,6 +21,7 @@ class Response {
   /**
    * @typedef {Object} ResponseOptions Options for Response constructor.
    * @param {Number} status=200 Response status code.
+   * @param {URL} url Response url.
    * @param {Headers|Object} [headers] Response headers.
    * @param {String|Buffer|Readable|Null} body=null Response body.
    */
@@ -28,7 +30,12 @@ class Response {
    * @throws {Error} If passed headers has immutable mode.
    * @constructor
    */
-  constructor({status = 200, headers = new Headers(), body = null} = {}) {
+  constructor({
+    url,
+    status = 200,
+    headers = new Headers(),
+    body = null,
+  } = {}) {
     this.status = status
 
     if (isPlainObject(headers)) {
@@ -41,6 +48,8 @@ class Response {
       this.headers = headers
     }
 
+    this._url = url
+
     this.body = body
   }
 
@@ -48,6 +57,7 @@ class Response {
    * Specify whether response is successful and returns status code in
    * range of 200 and 299.
    *
+   * @readonly
    * @type {Boolean} True when status code is in success range.
    */
   get ok() {
@@ -55,8 +65,19 @@ class Response {
   }
 
   /**
+   * Response URL property.
+   *
+   * @readonly
+   * @return {URL} instance of URL.
+   */
+  get url() {
+    return this._url
+  }
+
+  /**
    * Specify whether body is set.
    *
+   * @readonly
    * @type {Boolean} True if body is not null.
    */
   get hasBody() {

@@ -185,6 +185,12 @@ class Server {
           if (options instanceof Request) {
             req = options
           }
+          else if (options instanceof URL) {
+            req = new Request({
+              url: options,
+              parent: ctx.req,
+            })
+          }
           else {
             req = new Request({
               ...options,
@@ -192,7 +198,10 @@ class Server {
             })
           }
 
-          const res = new Response()
+          const res = new Response({
+            url: req.url,
+          })
+
           return {
             ctx: {},
             context(nextCtx) {

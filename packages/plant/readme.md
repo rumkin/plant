@@ -38,6 +38,7 @@ or event PostMessage.
     * [Response](#response-type).
     * [Headers](#headers-type).
     * [Socket](#socket-type).
+    * [Subrequest](#subrequest).
     * [URI](#uri-type).
 * [License](#license).
 
@@ -691,11 +692,11 @@ Push response to the client. If it's supported.
 
 ### subRequest()
 ```
-(request:Request|requestOptions) -> Subrequest
+(request:Request|URL|requestOptions) -> Subrequest
 ```
 
-Subrequest factory method. Receives request instance or request constructor
-arguments. Returns [Subrequest](#subrequest-type) type.
+Subrequest factory method. Receives request or URL instance or request constructor
+options. Returns [Subrequest](#subrequest-type) type.
 
 ### Subrequest Type
 
