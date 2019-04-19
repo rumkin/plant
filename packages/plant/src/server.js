@@ -173,18 +173,56 @@ class Server {
    * @returns {function(http.IncomingMessage,http.ServerResponse)} Native http request handler function
    */
   getHandler() {
-    const context = {...this.context}
-    return and(
+    const initialCtx = {...this.context}
+    const handler = and(
       async function (ctx, next) {
         if (! ctx.socket) {
           ctx.socket = new Socket()
         }
-        await next({...context, ...ctx})
+
+        ctx.subRequest = function(options) {
+          let req
+          if (options instanceof Request) {
+            req = options
+          }
+          else {
+            req = new Request({
+              ...options,
+              parent: ctx.req,
+            })
+          }
+
+          const res = new Response()
+          return {
+            ctx: {},
+            context(nextCtx) {
+              this.ctx = nextCtx
+              return this
+            },
+            send() {
+              return handler({
+                ...initialCtx,
+                ...this.ctx,
+                ...ctx,
+                req,
+                res,
+              })
+              .then(() => res)
+            },
+            push() {
+              return this.send()
+              .then((subRes) => ctx.socket.push(subRes))
+            },
+          }
+        }
+        await next({...initialCtx, ...ctx})
         return ctx
       },
       cookieHandler,
       ...this.handlers,
     )
+
+    return handler
   }
 }
 

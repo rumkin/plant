@@ -17,8 +17,7 @@ const Headers = require('./headers')
  * @prop {URL} url - WebAPI URL object.
  * @prop {Headers|Object.<String,String>} headers={} - Request headers.
  * @prop {ReadableStream|Null} body=null Request body.
- * @prop {Object} data={} Request data extracted from the body.
- * @prop {string} peer Request peer URI.
+ * @prop {Request} parent=null – Parent request.
  */
 
 /**
@@ -26,13 +25,11 @@ const Headers = require('./headers')
  * @classdesc Plant Request representation object
  *
  * @prop {String} method='GET' - Request method.
- * @prop {URL} url - Wahtwg URL object.
+ * @prop {URL} url - WebAPI URL object.
  * @prop {Headers} headers - WebAPI request headers (in immmutable mode).
  * @prop {String[]} domains - Full domains of server splitted by dot `.`.
- * @prop {String} path - Current processing pathname without basePath
- * @prop {String} basePath - Current base url pathname.
  * @prop {Buffer|Null} body - Request body as buffer. Null until received.
- * @prop {Object} data=null - Request data. It can be parsed JSON value or multipart data value.
+ * @prop {Request} parent=null – Parent request.
  */
 class Request {
   /**
@@ -44,6 +41,7 @@ class Request {
     headers = {},
     url,
     body = null,
+    parent = null,
   }) {
     this.url = url
     this.method = method.toUpperCase()
@@ -58,9 +56,14 @@ class Request {
       throw new TypeError('options.body is not a readable stream')
     }
 
+    if (parent !== null && parent instanceof Request === false) {
+      throw new TypeError('options.parent should be instance of Request or null')
+    }
+
     this.body = body
     this.bodyUsed = false
     this.buffer = null
+    this.parent = parent
   }
 
   /**

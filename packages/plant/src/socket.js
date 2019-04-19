@@ -15,14 +15,23 @@ function noop() {}
  */
 class Socket extends EventEmitter {
   /**
-   * @param  {Readable} connection Readable stream.
+   * @param  {Object} options Socket options.
+   * @param {Function} [options.onEnd] Callback triggered when end event is emitted.
+   * @param {function(Response):Promise<Response,Error>} [options.onPush] Callback triggered when push requested by server. It should be set  only when socket support pushes.
    * @constructor
    */
-  constructor({onEnd = noop} = {}) {
+  constructor({onEnd = noop, onPush = null} = {}) {
     super()
+
+    if (onPush !== null) {
+      if (typeof onPush !== 'function') {
+        throw new TypeError('options.onPush should be null or a function')
+      }
+    }
 
     this._isEnded = false
     this._end = onEnd
+    this._push = onPush
   }
 
   /**
@@ -32,6 +41,10 @@ class Socket extends EventEmitter {
    */
   get isEnded() {
     return this._isEnded
+  }
+
+  get canPush() {
+    return this._push !== null
   }
 
   /**
@@ -50,6 +63,23 @@ class Socket extends EventEmitter {
 
   destroy() {
     this.emit('destroy')
+  }
+
+  /**
+   * push - Push response to the client
+   *
+   * @param  {Response} response Plant Response instance
+   * @return {Promise<Response,Error>} Returns Promise resolved with sent response.
+   */
+  push(response) {
+    if (! this.canPush) {
+      throw new Error('This socket could not push')
+    }
+
+    return this._push(response)
+    .then(function() {
+      return response
+    })
   }
 }
 

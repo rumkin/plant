@@ -93,13 +93,13 @@ createServer(plant)
 
 ## Context
 
-The first handler always receives context with the properties:
+The default context has this properties:
 
 * `req` – [Request](#request-type) instance.
 * `res` – [Response](#response-type) instance.
 * `peer` – [Peer](#peer-type) representing other connection party.
 * `socket` – [Socket](#socket-type) is abstract socket, representing connection.
-* `route` – [Router.Route](#route-type) holds routing state.
+* `subRequest`– [subRequest()](#subrequest) method to send request to the server from handlers.
 
 ## Cascades explanation
 
@@ -294,6 +294,7 @@ new Peer({
 |domains| Domains name separated by '.' in reverse order |
 |body| Request body readable stream. It is `null` by default if body not exists (GET, HEAD, OPTIONS request).|
 |buffer| If body has been read already this property will contain a buffer |
+|parent   |**non-standard** Request that caused current request to be called. For example for http2 push |
 
 ### Request.Request()
 ```text
@@ -310,6 +311,7 @@ be in immutable mode.
     url: URL,
     headers: Object|Headers={},
     body: ReadableStream|Null=null,
+    parent: Request|Null = null,
 }
 ```
 
@@ -648,6 +650,13 @@ be sent.
 Constructor has one only option `onEnd` which is a function called when
 connection ended.
 
+### Socket.canPush
+```Text
+Boolean
+```
+
+Determine wether socket allows to push responses.
+
 ### Socket.isEnded
 ```text
 Boolean
@@ -662,6 +671,57 @@ sending and cascade from propagation.
 ```
 
 End connection. Call `onEnd` function passed into constructor.
+
+### Socket.destroy()
+```text
+() -> void
+```
+
+⚠️ It should not be called in handlers. This method is for low level request
+handlers only.
+
+Destroy connection and remove events listeners.
+
+### Socket.push()
+```
+(response: Response) -> Promise<void,Error>
+```
+
+Push response to the client. If it's supported.
+
+### subRequest()
+```
+(request:Request|requestOptions) -> Subrequest
+```
+
+Subrequest factory method. Receives request instance or request constructor
+arguments. Returns [Subrequest](#subrequest-type) type.
+
+### Subrequest Type
+
+### Subrequest#context()
+```
+(context: Object) -> Subrequest
+```
+
+Set initial context values for subrequest.
+
+### Subrequest#send()
+```
+() -> Promise<Response,Error>
+```
+
+Make a call and return response for specified request. Returns promise that
+fulfills with Response instance.
+
+### Subrequest#push()
+```
+() -> Promise<Response,Error>
+```
+
+Make a call and immediately push response for specified request. Returns promise that
+fulfills with Response instance.
+
 
 ## Error handling
 
