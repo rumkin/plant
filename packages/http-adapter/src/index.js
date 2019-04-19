@@ -35,8 +35,15 @@ function getResolvedNetworkProps(req) {
   const {remoteAddress, remotePort} = req.connection
   let address = remoteAddress
   let port = remotePort
-  let host = req.headers['host']
   let encrypted = req.connection.encrypted
+  let host
+
+  if (req.headers[':authority']) {
+    host = req.headers[':authority']
+  }
+  else if (req.headers['host']) {
+    host = req.headers['host']
+  }
 
   if (remoteAddress === '::ffff:127.0.0.1') {
     const xForwardedFor = req.headers['x-forwarded-for']
@@ -94,20 +101,82 @@ function createRequest(req, {host, encrypted}) {
   return inReq
 }
 
+async function writeResponseIntoStream(stream, response) {
+  const {body} = response
+
+  if (isObject(body)) {
+    if (typeof body.getReader === 'function') {
+      if (body.locked) {
+        throw new Error('Body is locked')
+      }
+
+      const reader = body.getReader()
+      while (true) {
+        const {value, done} = await reader.read()
+        // eslint-disable-next-line max-depth
+        if (done) {
+          break
+        }
+        stream.write(value)
+      }
+      stream.end()
+    }
+    else {
+      throw new TypeError('Invalid body type')
+    }
+  }
+  else {
+    stream.end(body)
+  }
+}
+
 /**
  * Creates Plant.Socket instance from http socket object. Bind abort event
  * listener to mark socket closed.
  *
  * @param  {Writable} connection Writable socket stream.
+ * @param  {Http2Stream} stream HTTP2 Stream of connection.
  * @return {Socket} New socket instance.
  */
-function createSocket(connection) {
+function createSocket(connection, stream) {
+  let onPush
+
+  if (stream && stream.pushAllowed) {
+    onPush = function(res) {
+      return new Promise(function(resolve, reject) {
+        const headers = {
+          ':path': res.url.pathname + res.url.search,
+        }
+
+        res.headers.forEach((function(value, header) {
+          headers[header] = value
+        }))
+
+        stream.pushStream(headers, function(err, pushStream) {
+          if (err) {
+            reject(err)
+          }
+          else {
+            pushStream.respond({
+              ':status': res.status,
+            })
+            writeResponseIntoStream(pushStream, res)
+            .then(resolve, reject)
+          }
+        })
+      })
+    }
+  }
+  else {
+    onPush = null
+  }
   const socket = new Socket({
     onEnd() {
       if (! connection.ended) {
         connection.end()
       }
     },
+    onPush,
   })
 
   let onEnd
@@ -120,11 +189,11 @@ function createSocket(connection) {
 
   unbind = () => {
     connection.removeListener('abort', onEnd)
-    connection.removeListener('end', onEnd)
+    connection.removeListener('close', onEnd)
   }
 
   connection.on('abort', onEnd)
-  connection.on('end', onEnd)
+  connection.on('close', onEnd)
   socket.on('destroy', unbind)
 
   return socket
@@ -136,8 +205,9 @@ function createSocket(connection) {
  * @param  {http.ServerResponse} res Nodejs http ServerResponse instance.
  * @return {Response}     Plant.Response instance.
  */
-function createResponse(res) {
+function createResponse(res, {url}) {
   return new Response({
+    url,
     status: res.statusCode,
     headers: new Headers(res.headers),
     body: null,
@@ -156,8 +226,8 @@ function createResponse(res) {
 function handleRequest(httpReq, httpRes, next) {
   const [host, remote, encrypted] = getResolvedNetworkProps(httpReq)
   const req = createRequest(httpReq, {host, encrypted})
-  const res = createResponse(httpRes)
-  const socket = createSocket(httpReq.socket)
+  const res = createResponse(httpRes, {url: req.url})
+  const socket = createSocket(httpReq.socket, httpReq.stream)
   const peer = new Peer({
     uri: new URI({
       protocol: 'tcp:',
@@ -177,50 +247,22 @@ function handleRequest(httpReq, httpRes, next) {
     socket,
   })
   .then(async () => {
-    socket.destroy()
+    if (httpReq.ended) {
+      socket.destroy()
+      return
+    }
 
     if (res.body === null) {
       res.setStatus(404).text('Nothing found')
     }
 
-    httpRes.statusCode = res.statusCode
+    httpRes.statusCode = res.status
 
     for (const header of res.headers.keys()) {
       httpRes.setHeader(header, res.headers.raw(header))
     }
 
-    if (httpReq.ended) {
-      return
-    }
-
-    const {body} = res
-
-    if (isObject(body)) {
-      // TODO Replace with Web Stream API
-      if (typeof body.getReader === 'function') {
-        if (body.locked) {
-          throw new Error('Body is locked')
-        }
-        httpRes.flushHeaders()
-
-        const reader = body.getReader()
-        while (true) {
-          const {value, done} = await reader.read()
-          // eslint-disable-next-line max-depth
-          if (done) {
-            break
-          }
-          httpRes.write(value)
-        }
-        httpRes.end()
-      }
-      else {
-        throw new TypeError('Invalid body type')
-      }
-    }
-    else {
-      httpRes.end(body)
-    }
+    writeResponseIntoStream(httpRes, res)
   })
 }
 
