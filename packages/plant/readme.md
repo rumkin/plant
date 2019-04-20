@@ -5,7 +5,7 @@
 [![npm](https://img.shields.io/npm/v/@plant/plant.svg?style=flat-square)](https://npmjs.com/package/@plant/plant)
 [![Travis](https://img.shields.io/travis/rumkin/plant.svg?style=flat-square)](https://travis-ci.org/rumkin/plant)
 [![npm](https://img.shields.io/npm/dw/@plant/plant.svg?style=flat-square)](https://npmjs.com/package/@plant/plant)
-![](https://img.shields.io/badge/size-71KiB-blue.svg?style=flat-square)
+![](https://img.shields.io/badge/size-8KiB-blue.svg?style=flat-square)
 
 ---
 
@@ -13,14 +13,14 @@ Plant is WebAPI standards based web server powered by ES2017, created with
 modular architecture and functional design patterns in mind. It uses cascades
 and contexts to be modular, pure and less coupled.
 
-Plant is transport agnostic and can work right in the browser using WebSockets
-or event PostMessage.
+Plant supports HTTP/1 and HTTP/2. But it's transport agnostic and can work right
+in the browser over WebSockets, WebRTC, PostMessage.
 
 ## Features
 
 - 🏎 Faster then Express: **15K** vs **14K** req/sec on Hello World test.
-- ☁️ Lightweight: **71 KiB** with comments and 28 KiB when minified.
-- 📐 Standards based: uses WebAPI URL and Headers interfaces.
+- ☁️ Lightweight: only 8 KiB minified and gzipped.
+- 📐 Standards based: uses WebAPI interfaces.
 
 ---
 
@@ -29,7 +29,6 @@ or event PostMessage.
 * [Install](#install).
 * [Usage](#usage).
 * [Examples](#examples).
-    * [Gzip example](#gzip-example).
 * [API](#api).
     * [Plant](#plant-type).
     * [Handler](#handler-type).
@@ -88,7 +87,6 @@ createServer(plant)
 * [Router](https://github.com/rumkin/plant/tree/master/example/router.js).
 * [Cookie handling](https://github.com/rumkin/plant/tree/master/example/cookie.js).
 * [File serving](https://github.com/rumkin/plant/tree/master/example/file.js).
-* Response [Gzip compression](https://github.com/rumkin/plant/tree/master/example/gzip.js).
 * [Context separations](https://github.com/rumkin/plant/tree/master/example/context.js).
 * [Session](https://github.com/rumkin/plant/tree/master/example/session.js).
 
@@ -411,16 +409,18 @@ Read request body and returns it as a string.
 ### Response Type
 ```text
 {
+    url: URL,
     ok: Boolean,
     hasBody: Boolean,
     status: Number,
     headers: Headers,
-    body: Blob|ArrayBuffer|ReadableStream|String|Null,
+    body: TypedArray|ReadableStream|String|Null,
 }
 ```
 
 |Property|Description|
 |:-------|:----------|
+|url| Request url|
 |ok| True if status is in range of 200 and 299|
 |hasBody| True if body is not null. Specify is response should be sent|
 |status| Status code. `200` By default|
@@ -438,9 +438,10 @@ have mode 'none'.
 #### ResponseOptions
 ```text
 {
+    url: URL,
     status: Number=200,
     headers: Headers|Object={},
-    body: Buffer|ReadableStream|String|Null=null,
+    body: TypedArray|ReadableStream|String|Null=null,
 }
 ```
 
@@ -493,10 +494,6 @@ res.json({number: 3.14159});
 
 Send text as response. Set `text/plain` content type.
 
-### Response.formData()
-
-> ⚠️ Not implemented yet.
-
 ##### Example
 
 ```javascript
@@ -538,7 +535,7 @@ res.stream(fs.createReadStream(req.path));
 
 Set any string-like value as response.
 
-### Response.end()
+### Response.empty()
 
 ```text
 () -> Response

@@ -77,7 +77,7 @@ describe('subRequest()', () => {
       await plant.getHandler()({req, res, socket})
 
       should(pushedRes).be.not.equal(null)
-      should(pushedRes).has.ownProperty('body').which.equal('Subrequest')
+      should(pushedRes).has.property('body').which.equal('Subrequest')
 
       should(res.body).be.equal('Ok!')
     }

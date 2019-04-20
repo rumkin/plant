@@ -7,6 +7,7 @@ const isPlainObject = require('lodash.isplainobject')
 
 const {isReadableStream} = require('./util/stream')
 const Headers = require('./headers')
+const TypedArray = Object.getPrototypeOf(Uint8Array)
 
 /**
  * @class
@@ -15,7 +16,7 @@ const Headers = require('./headers')
  * @prop {Number} status - Response status code
  * @prop {URL} url - Response URL
  * @prop {Headers} headers - Response headers
- * @prop {Null|Buffer|String|Readable} body - Response body.
+ * @prop {Null|TypedArray|String|Readable} body - Response body.
  */
 class Response {
   /**
@@ -23,7 +24,7 @@ class Response {
    * @param {Number} status=200 Response status code.
    * @param {URL} url Response url.
    * @param {Headers|Object} [headers] Response headers.
-   * @param {String|Buffer|Readable|Null} body=null Response body.
+   * @param {String|TypedArray|Readable|Null} body=null Response body.
    */
   /**
    * @param {Response.Options} options={} Response options object.
@@ -48,9 +49,14 @@ class Response {
       this.headers = headers
     }
 
-    this._url = url
+    if (body !== null) {
+      if (! isAcceptableBody(body)) {
+        throw new TypeError('Body should be a string, TypedArray, ReadableStream or null')
+      }
+    }
 
-    this.body = body
+    this._url = url
+    this._body = body
   }
 
   /**
@@ -84,6 +90,25 @@ class Response {
     return this.body !== null
   }
 
+  get body() {
+    return this._body
+  }
+
+  set body(value) {
+    if (value === null) {
+      this.headers.delete('content-length')
+      this.headers.delete('content-type')
+      return
+    }
+
+    if (typeof value !== 'string' && value instanceof TypedArray === false) {
+      throw new TypeError('Body value could be string or TypedArray only')
+    }
+
+    this._body = value
+    this.headers.set('content-length', value.length)
+  }
+
   /**
    * setStatus - Set response status
    *
@@ -115,8 +140,8 @@ class Response {
    * @return {Response} Returns `this`
    */
   text(result) {
-    this.headers.set('content-type', 'text/plain')
     this.body = result
+    this.headers.set('content-type', 'text/plain')
 
     return this
   }
@@ -128,8 +153,8 @@ class Response {
    * @return {Response} Returns `this`
    */
   html(result) {
-    this.headers.set('content-type', 'text/html')
     this.body = result
+    this.headers.set('content-type', 'text/html')
 
     return this
   }
@@ -145,7 +170,7 @@ class Response {
       throw new TypeError('Not a ReadableStream')
     }
 
-    this.body = stream
+    this._body = stream
 
     return this
   }
@@ -158,10 +183,10 @@ class Response {
    */
   send(body) {
     if (isObject(body) && isReadableStream(body)) {
-      this.body = body
+      this._body = body
     }
     else {
-      this.body = String(body)
+      this.body = body
     }
 
     return this
@@ -172,7 +197,7 @@ class Response {
    *
    * @return {Response}  Returns `this`.
    */
-  end() {
+  empty() {
     this.body = ''
     return this
   }
@@ -186,10 +211,18 @@ class Response {
   redirect(url) {
     this.status = 302
     this.headers.set('location', url)
+    this.headers.delete('content-type')
+
     this.body = ''
 
     return this
   }
+}
+
+function isAcceptableBody(body) {
+  return typeof body === 'string'
+  || isReadableStream(body)
+  || body instanceof TypedArray
 }
 
 module.exports = Response
