@@ -1,0 +1,12 @@
+var/
+tmp/
+examples/
+docs/
+bin/
+
+.jsdoc.json
+.editorconfig
+.eslintrc
+.travis.yml
+bake.sh
+todo.md

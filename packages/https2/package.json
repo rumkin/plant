@@ -1,0 +1,34 @@
+{
+  "name": "@plant/https",
+  "version": "0.1.0-a.1",
+  "description": "Plant node.js HTTP2 module's SSL server handler",
+  "main": "index.js",
+  "scripts": {
+    "test": "testup run test.spec.js",
+    "ssl": "bin/ssl.sh var/ssl",
+    "prepublishOnly": "allow-publish-tag next && npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "github.com/rumkin/plant"
+  },
+  "keywords": [
+    "plant",
+    "http",
+    "native-http"
+  ],
+  "author": "Rumkin <dev@rumk.in> (https://rumk.in/)",
+  "license": "MIT",
+  "dependencies": {
+    "@plant/http-adapter": "^0.2.0"
+  },
+  "devDependencies": {
+    "@plant/plant": "^2.0.0-rc4",
+    "@plant/test-http-suite": "^0.5.0",
+    "@testup/cli": "^0.4.0",
+    "@testup/console-reporter": "^0.1.1",
+    "@testup/core": "^0.1.2",
+    "allow-publish-tag": "^1.0.1",
+    "should": "^13.2.2"
+  }
+}
