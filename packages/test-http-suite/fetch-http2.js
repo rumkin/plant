@@ -1,6 +1,6 @@
 const http2 = require('http2')
 
-function fetch(url, options = {}) {
+function fetch(url, {body, ...options} = {}) {
   return new Promise(function (resolve, reject) {
     let headers
     let chunks = []
@@ -38,6 +38,8 @@ function fetch(url, options = {}) {
     const req = client.request({
       ':path': url.pathname + url.search,
       ...(options.headers || {}),
+    }, {
+      endStream: !!body ? false : true,
     })
 
     req.on('response', (_headers) => {
@@ -65,7 +67,9 @@ function fetch(url, options = {}) {
     })
 
     req.on('error', reject)
-
+    if (body) {
+      req.write(body)
+    }
     req.end()
   })
 }

@@ -1,6 +1,6 @@
 const https = require('https')
 
-function fetch(url, options = {}) {
+function fetch(url, {body, ...options} = {}) {
   return new Promise(function (resolve, reject) {
 
     const req = https.request(url + '', options)
@@ -30,6 +30,10 @@ function fetch(url, options = {}) {
     })
 
     req.on('error', reject)
+
+    if (body) {
+      req.write(body)
+    }
 
     req.end()
   })
