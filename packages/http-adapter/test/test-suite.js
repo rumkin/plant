@@ -44,6 +44,30 @@ module.exports = (title, createServer) => describe(title, function() {
     }
   })
 
+  it('Should return buffer response', async function() {
+    const server = createServer(Plant.create(
+      errorTrap,
+      async function({res}) {
+        res.body = Buffer.from('hello')
+      }
+    ))
+
+    server.listen()
+
+    try {
+      const {text} = await server.fetch('/', {
+        headers: {
+          'content-type': 'text/plain',
+        },
+      })
+
+      should(text).be.equal('hello')
+    }
+    finally {
+      server.close()
+    }
+  })
+
   it('Should return 500 response on errors', async function() {
     const server = createServer(Plant.create(
       async function() {
@@ -283,7 +307,7 @@ module.exports = (title, createServer) => describe(title, function() {
       async function({res}) {
         res.setCookie('one', 1)
         res.setCookie('two', 2)
-        res.end()
+        res.empty()
       }
     ))
 
@@ -367,7 +391,7 @@ module.exports = (title, createServer) => describe(title, function() {
     const server = createServer(Plant.create(
       errorTrap,
       async function({res, httpReq}) {
-        res.send(typeof httpReq === 'undefined')
+        res.json(typeof httpReq === 'undefined')
       }
     ))
 

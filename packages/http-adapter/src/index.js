@@ -17,6 +17,7 @@ const {URL} = require('url')
 const isObject = require('lodash.isobject')
 
 const {ReadableStream} = streams
+const TypedArray = Object.getPrototypeOf(Uint8Array)
 
 /**
  * @typedef {Object} NativeContext Initial http context with native instances for req and res.
@@ -119,15 +120,19 @@ async function writeResponseIntoStream(stream, response) {
         }
         stream.write(value)
       }
-      stream.end()
+    }
+    else if (body instanceof TypedArray) {
+      stream.write(body)
     }
     else {
       throw new TypeError('Invalid body type')
     }
   }
   else {
-    stream.end(body)
+    stream.write(body)
   }
+
+  stream.end()
 }
 
 /**
