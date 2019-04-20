@@ -1,7 +1,8 @@
 const Plant = require('@plant/plant')
-const {Router} = Plant
+const Router = require('@plant/router')
 
-// Greeting manager
+// Greeting manager is our business logic. It knows nothing about transport
+// in our case HTTP. It just do particluar job.
 class GreetManager {
   constructor(user) {
     this.user = user
@@ -12,7 +13,8 @@ class GreetManager {
   }
 }
 
-// Greeting manager router
+// Greeting manager router knows how to connect HTTP with businnes logic which
+// is a GreetingManager
 function greetingRouter(manager) {
   const router = new Router()
 
@@ -25,6 +27,8 @@ function greetingRouter(manager) {
 
 const plant = new Plant()
 
+// Now we can add any count of our business logic instances to public HTTP
+// interface.
 plant.use('/guest', greetingRouter(new GreetManager('guest')))
 plant.use('/admin', greetingRouter(new GreetManager('Admin')))
 plant.use('/world', greetingRouter(new GreetManager('World')))

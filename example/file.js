@@ -1,6 +1,7 @@
 const fs = require('fs')
 const path = require('path')
-const http = require('http')
+
+const createServer = require('@plant/http')
 const Plant = require('@plant/plant')
 
 const PORT = process.env.PORT || 8080
@@ -14,5 +15,5 @@ plant.use(async function({req, res}) {
   )
 })
 
-http.createServer(plant.handler())
+createServer(plant.handler())
 .listen(PORT)

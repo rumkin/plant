@@ -1,8 +1,8 @@
-const http = require('http')
-const Server = require('../')
-const {Router} = Server
+const createServer = require('@plant/http')
+const Plant = require('@plant/plant')
+const Router = require('@plant/router')
 
-const app = new Server()
+const app = new Plant()
 
 // Add logger to context
 app.use(async function(context, next){
@@ -36,8 +36,8 @@ function contextVersion(version) {
   }
 }
 
-app.use('/api/user/', contextVersion(1), router.handler())
-app.use('/api/admin/', contextVersion(2), router.handler())
+app.use('/api/user/', contextVersion(1), router)
+app.use('/api/admin/', contextVersion(2), router)
 
-http.createServer(app.handler())
+createServer(app)
 .listen(process.env.PORT || 8080)

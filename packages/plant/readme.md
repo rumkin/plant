@@ -88,7 +88,6 @@ createServer(plant)
 * [Cookie handling](https://github.com/rumkin/plant/tree/master/example/cookie.js).
 * [File serving](https://github.com/rumkin/plant/tree/master/example/file.js).
 * [Context separations](https://github.com/rumkin/plant/tree/master/example/context.js).
-* [Session](https://github.com/rumkin/plant/tree/master/example/session.js).
 
 ## Context
 

@@ -1,5 +1,5 @@
-const http = require('http')
-const Server = require('../')
+const createServer = require('@plant/http')
+const Plant = require('@plant/plant')
 
 const app = new Server()
 
@@ -10,5 +10,5 @@ app.use(async function({req, res}){
   res.json(req.cookies)
 })
 
-http.createServer(app.handler())
+createServer(app)
 .listen(process.env.PORT || 8080)

@@ -1,5 +1,5 @@
-const http = require('http')
-const Plant = require('..')
+const createServer = require('@plant/http')
+const Plant = require('@plant/plant')
 
 const plant = new Plant()
 
@@ -8,5 +8,5 @@ plant.use(async ({res}) => {
   res.body = 'Hello, World!';
 })
 
-http.createServer(plant.handler())
+createServer(plant.handler())
 .listen(8080)
