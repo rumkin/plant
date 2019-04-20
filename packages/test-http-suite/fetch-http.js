@@ -14,6 +14,7 @@ function fetch(url, {body, ...options} = {}) {
 
       res.on('end', () => {
         resolve({
+          url,
           status: res.statusCode,
           headers: res.headers,
           body: Buffer.concat(chunks),

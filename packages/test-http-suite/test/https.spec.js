@@ -18,9 +18,10 @@ module.exports = ({describe, it}) => {
       server.listen(0)
 
       try {
-        const res = await server.fetch('/')
+        const res = await server.fetch('/index.html')
         should(res.status).be.equal(200)
         should(res.text).be.equal('Hello, World')
+        should(res.url.pathname).be.equal('/index.html')
       }
       finally {
         server.close()

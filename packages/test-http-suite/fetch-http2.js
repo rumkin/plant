@@ -1,20 +1,23 @@
 const http2 = require('http2')
 
-function fetch(url, {body, ...options} = {}) {
+function fetch(url, {body, headers = {}, ...options} = {}) {
   return new Promise(function (resolve, reject) {
-    let headers
     let chunks = []
-    const pushed = {}
+    const response = {
+      headers: {}
+    }
+    const pushed = []
 
-    const client = http2.connect(new URL(
-      '/', url
-    ), options)
+    const client = http2.connect(
+      new URL('/', url), options
+    )
 
     client.on('error', reject)
 
     client.on('stream', (pushedStream, requestHeaders) => {
       let pushChunks = []
       const push = {
+        url: new URL(requestHeaders[':path'], url),
         get text() {
           return this.body.toString('utf8')
         },
@@ -37,13 +40,13 @@ function fetch(url, {body, ...options} = {}) {
 
     const req = client.request({
       ':path': url.pathname + url.search,
-      ...(options.headers || {}),
+      ...headers,
     }, {
       endStream: !!body ? false : true,
     })
 
     req.on('response', (_headers) => {
-      headers = {..._headers}
+      response.headers = {..._headers}
     })
 
     req.on('data', (chunk) => {
@@ -52,8 +55,9 @@ function fetch(url, {body, ...options} = {}) {
 
     req.on('end', () => {
       resolve({
-        status: parseInt(headers[':status'], 10),
-        headers,
+        url,
+        status: parseInt(response.headers[':status'], 10),
+        headers: response.headers,
         body: Buffer.concat(chunks),
         get text() {
           return this.body.toString('utf8')
