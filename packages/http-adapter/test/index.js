@@ -1,1 +1,2 @@
-require('./http-adapter.spec')
+require('./http.spec')
+require('./http2.spec')

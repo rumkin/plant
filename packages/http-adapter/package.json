@@ -13,7 +13,8 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "@plant/plant": "^1.0.0-a.4",
+    "@plant/plant": "^2.0.0",
+    "@plant/test-http-suite": "^0.4.0",
     "allow-publish-tag": "^1.0.1",
     "eslint": "^4.0.0",
     "istanbul": "^0.4.5",
