@@ -60,5 +60,25 @@ module.exports = ({describe, it}) => {
         server.close()
       }
     })
+
+    it('Should send body', async () => {
+      const server = createServer((req, res) => {
+        req.pipe(res)
+      }, ssl)
+
+      server.listen(0)
+
+      try {
+        const {status, text} = await server.fetch('/', {
+          method: 'POST',
+          body: 'Hello',
+        })
+        should(status).be.equal(200)
+        should(text).be.equal('Hello')
+      }
+      finally {
+        server.close()
+      }
+    })
   })
 }
