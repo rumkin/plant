@@ -1,0 +1,28 @@
+{
+  "name": "@plant/test-http-suite",
+  "version": "0.1.0",
+  "description": "Simple Node.js native HTTP test server",
+  "main": "index.js",
+  "scripts": {
+    "test": "testup run test/http.spec.js test/https.spec.js test/http2.spec.js test/https2.spec.js",
+    "prepublishOnly": "npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "github.com/rumkin/plant"
+  },
+  "keywords": [
+    "http",
+    "native-http",
+    "test",
+    "test-utils"
+  ],
+  "author": "Rumkin <dev@rumk.in> (https://rumk.in/)",
+  "license": "MIT",
+  "devDependencies": {
+    "@testup/cli": "^0.4.0",
+    "@testup/console-reporter": "^0.1.1",
+    "@testup/core": "^0.1.2",
+    "should": "^13.2.3"
+  }
+}
