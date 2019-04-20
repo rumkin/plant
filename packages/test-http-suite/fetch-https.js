@@ -3,12 +3,7 @@ const https = require('https')
 function fetch(url, options = {}) {
   return new Promise(function (resolve, reject) {
 
-    const req = https.request({
-      ...options,
-      url: url.pathname + url.search,
-      hostname: url.hostname,
-      port: url.port,
-    })
+    const req = https.request(url + '', options)
 
     req.on('response', (res) => {
       let chunks = []

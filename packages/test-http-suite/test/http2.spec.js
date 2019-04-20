@@ -29,9 +29,26 @@ module.exports = ({describe, it}) => {
       server.listen(0)
 
       try {
-        const res = await server.fetch('/')
-        should(res.status).be.equal(200)
-        should(res.json).be.deepEqual({hello: 'world'})
+        const {status, json} = await server.fetch('/')
+        should(status).be.equal(200)
+        should(json).be.deepEqual({hello: 'world'})
+      }
+      finally {
+        server.close()
+      }
+    })
+
+    it('Should receive correct URL', async () => {
+      const server = createServer((req, res) => {
+        res.end(req.url + '')
+      })
+
+      server.listen(0)
+
+      try {
+        const {status, text} = await server.fetch('/page?test=true')
+        should(status).be.equal(200)
+        should(text).be.equal('/page?test=true')
       }
       finally {
         server.close()

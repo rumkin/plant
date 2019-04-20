@@ -3,12 +3,7 @@ const http = require('http')
 function fetch(url, options = {}) {
   return new Promise(function (resolve, reject) {
 
-    const req = http.request({
-      ...options,
-      url: url.pathname + url.search,
-      hostname: url.hostname,
-      port: url.port,
-    })
+    const req = http.request(url + '', options)
 
     req.on('response', (res) => {
       let chunks = []
