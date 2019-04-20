@@ -18,6 +18,9 @@ function fetch(url, options = {}) {
         get text() {
           return this.body.toString('utf8')
         },
+        get json() {
+          return JSON.parse(this.text)
+        },
       }
       pushedStream.on('push', (responseHeaders) => {
         push.status = parseInt(responseHeaders[':status'], 10)
@@ -52,6 +55,9 @@ function fetch(url, options = {}) {
         body: Buffer.concat(chunks),
         get text() {
           return this.body.toString('utf8')
+        },
+        get json() {
+          return JSON.parse(this.text)
         },
         pushed,
       })

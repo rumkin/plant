@@ -25,6 +25,9 @@ function fetch(url, options = {}) {
           get text() {
             return this.body.toString('utf8')
           },
+          get json() {
+            return JSON.parse(this.text)
+          },
         })
       })
 

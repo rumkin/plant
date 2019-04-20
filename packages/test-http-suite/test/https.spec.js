@@ -26,5 +26,22 @@ module.exports = ({describe, it}) => {
         server.close()
       }
     })
+
+    it('Should parse JSON', async () => {
+      const server = createServer((req, res) => {
+        res.end(JSON.stringify({hello: 'world'}))
+      }, ssl)
+
+      server.listen(0)
+
+      try {
+        const res = await server.fetch('/')
+        should(res.status).be.equal(200)
+        should(res.json).be.deepEqual({hello: 'world'})
+      }
+      finally {
+        server.close()
+      }
+    })
   })
 }
