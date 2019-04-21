@@ -2,7 +2,7 @@
 const should = require('should')
 
 const {and} = require('@plant/flow')
-const {Request, Response, Socket, Peer, URI} = require('@plant/plant')
+const {Request, Response, Route, Socket, Peer, URI} = require('@plant/plant')
 
 const Router = require('..')
 
@@ -20,7 +20,13 @@ function createContext(url) {
     }),
   })
 
-  return {req, socket, peer}
+  const route = new Route({
+    path: req.url.pathname,
+    basePath: '/',
+    params: {},
+  })
+
+  return {req, socket, peer, route}
 }
 
 describe('Router()', function(){

@@ -257,38 +257,24 @@ function getRouteMatcher(method, routePath) {
   const matcher = createParamsMatcher(routePath)
 
   return async function(ctx, next) {
-    let path
-    let basePath
-    let params
+    const {req, route} = ctx
 
-    if (! ctx.route) {
-      path = ctx.req.url.pathname
-      basePath = '/'
-      params = {}
+    if (! req || ! route) {
+      return
     }
-    else {
-      const {route} = ctx
-      path = route.path
-      basePath = route.basePath
-      params = route.params
-    }
-
-    const {req} = ctx
 
     if (req.method !== method && method !== 'all') {
       return
     }
-    const nextParams = matcher(path + '/')
+    const nextParams = matcher(route.path)
 
     if (! nextParams) {
       return
     }
 
-    const subRoute = new RouteState({
-      path,
-      basePath,
+    const subRoute = route.extend({
       params: {
-        ...params,
+        ...route.params,
         ...nextParams,
       },
     })
@@ -310,33 +296,23 @@ function getSubrouteMatcher(routePath) {
   const matcher = createParamsMatcher(routePath.replace(/\/*$/, '/*'))
 
   return async function(ctx, next){
-    let path
-    let basePath
-    let params
+    const {route} = ctx
 
-    if (! ctx.route) {
-      path = ctx.req.url.pathname
-      basePath = '/'
-      params = {}
-    }
-    else {
-      const {route} = ctx
-      path = route.path
-      basePath = route.basePath
-      params = route.params
+    if (! route) {
+      return
     }
 
-    const nextParams = matcher(path)
+    const nextParams = matcher(route.path)
 
     if (! nextParams) {
       return
     }
 
-    const subRoute = new RouteState({
+    const subRoute = route.instantiate({
       path: '/' + nextParams[0],
-      basePath: basePath + path.slice(1, -nextParams[0].length),
+      basePath: route.basePath + route.path.slice(1, -nextParams[0].length),
       params: {
-        ...params,
+        ...route.params,
         ...nextParams,
       },
     })
@@ -378,33 +354,6 @@ function createParamsMatcher(route) {
   }
 }
 
-class RouteState {
-  static fromRequest(req) {
-    return new this({
-      path: req.url.pathname,
-      basePath: '/',
-      params: {},
-    })
-  }
-
-  constructor({path = '/', basePath = '/', params = {}} = {}) {
-    this.path = path
-    this.basePath = basePath
-    this.params = params
-  }
-
-  clone() {
-    const copy = new this.constructor({
-      path: this.path,
-      basePath: this.basePath,
-      params: {...this.params},
-    })
-
-    return copy
-  }
-}
-
 module.exports = Router
-Router.RouteState = RouteState
 Router.getRouteMatcher = getRouteMatcher
 Router.getSubrouteMatcher = getSubrouteMatcher
