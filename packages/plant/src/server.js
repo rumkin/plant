@@ -215,8 +215,14 @@ class Server {
             })
           }
           else {
+            let url = options.url
+            if (typeof url === 'string') {
+              url = new URL(url, ctx.req.url)
+            }
+
             req = new Request({
               ...options,
+              url,
               parent: ctx.req,
             })
           }
@@ -231,6 +237,7 @@ class Server {
             ...ctx,
             req,
             res,
+            route: Route.fromRequest(req),
           })
           .then(() => res)
         }

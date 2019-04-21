@@ -5,7 +5,7 @@ const Plant = require('..')
 const {Response, Request} = Plant
 
 describe('fetch()', () => {
-  it('should return response on fetch#send()',
+  it('should return response',
     async () => {
       const plant = new Plant()
 
@@ -28,6 +28,33 @@ describe('fetch()', () => {
 
       const req = new Request({
         url: new URL('http://localhost/test'),
+      })
+      const res = new Response()
+
+      await plant.getHandler()({req, res})
+
+      should(res.body).be.equal('Hello, Subrequest!')
+    }
+  )
+
+  it('should work with built-in router',
+    async () => {
+      const plant = new Plant()
+
+      plant.use('/subrequest', ({res}) => {
+        res.body = 'Subrequest'
+      })
+
+      plant.use(async ({res, fetch}) => {
+        const subResponse = await fetch({
+          url: '/subrequest',
+        })
+
+        res.body = 'Hello, ' + subResponse.body + '!'
+      })
+
+      const req = new Request({
+        url: new URL('http://localhost/'),
       })
       const res = new Response()
 
