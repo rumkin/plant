@@ -118,7 +118,7 @@ createServer(plant)
 
 ## Packages
 
-### [Plant Router](packages/router) `@plant/router`
+### [Router](packages/router) `@plant/router`
 
 [NPM](https://npmjs.com/package/@plant/router) ·
 [Source](packages/router) · [Readme](packages/router/readme.md)
@@ -126,7 +126,7 @@ createServer(plant)
 Plant standalone router.
 
 
-### [Plant HTTP2](packages/http2) `@plant/http2`
+### [HTTP2](packages/http2) `@plant/http2`
 
 [NPM](https://npmjs.com/package/@plant/http2) ·
 [Source](packages/http2) · [Readme](packages/http2/readme.md)
@@ -135,7 +135,7 @@ Plant adapter for native node.js http2 module server. It creates server
 listener from Plant instance and `http2.createServer()` [options](https://nodejs.org/dist/latest-v11.x/docs/api/http2.html#http2_http2_createserver_options_onrequesthandler). It's
 usage is the same as https module.
 
-### [Plant HTTPS2](packages/https2) `@plant/https2`
+### [HTTPS2](packages/https2) `@plant/https2`
 
 [NPM](https://npmjs.com/package/@plant/https2) ·
 [Source](packages/https2) · [Readme](packages/https2/readme.md)
@@ -144,14 +144,14 @@ Plant adapter for native node.js http2 module SSL server. It creates server
 listener from Plant instance and `http2.createSecureServer()` [options](https://nodejs.org/dist/latest-v11.x/docs/api/http2.html#http2_http2_createsecureserver_options_onrequesthandler). It's
 usage is the same as https module.
 
-### [Plant HTTP](packages/http) `@plant/http`
+### [HTTP](packages/http) `@plant/http`
 
 [NPM](https://npmjs.com/package/@plant/http) ·
 [Source](packages/http) · [Readme](packages/http/readme.md)
 
 Plant adapter for native node.js http module. It creates server listener from plant instance.
 
-### [Plant HTTPS](packages/https) `@plant/https`
+### [HTTPS](packages/https) `@plant/https`
 
 [NPM](https://npmjs.com/package/@plant/https) ·
 [Source](packages/https) · [Readme](packages/https/readme.md)
@@ -160,14 +160,14 @@ Plant adapter for native node.js https module. It creates server listener from p
 
 ## Internal packages
 
-### [Plant flow](packages/flow) `@plant/flow`
+### [flow](packages/flow) `@plant/flow`
 
 [NPM](https://npmjs.com/package/@plant/flow) ·
 [Source](packages/flow) · [Readme](packages/flow/readme.md)
 
 This is library for cascades. This is where contexts manage take place and requests pass from one handler to another.
 
-### [Plant HTTP Adapter](packages/http-adapter) `@plant/http-adapter`
+### [HTTP Adapter](packages/http-adapter) `@plant/http-adapter`
 
 [NPM](https://npmjs.com/package/@plant/http-adapter) ·
 [Source](packages/http-adapter) · [Readme](packages/http-adapter/readme.md)
