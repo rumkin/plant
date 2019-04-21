@@ -27,7 +27,7 @@ router.get('/greet', async function({res}) {
     res.body = 'Hello World'
 })
 
-plant.use(router)
+plant.use('/api/v1/', router)
 ```
 
 ## [Plant Router](packages/router) `@plant/router`
@@ -46,6 +46,24 @@ Plant standalone router.
 Plant adapter for native node.js http2 module server. It creates server
 listener from Plant instance and `http2.createServer()` [options](https://nodejs.org/dist/latest-v11.x/docs/api/http2.html#http2_http2_createserver_options_onrequesthandler). It's
 usage is the same as https module.
+
+### Hello World Example
+
+```javascript
+// Build request handler
+const createServer = require('@plant/http2');
+const Plant = require('@plant/plant');
+
+const plant = new Plant();
+plant.use(({res, socket}) => {
+    res.body = 'Hello, World!'
+})
+
+createServer(plant)
+.listen(8080)
+```
+
+### HTTP2 Push Example
 
 ```javascript
 // Build request handler
@@ -80,6 +98,27 @@ createServer(plant)
 Plant adapter for native node.js http2 module SSL server. It creates server
 listener from Plant instance and `http2.createSecureServer()` [options](https://nodejs.org/dist/latest-v11.x/docs/api/http2.html#http2_http2_createsecureserver_options_onrequesthandler). It's
 usage is the same as https module.
+
+### Hello World Example
+
+```javascript
+// Build request handler
+const createServer = require('@plant/https2');
+const Plant = require('@plant/plant');
+
+const plant = new Plant();
+plant.use(({res, socket}) => {
+    res.body = 'Hello, World!'
+})
+
+createServer(plant, {
+    key: Buffer.from('...'),
+    cert: Buffer.from('...'),
+})
+.listen(8080)
+```
+
+### HTTP2 Push Example
 
 ```javascript
 // Build request handler
@@ -118,6 +157,8 @@ createServer(plant, {
 
 Plant adapter for native node.js http module. It creates server listener from plant instance.
 
+### Hello World Example
+
 ```javascript
 // Build request handler
 const createServer = require('@plant/http');
@@ -137,6 +178,8 @@ createServer(plant).listen(8080)
 [Source](packages/https) · [Readme](packages/https/readme.md)
 
 Plant adapter for native node.js https module. It creates server listener from plant instance and https options.
+
+### Hello World Example
 
 ```javascript
 // Build request handler
