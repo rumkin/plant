@@ -312,10 +312,9 @@ function handleRequest(httpReq, httpRes, next) {
  * @returns {function(http.IncomingMessage,http.ServerResponse)} Native http request handler function
  */
 function createRequestHandler(plant, handlers = []) {
-  const filtrateContext = without(['httpReq', 'httpRes'])
   const handler = and(
     ...handlers,
-    (ctx, next) => next(filtrateContext(ctx)),
+    contextWithout(['httpReq', 'httpRes']),
     plant,
   )
 
@@ -341,14 +340,16 @@ function handleRequestError(req, res, error) {
   res.end()
 }
 
-function without(keys) {
-  return function(value) {
-    const newValue = {...value}
-    for (const key of keys) {
-      delete newValue[key]
-    }
-    return newValue
+function contextWithout(keys) {
+  return (ctx, next) => next(without(keys, ctx))
+}
+
+function without(keys, value) {
+  const newValue = {...value}
+  for (const key of keys) {
+    delete newValue[key]
   }
+  return newValue
 }
 
 module.exports = createRequestHandler

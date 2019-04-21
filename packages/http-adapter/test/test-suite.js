@@ -406,4 +406,24 @@ module.exports = (title, createServer) => describe(title, function() {
       server.close()
     }
   })
+
+  it('Should filtrate httpRes', async function() {
+    const server = createServer(Plant.create(
+      errorTrap,
+      async function({res, httpRes}) {
+        res.json(typeof httpRes === 'undefined')
+      }
+    ))
+
+    server.listen()
+
+    try {
+      const {status, text} = await server.fetch('/')
+      should(status).be.equal(200)
+      should(text).be.equal('true')
+    }
+    finally {
+      server.close()
+    }
+  })
 })
