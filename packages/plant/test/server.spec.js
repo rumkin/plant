@@ -2,7 +2,7 @@
 const should = require('should')
 
 const Plant = require('..')
-const {Request, Response} = Plant
+const {Request, Response, Socket} = Plant
 
 async function errorTrap(ctx, next) {
   try {
@@ -74,6 +74,43 @@ describe('Server()', function() {
     await plant.getHandler()({req, res})
 
     should(res.body).be.equal('b')
+  })
+
+  it('Should send pushes if socket supports it', async () => {
+    let pushed
+    const plant = new Plant()
+
+    plant.use('/script.js', ({res}) => {
+      res.headers.set('content-type', 'application/javascript')
+      res.body = 'console.log("Hello")'
+    })
+
+    plant.use(({res}) => {
+      res.push(new Request({
+        url: new URL('/script.js', res.url),
+      }))
+      res.body = 'Hello, World!'
+    })
+
+    const socket = new Socket({
+      async onPush(_pushed) {
+        pushed = _pushed
+      },
+    })
+
+    const req = new Request({
+      url: new URL('http://localhost/b'),
+    })
+
+    const res = new Response({
+      url: req.url,
+    })
+
+    await plant.getHandler()({req, res, socket})
+
+    should(res.body).be.equal('Hello, World!')
+    should(pushed).be.instanceof(Response)
+    should(pushed.body).be.equal('console.log("Hello")')
   })
 
   describe('Server.route()', function() {

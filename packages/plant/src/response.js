@@ -6,8 +6,16 @@ const isObject = require('lodash.isobject')
 const isPlainObject = require('lodash.isplainobject')
 
 const {isReadableStream} = require('./util/stream')
+const Request = require('./request')
 const Headers = require('./headers')
 const TypedArray = Object.getPrototypeOf(Uint8Array)
+
+/**
+ * @typedef Push
+ * @prop {Request|null} request Request instance.
+ * @prop {Response|null} response Response instance if request already completed.
+ * @prop {Object|null} context Context for request.
+ */
 
 /**
  * @class
@@ -57,14 +65,15 @@ class Response {
 
     this._url = url
     this._body = body
+    this._pushes = []
   }
 
   /**
-   * Specify whether response is successful and returns status code in
+   * Specify whether response is successful and status code is in
    * range of 200 and 299.
    *
    * @readonly
-   * @type {Boolean} True when status code is in success range.
+   * @type {Boolean}
    */
   get ok() {
     return this.status > 199 && this.status < 300
@@ -74,22 +83,37 @@ class Response {
    * Response URL property.
    *
    * @readonly
-   * @return {URL} instance of URL.
+   * @type {URL}
    */
   get url() {
     return this._url
   }
 
   /**
-   * Specify whether body is set.
+   * Specify whether body is set. True if body is not null.
    *
    * @readonly
-   * @type {Boolean} True if body is not null.
+   * @type {Boolean}
    */
   get hasBody() {
     return this.body !== null
   }
 
+  /**
+   * Determine wether response has pushes.
+   *
+   * @readonly
+   * @type {boolean}
+   */
+  get hasPushes() {
+    return this._pushes.length > 0
+  }
+
+  /**
+   * Response body
+   *
+   * @type {string|TypedArray|ReadableStream|null}
+   */
   get body() {
     return this._body
   }
@@ -98,15 +122,26 @@ class Response {
     if (value === null) {
       this.headers.delete('content-length')
       this.headers.delete('content-type')
-      return
     }
-
-    if (typeof value !== 'string' && value instanceof TypedArray === false) {
-      throw new TypeError('Body value could be string or TypedArray only')
+    else if (isReadableStream(value)) {
+      this._body = value
     }
-
-    this._body = value
-    this.headers.set('content-length', value.length)
+    else if (typeof value === 'string' || value instanceof TypedArray) {
+      this._body = value
+      this.headers.set('content-length', value.length)
+    }
+    else {
+      throw new TypeError('Body value could be a string, TypedArray, ReadableStream or null')
+    }
+  }
+  /**
+   * Retun list of pushed responses and requests.
+   *
+   * @readonly
+   * @type {Push[]}
+   */
+  get pushes() {
+    return [...this._pushes]
   }
 
   /**
@@ -198,6 +233,7 @@ class Response {
    * @return {Response}  Returns `this`.
    */
   empty() {
+    this.headers.delete('content-type')
     this.body = ''
     return this
   }
@@ -211,9 +247,47 @@ class Response {
   redirect(url) {
     this.status = 302
     this.headers.set('location', url)
-    this.headers.delete('content-type')
+    this.empty()
 
-    this.body = ''
+    return this
+  }
+
+  /**
+   * Add request or response into response pushes list. It's using for transports
+   * which support pushes.
+   *
+   * @param  {Response|Request|URL} target Complete response or new request.
+   * @param  {Object} [context] Context is optional and is using when overriding is required.
+   * @return {Response} Return itself
+   * @throws {TypeError} if the first argument type is mismatched.
+   */
+  push(target, context) {
+    if (target instanceof Response) {
+      this._pushes.push({
+        request: null,
+        context: null,
+        response: target,
+      })
+    }
+    else if (target instanceof Request) {
+      this._pushes.push({
+        request: target,
+        context,
+        response: null,
+      })
+    }
+    else if (target instanceof URL) {
+      this._pushes.push({
+        request: new Request({
+          url: target,
+        }),
+        context,
+        response: null,
+      })
+    }
+    else {
+      throw new TypeError('Argument #1 could be a Response, Request or URL')
+    }
 
     return this
   }

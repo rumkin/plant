@@ -59,12 +59,12 @@ const URI = require('./uri')
  * @class
  * @classdesc Plant cascade server.
  */
-class Server {
+class Plant {
   /**
    * Static constructor.
    *
    * @param {*} args Server constructor arguments.
-   * @returns {Server} Server instance.
+   * @returns {Plant} Server instance.
    * @static
    */
   static new(...args) {
@@ -76,7 +76,7 @@ class Server {
    *
    * @param  {ServerOptions} [options={}] Server options. Optional
    * @param  {...HandleType} args Request handler.
-   * @return {Server} Return new server instance.
+   * @return {Plant} Return new server instance.
    * @static
    */
   static create(...args) {
@@ -128,7 +128,7 @@ class Server {
    *
    * @param  {String} [route] Optional route prefix.
    * @param  {...HandleType} args Cascade handlers.
-   * @return {Server} return `this`.
+   * @return {Plant} return `this`.
    */
   use(...args) {
     let handlers
@@ -152,7 +152,7 @@ class Server {
    * Add parallel cascade handler.
    *
    * @param  {...HandleType} handlers Cascade request handlers list.
-   * @return {Server} Returns `this`.
+   * @return {Plant} Returns `this`.
    */
   or(...handlers) {
     if (handlers.length) {
@@ -165,7 +165,7 @@ class Server {
    * Add nested cascade handler.
    *
    * @param  {...HandleType} handlers Request handlers
-   * @return {Server} Returns `this`.
+   * @return {Plant} Returns `this`.
    */
   and(...handlers) {
     if (handlers.length) {
@@ -198,51 +198,27 @@ class Server {
           })
         }
 
-        ctx.fetch = function(options, nextCtx = {}) {
-          let req
-          if (options instanceof Request) {
-            req = options
-          }
-          else if (options instanceof URL) {
-            req = new Request({
-              url: options,
-              parent: ctx.req,
-            })
-          }
-          else if (typeof options === 'string') {
-            req = new Request({
-              url: new URL(options, ctx.req.url),
-            })
-          }
-          else {
-            let url = options.url
-            if (typeof url === 'string') {
-              url = new URL(url, ctx.req.url)
-            }
-
-            req = new Request({
-              ...options,
-              url,
-              parent: ctx.req,
-            })
-          }
-
-          const res = new Response({
-            url: req.url,
-          })
-
-          return handler({
-            ...initialCtx,
-            ...nextCtx,
-            ...ctx,
-            req,
-            res,
-            route: Route.fromRequest(req),
-          })
-          .then(() => res)
-        }
+        ctx.fetch = createFetch(handler, {
+          ...initialCtx,
+          ...ctx,
+        })
 
         await next({...initialCtx, ...ctx})
+
+        const {res, socket, fetch} = ctx
+        if (socket.canPush && res.hasPushes) {
+          for (const push of res.pushes) {
+            if (push.response !== null) {
+              await socket.push(push.response)
+            }
+            else {
+              await socket.push(
+                await fetch(push.request, push.context)
+              )
+            }
+          }
+        }
+
         return ctx
       },
       cookieHandler,
@@ -251,6 +227,58 @@ class Server {
 
     return handler
   }
+}
+
+function createFetch(handler, ctx) {
+  function fetch(options, nextCtx) {
+    let req
+    if (options instanceof Request) {
+      req = options
+    }
+    else if (options instanceof URL) {
+      req = new Request({
+        url: options,
+        parent: ctx.req,
+      })
+    }
+    else if (typeof options === 'string') {
+      req = new Request({
+        url: new URL(options, ctx.req.url),
+      })
+    }
+    else {
+      let url = options.url
+      if (typeof url === 'string') {
+        url = new URL(url, ctx.req.url)
+      }
+
+      req = new Request({
+        ...options,
+        url,
+        parent: ctx.req,
+      })
+    }
+
+    const res = new Response({
+      url: req.url,
+    })
+
+    const childCtx = {
+      ...ctx,
+      ...nextCtx,
+      req,
+      res,
+      route: Route.fromRequest(req),
+    }
+
+    return handler({
+      ...childCtx,
+      fetch: createFetch(handler, childCtx),
+    })
+    .then(() => res)
+  }
+
+  return fetch
 }
 
 function getRouteMatcher(routePath) {
@@ -272,13 +300,14 @@ function getRouteMatcher(routePath) {
   }
 }
 
-module.exports = Server
+module.exports = Plant
 
 // Expose core classes
-Server.Headers = Headers
-Server.Peer = Peer
-Server.Request = Request
-Server.Response = Response
-Server.Route = Route
-Server.Socket = Socket
-Server.URI = URI
+Plant.Headers = Headers
+Plant.Peer = Peer
+Plant.Request = Request
+Plant.Response = Response
+Plant.Route = Route
+Plant.Socket = Socket
+Plant.URI = URI
+Plant.createFetch = createFetch
