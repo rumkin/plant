@@ -35,10 +35,11 @@ in the browser over WebSockets, WebRTC, PostMessage.
     * [Peer](#peer-type).
     * [Request](#request-type).
     * [Response](#response-type).
+    * [Route](#route-type).
     * [Headers](#headers-type).
     * [Socket](#socket-type).
-    * [Subrequest](#subrequest).
     * [URI](#uri-type).
+    * [fetch](#fetch).
 * [License](#license).
 
 ---
@@ -95,9 +96,10 @@ The default context has this properties:
 
 * `req` – [Request](#request-type) instance.
 * `res` – [Response](#response-type) instance.
-* `peer` – [Peer](#peer-type) representing other connection party.
-* `socket` – [Socket](#socket-type) is abstract socket, representing connection.
-* `subRequest`– [subRequest()](#subrequest) method to send request to the server from handlers.
+* `route` – [Route](#route-type) instance.
+* `peer` – [Peer](#peer-type) instance.
+* `socket` – [Socket](#socket-type) instance.
+* `fetch`– [fetch()](#subrequest) function.
 
 ## Cascades explanation
 
@@ -542,6 +544,54 @@ Set any string-like value as response.
 
 Set empty body.
 
+### Route Type
+```
+{
+    path: string,
+    basePath: string,
+    params: Object,
+}
+```
+
+Route type represents which part of path is handling now. It's using by nested
+routers. It stores parsed path in `basePath` and unparsed part in `path`
+properties. All extracted values are stored in `params`.
+
+|Property|Description|
+|:-------|:----------|
+|path| Unparsed part of requested URL|
+|basePath| Parsed part of requested URL|
+|params| Params extracted from the `basePath` |
+
+### Route.clone()
+```
+() -> Route
+```
+
+Clone route object
+
+### Route.extend()
+```
+(props: {
+    path?: string
+    basePath?: string,
+    params?: object
+}) -> Route
+```
+
+Copy current route instance and overwrite values with new `props`.
+
+
+### Route.instantiate()
+```
+(props: {
+    path: string
+    basePath: string,
+    params: object
+}) -> Route
+```
+
+Create nw route instance using values from `props`.
 
 ### Headers Type
 
@@ -571,7 +621,7 @@ plant.use(async function({req}, next) {
 // Response headers
 plant.use(async function({req, res}, next) {
     res.headers.set('content-type', 'image/png');
-    res.send(fs.createReadStream('logo.png'));
+    res.send(await fs.readFile('logo.png'));
 });
 ```
 
@@ -686,39 +736,46 @@ Destroy connection and remove events listeners.
 
 Push response to the client. If it's supported.
 
-### subRequest()
-```
-(request:Request|URL|requestOptions) -> Subrequest
-```
 
-Subrequest factory method. Receives request or URL instance or request constructor
-options. Returns [Subrequest](#subrequest-type) type.
+## URI Type
 
-### Subrequest Type
+URI is an object that represents URI in plant. While URL requires protocols
+to be registered by IANA, WebAPI URL wouldn't parse strings with custom scheme like
+`tcp://127.0.0.1:12345/` (`127.0.0.1:12345` became a part of pathname).
+Thus we use URI, which doesn't mean to be an URL, but presents network
+identifier correct. Plant doesn't provide parser and URI should be generated
+manually.
 
-### Subrequest#context()
-```
-(context: Object) -> Subrequest
-```
+This is how Plant represents TCP address of the HTTP peer:
 
-Set initial context values for subrequest.
-
-### Subrequest#send()
-```
-() -> Promise<Response,Error>
-```
-
-Make a call and return response for specified request. Returns promise that
-fulfills with Response instance.
-
-### Subrequest#push()
-```
-() -> Promise<Response,Error>
+```javascript
+new URI({
+    protocol: 'tcp:',
+    hostname: 'localhost',
+    port: '12345',
+    pathname: '/',
+})
 ```
 
-Make a call and immediately push response for specified request. Returns promise that
-fulfills with Response instance.
+This implementation will be enhanced with parser in one of the next versions.
 
+### fetch()
+```
+(request:Request|String|URL|requestOptions, context:Object) -> Promise<Response>
+```
+
+Send request to the server.
+
+```js
+plant.use(async ({res, socket, fetch}) => {
+    if (socket.canPush) {
+        await fetch('/style.css')
+        .then((styleRes) => socket.push(styleRes))
+    }
+
+    res.body = '<html>...'
+})
+```
 
 ## Error handling
 
@@ -743,28 +800,6 @@ async function errorHandler({req, res}, next) {
     }
 };
 ```
-
-## URI Type
-
-URI is an object that represents URI in plant. While URL requires protocols
-to be registered by IANA, WebAPI URL wouldn't parse strings with custom scheme like
-`tcp://127.0.0.1:12345/` (`127.0.0.1:12345` became a part of pathname).
-Thus we use URI, which doesn't mean to be an URL, but presents network
-identifier correct. Plant doesn't provide parser and URI should be generated
-manually.
-
-This is how Plant represents TCP address of the HTTP peer:
-
-```javascript
-new URI({
-    protocol: 'tcp:',
-    hostname: 'localhost',
-    port: '12345',
-    pathname: '/',
-})
-```
-
-This implementation will be enhanced with parser in the next versions.
 ---
 
 

@@ -1,7 +1,7 @@
+require('./fetch.spec')
 require('./headers.spec')
 require('./request.spec')
 require('./response.spec')
 require('./socket.spec')
 require('./server.spec')
-require('./subRequest.spec')
 require('./uri.spec')

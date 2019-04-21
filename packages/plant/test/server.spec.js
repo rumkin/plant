@@ -56,4 +56,44 @@ describe('Server()', function() {
       should(result.res).be.equal(res)
     })
   })
+
+  it('Should serve routes', async () => {
+    const plant = new Plant()
+
+    ;['a', 'b', 'c']
+    .forEach((route) => {
+      plant.use('/' + route, ({res}) => res.body = route)
+    })
+
+    const req = new Request({
+      url: new URL('http://localhost/b'),
+    })
+
+    const res = new Response()
+
+    await plant.getHandler()({req, res})
+
+    should(res.body).be.equal('b')
+  })
+
+  describe('Server.route()', function() {
+    it('Should create route mathcer', async () => {
+      const plant = new Plant()
+
+      ;['a', 'b', 'c']
+      .forEach((route) => {
+        plant.use(Plant.route('/' + route), ({res}) => res.body = route)
+      })
+
+      const req = new Request({
+        url: new URL('http://localhost/b'),
+      })
+
+      const res = new Response()
+
+      await plant.getHandler()({req, res})
+
+      should(res.body).be.equal('b')
+    })
+  })
 })

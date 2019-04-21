@@ -12,6 +12,7 @@ const Headers = require('./headers')
 const Peer = require('./peer')
 const Response = require('./response')
 const Request = require('./request')
+const Route = require('./route')
 const Socket = require('./socket')
 const URI = require('./uri')
 
@@ -95,6 +96,10 @@ class Server {
     .use(...handlers)
   }
 
+  static route(url) {
+    return getRouteMatcher(url)
+  }
+
   /**
    * Instantiate new Plant.Server and creates http handler from it.
    *
@@ -129,6 +134,9 @@ class Server {
     let handlers
 
     if (args.length > 1) {
+      if (typeof args[0] === 'string') {
+        args[0] = getRouteMatcher(args[0])
+      }
       handlers = [or(and(...args))]
     }
     else {
@@ -180,7 +188,17 @@ class Server {
           ctx.socket = new Socket()
         }
 
-        ctx.subRequest = function(options) {
+        // If server mounted as handler of another server then route should
+        // not be recreated.
+        if (! ctx.route) {
+          ctx.route = new Route({
+            path: ctx.req.url.pathname,
+            basePath: '/',
+            params: {},
+          })
+        }
+
+        ctx.fetch = function(options, nextCtx = {}) {
           let req
           if (options instanceof Request) {
             req = options
@@ -189,6 +207,11 @@ class Server {
             req = new Request({
               url: options,
               parent: ctx.req,
+            })
+          }
+          else if (typeof options === 'string') {
+            req = new Request({
+              url: new URL(options, ctx.req.url),
             })
           }
           else {
@@ -202,28 +225,16 @@ class Server {
             url: req.url,
           })
 
-          return {
-            ctx: {},
-            context(nextCtx) {
-              this.ctx = nextCtx
-              return this
-            },
-            send() {
-              return handler({
-                ...initialCtx,
-                ...this.ctx,
-                ...ctx,
-                req,
-                res,
-              })
-              .then(() => res)
-            },
-            push() {
-              return this.send()
-              .then((subRes) => ctx.socket.push(subRes))
-            },
-          }
+          return handler({
+            ...initialCtx,
+            ...nextCtx,
+            ...ctx,
+            req,
+            res,
+          })
+          .then(() => res)
         }
+
         await next({...initialCtx, ...ctx})
         return ctx
       },
@@ -235,6 +246,25 @@ class Server {
   }
 }
 
+function getRouteMatcher(routePath) {
+  return function({route, ...ctx}, next) {
+    if (! route.path.startsWith(routePath)) {
+      return
+    }
+
+    const subRoute = new Route({
+      path: route.path.slice(routePath.length),
+      basePath: route.basePath + routePath,
+      params: {...route.params},
+    })
+
+    return next({
+      ...ctx,
+      route: subRoute,
+    })
+  }
+}
+
 module.exports = Server
 
 // Expose core classes
@@ -242,5 +272,6 @@ Server.Headers = Headers
 Server.Peer = Peer
 Server.Request = Request
 Server.Response = Response
+Server.Route = Route
 Server.Socket = Socket
 Server.URI = URI
