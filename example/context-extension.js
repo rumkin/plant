@@ -1,31 +1,31 @@
 const Plant = require('@plant/plant')
 
-const LOGGER = Symbol('logger')
+const SESSION = Symbol('session')
 
-function addLogger(logger) {
-  return function(ctx, next) {
-    return next({
-      ...ctx,
-      [LOGGER]: logger,
-    })
-  }
+async function addSession(ctx, next) {
+  // Get session somehow
+  const session = await getSession()
+  await next({
+    ...ctx,
+    [SESSION]: session,
+  })
+  // Write session somehow
+  await writeSession(session)
 }
 
-function getLogger(ctx) {
-  return ctx[LOGGER]
+function getSession(ctx) {
+  return ctx[SESSION]
 }
 
 // Create server instance
 const app = new Plant()
 
-// Add logger to context
-app.use(addLogger(console))
+// Add session to context
+app.use(addSession)
 
-// Use logger
+// Use session
 app.use(async function({res, ...ctx}, next) {
-  const logger = getLogger(ctx)
+  const session = getSession(ctx)
 
   await next()
-
-  logger.log('%s - %s | %s',  res.method, res.status, res.url)
 })

@@ -98,7 +98,7 @@ createServer(plant)
 * [Echo](https://github.com/rumkin/plant/tree/master/example/echo.js).
 * [Router](https://github.com/rumkin/plant/tree/master/example/router.js).
 * [Cookie handling](https://github.com/rumkin/plant/tree/master/example/cookie.js).
-* [File serving](https://github.com/rumkin/plant/tree/master/example/file.js).
+* [File streaming](https://github.com/rumkin/plant/tree/master/example/file-stream.js).
 * [Context separations](https://github.com/rumkin/plant/tree/master/example/context.js).
 * [Context extension](https://github.com/rumkin/plant/tree/master/example/context-extension.js).
 
