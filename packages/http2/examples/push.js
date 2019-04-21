@@ -13,13 +13,14 @@ plant.use(({req}, next) => {
 })
 
 // Server logic
-plant.use(async ({req, res, socket, subRequest}) => {
+plant.use(async ({req, res, socket, fetch}) => {
   let {pathname} = req.url
   if (pathname === '/index.html') {
     if (socket.canPush) {
-      await subRequest({
+      await fetch({
         url: new URL('/style.css', req.url),
-      }).push()
+      })
+      .then(subRes => socket.push(subRes))
     }
   }
 
