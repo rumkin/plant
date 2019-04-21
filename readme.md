@@ -12,9 +12,19 @@
 [NPM](https://npmjs.com/package/@plant/plant) ·
 [Source](packages/plant) · [Readme](packages/plant/readme.md)
 
-Plant is WebAPI standards based HTTP/2 web server powered by ES2017, created with
-modular architecture and functional design patterns in mind. It uses cascades
-and contexts to be modular, pure and less coupled.
+Plant is WebAPI standards based HTTP2 web server, created with
+modular architecture and functional design in mind. It's modular, pure and less coupled.
+
+Plant supports HTTP 1 and HTTP 2. But it's transport agnostic and can work right
+in the browser over WebSockets, WebRTC, or PostMessage.
+
+## Features
+
+- 🏎 Fast: **15K** vs **14K** req/sec on Hello World test versus Express.
+- ☁️ Lightweight: only **8** KiB minified and gzipped.
+- 📐 Standards based: uses WebAPI interfaces.
+- 🛳 Transport agnostic: no HTTP or platform coupling, ship requests via __everything__.
+- 🧳 Portable: works in node.js and browser.
 
 ```javascript
 const Plant = require('@plant/plant');

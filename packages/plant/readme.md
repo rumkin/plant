@@ -9,18 +9,19 @@
 
 ---
 
-Plant is WebAPI standards based web server powered by ES2017, created with
-modular architecture and functional design patterns in mind. It uses cascades
-and contexts to be modular, pure and less coupled.
+Plant is WebAPI standards based HTTP2 web server, created with
+modular architecture and functional design in mind. It's modular, pure and less coupled.
 
-Plant supports HTTP/1 and HTTP/2. But it's transport agnostic and can work right
-in the browser over WebSockets, WebRTC, PostMessage.
+Plant supports HTTP 1 and HTTP 2. But it's transport agnostic and can work right
+in the browser over WebSockets, WebRTC, or PostMessage.
 
 ## Features
 
 - 🏎 Faster then Express: **15K** vs **14K** req/sec on Hello World test.
 - ☁️ Lightweight: only 8 KiB minified and gzipped.
 - 📐 Standards based: uses WebAPI interfaces.
+- 🛳 Transport agnostic: no HTTP or platform coupling, ship requests via everything.
+- 🧳 Portable: works in node.js and browser.
 
 ---
 
@@ -62,7 +63,7 @@ npm i @plant/plant@next
 
 Plant is designed to have no side effects thus it has no builtin transport. It
 depends on modules for http, https, WebSocket or anything else to provide
-transport layer. In this example http is used and '@plant/http2' should be
+transport layer. In this example http is used and `@plant/http2` should be
 installed (`npm i @plant/http`).
 
 ```javascript
@@ -85,9 +86,9 @@ createServer(plant)
 
 * Plant doesn't work with native node streams. It understands only WebAPI
   streams. Use [web-stream-polyfills](https://npmjs.com/package/web-stream-polyfills)
-  package to create your wrapper. It's made for decreasing platform coupling.
-* Plant avoid extensions of Request and Response instances like express do. It's
-  using extensible contexts for that. You should avoid extension. To prevent
+  package to wrap node.js stream. It's made for decreasing Node.js coupling.
+* Plant avoid extensions of Request and Response instances like Express do. It's
+  using modifiable context for that. You should avoid extension. To prevent
   collisions it's recommended to use symbol as context entry name. Watch
   [context extension example](https://github.com/rumkin/plant/tree/master/example/context-extension.js).
 
@@ -99,27 +100,25 @@ createServer(plant)
 * [Cookie handling](https://github.com/rumkin/plant/tree/master/example/cookie.js).
 * [File serving](https://github.com/rumkin/plant/tree/master/example/file.js).
 * [Context separations](https://github.com/rumkin/plant/tree/master/example/context.js).
+* [Context extension](https://github.com/rumkin/plant/tree/master/example/context-extension.js).
 
 ## Context
 
-The default context has this properties:
+By default context has this properties:
 
-* `req` – [Request](#request-type) instance.
-* `res` – [Response](#response-type) instance.
-* `route` – [Route](#route-type) instance.
-* `peer` – [Peer](#peer-type) instance.
-* `socket` – [Socket](#socket-type) instance.
-* `fetch`– [fetch()](#fetch) function.
+* `req` – [Request](#request-type) instance. Request from client.
+* `res` – [Response](#response-type) instance. Response to client.
+* `route` – [Route](#route-type) instance. Current processed path.
+* `peer` – [Peer](#peer-type) instance. Other side of connection.
+* `socket` – [Socket](#socket-type) instance. Connection socket.
+* `fetch`– [fetch()](#fetch) function. Method to send request to itself.
 
 ## Cascades explanation
 
 Cascades are nested functions which passes context object to the deepest function.
 The flow and depth could be modified using `or` and `and` modifiers. Each level
 of cascade could modify context on it's own without touching overlaying
-or adjacent context.
-
-Default context contains **req**, **res** and **socket** properties. You can add
-your own properties, modify or delete existing:
+or adjacent contexts.
 
 ```javascript
 plant.use(async function({req, res, socket}, next) => {
@@ -137,17 +136,16 @@ plant.use(async (ctx, next) => {
 });
 ```
 
-It allow to create predictable behavior and avoid unexpected side effects to
-change. Plant itself overwrite default node.js HTTP Request and Response objects
+It allows to create predictable behavior and avoid unexpected side effects.
+Plant itself overwrites default node.js HTTP Request and Response objects
 with Plant.Request and Plant.Response.
 
 ## API
 
 ### Plant Type
 
-Plant is the handlers configuration and flow manipulation instrument. It allow to
-specify execution order, define routes and set uncaught error handler.
-It has no readable props.
+Plant is the main configuration instrument. It's using to specify execution order,
+define routes and set uncaught error handler.
 
 ### Plant.constuctor()
 ```text
@@ -158,7 +156,6 @@ It has no readable props.
 ```text
 {
     handlers: Handlers[] = [],
-    errorHandler: (Error) -> void = console.log,
     context: Object = {},
 }
 ```
@@ -168,7 +165,6 @@ Plant server configuration options.
 |Property|Description|
 |:-------|:----------|
 |handlers| Array of request handlers added to cascade|
-|errorHandler| This error handler will capture unhandled error when response is send|
 |context| Default context values. Empty object by default|
 
 ### Plant.use()
@@ -177,21 +173,21 @@ Plant server configuration options.
 ```
 
 This method do several things:
-1. If route specified add route.
-2. If handler count greater than one it creates turn for request which allow
+1. If route specified, adds route.
+2. If handler count greater than one it creates turn for request which allows
 to change Request execution direction.
 
 ##### Example
 
 ```javascript
 function conditionHandler({req}, next) {
-    if (req.url.searchParams.has('n')) {
+    if (req.url.searchParams.has('page')) {
         return next();
     }
 }
 
-plant.use('/a', conditionHandler, ({res}) => res.text('n param passed'));
-plant.use('/a', ({res}) => res.text('n param not passed'));
+plant.use('/a', conditionHandler, ({res}) => res.text('page param passed'));
+plant.use('/a', ({res}) => res.text('page param not passed'));
 ```
 
 ### Plant.or()
@@ -199,7 +195,8 @@ plant.use('/a', ({res}) => res.text('n param not passed'));
 (...handlers: Handler) -> Plant
 ```
 
-Add handlers in parallel. Plant will iterate over handler until response body is set.
+Add handlers in parallel. Plant will iterate over handler until response body is
+set or any handler exists.
 
 ##### Example
 
@@ -230,18 +227,41 @@ function add({i = 0, ctx}, next) {
 plant.and(add, add, add, ({i, res}) => res.text(i)); // i is 3
 ```
 
-### Plant.handler()
+### Plant.getHandler()
 
 ```text
-() -> http.RequestListener
+() -> (context: InitialContext) -> Promise<InitialContext, Error>
 ```
 
-This method returns requestListener value for native node.js http/https server:
+This method returns request handler for http adapter:
+
+#### InitialContext Type
+```
+{
+    req: Request,
+    res: Response,
+    peer: Peer,
+    socket?: Socket,
+    route?: Route,
+    [key:string]?: *,
+}
+```
+
+Initial context is minimal context which could be used by Plant handler to
+generate response. Entries like `socket` and `route` will be generated
+automatically inside of handler if they are not presented. Entry `fetch` is
+generating by default and will be overwritten.
 
 ##### Example
 
 ```javascript
-http.createServer(plant.handler())
+const http = require('http')
+const createRequestListener = require('@plant/http-adapter')
+const Plant = require('@Plant/plant')
+
+http.createServer(
+    createRequestListener(plant.getHandler())
+)
 .listen(8080);
 ```
 
@@ -268,10 +288,10 @@ server.use(router.handler());
 ```
 
 This type represents other side of request connection. It could be user or
-proxy. It could be non unique for each request if the peer has sent
-several requests using the same connection.
+proxy-server. This instance could be non unique for each request if the peer has
+sent several requests using the same connection.
 
-For local TCP connection it could look like this:
+For local TCP connections it could look like this:
 
 ```javascript
 new Peer({
@@ -415,7 +435,6 @@ Read request body and parse it as JSON.
 ```
 
 Read request body and returns it as a string.
-
 
 ### Response Type
 ```text
