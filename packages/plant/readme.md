@@ -12,7 +12,7 @@
 Plant is WebAPI standards based HTTP2 web server, created with
 modular architecture and functional design in mind. It's modular, pure and less coupled.
 
-Plant supports HTTP 1 and HTTP 2. But it's transport agnostic and can work right
+Plant supports HTTP 1 and HTTP 2 protocols. But it's transport agnostic and can work right
 in the browser over WebSockets, WebRTC, or PostMessage.
 
 ## Features
@@ -61,8 +61,8 @@ npm i @plant/plant@next
 
 ## Usage
 
-Plant is designed to have no side effects thus it has no builtin transport. It
-depends on modules for http, https, WebSocket or anything else to provide
+Plant is designed to platform independent thus it has no builtin transport. It
+requires modules for http, https, WebSocket or anything else to provide
 transport layer. In this example http is used and `@plant/http2` should be
 installed (`npm i @plant/http`).
 

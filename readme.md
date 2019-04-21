@@ -15,7 +15,7 @@
 Plant is WebAPI standards based HTTP2 web server, created with
 modular architecture and functional design in mind. It's modular, pure and less coupled.
 
-Plant supports HTTP 1 and HTTP 2. But it's transport agnostic and can work right
+Plant supports HTTP 1 and HTTP 2 protocols. But it's transport agnostic and can work right
 in the browser over WebSockets, WebRTC, or PostMessage.
 
 ## Features
@@ -37,7 +37,7 @@ router.get('/greet', async function({res}) {
     res.body = 'Hello World'
 })
 
-plant.use('/api/v1/', router)
+plant.use('/api/v1', router)
 ```
 
 ## [Plant Router](packages/router) `@plant/router`
