@@ -1,6 +1,6 @@
 {
   "name": "@plant/http",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Plant node.js HTTP module's server handler",
   "main": "index.js",
   "scripts": {
@@ -19,15 +19,14 @@
   ],
   "author": "Rumkin <dev@rumk.in> (https://rumk.in/)",
   "license": "MIT",
-  "dependencies": {
-    "@plant/http-adapter": "^0.1.0"
-  },
+  "dependencies": {},
   "devDependencies": {
-    "@plant/plant": "^1.0.0-a.4",
+    "@plant/http-adapter": "^0.2.0-rc4",
+    "@plant/plant": "^2.0.0-rc7",
+    "@plant/test-http-suite": "^0.5.0",
     "jsdoc": "^3.5.5",
     "minami": "^1.2.3",
     "mocha": "^5.2.0",
-    "node-fetch": "^2.2.0",
     "should": "^13.2.2"
   }
 }

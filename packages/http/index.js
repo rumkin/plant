@@ -5,6 +5,7 @@ const createRequestHandler = require('@plant/http-adapter')
  * createServer - creates http server instance with Plant as request handler.
  *
  * @param  {Plant} plant Plant instance.
+ * @param  {object} options HTTP createServer method options.
  * @return {net.Server} Http server instance ready to listen port.
  * @example
  *
@@ -19,9 +20,9 @@ const createRequestHandler = require('@plant/http-adapter')
  *
  * createServer(plant).listen(8080)
  */
-function createServer(plant) {
+function createServer(plant, options = {}) {
   const server = http.createServer(
-    createRequestHandler(plant)
+    options, createRequestHandler(plant)
   )
 
   return server

@@ -1,35 +1,37 @@
-const net = require('net');
+/* global describe after it */
+const net = require('net')
 
-const should = require('should');
-const fetch = require('node-fetch');
-const Plant = require('@plant/plant');
+const should = require('should')
+const fetch = require('@plant/test-http-suite/fetch-http')
+const Plant = require('@plant/plant')
 
-const createServer = require('.');
+const createServer = require('.')
 
 describe('@plant/http', function() {
   it('Should server be instance of net.Server', function() {
-    const plant = new Plant();
-    const server = createServer(plant);
+    const plant = new Plant()
+    const server = createServer(plant)
 
-    should(server).be.instanceOf(net.Server);
-  });
+    should(server).be.instanceOf(net.Server)
+  })
 
   it('Should handle http requests', async function() {
-    const plant = new Plant();
+    const plant = new Plant()
     plant.use(({res}) => {
-      res.body = 'Hello';
-    });
+      res.body = 'Hello'
+    })
 
-    const server = createServer(plant);
+    const server = createServer(plant)
     after(function() {
-      server.close();
-    });
+      server.close()
+    })
 
-    server.listen(0);
+    server.listen(0)
 
-    const res = await fetch(`http://127.0.0.1:${server.address().port}`);
-    const body = await res.text();
+    const {text} = await fetch(
+      new URL(`http://127.0.0.1:${server.address().port}`)
+    )
 
-    should(body).be.equal('Hello');
-  });
-});
+    should(text).be.equal('Hello')
+  })
+})
