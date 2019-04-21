@@ -2,7 +2,9 @@
 const should = require('should')
 
 const {and} = require('@plant/flow')
-const {Request, Response, Route, Socket, Peer, URI} = require('@plant/plant')
+const Plant = require('@plant/plant')
+
+const {Request, Response, Route, Socket, Peer, URI} = Plant
 
 const Router = require('..')
 
@@ -110,5 +112,32 @@ describe('Router()', function(){
     should(result).has.ownProperty('user').which.is.equal('3')
     should(result).has.ownProperty('param').which.is.equal('id')
     should(result).has.ownProperty('raw').which.is.equal(true)
+  })
+
+  it('Should work with route provided by Plant', async () => {
+    const plant = new Plant()
+    const router = new Router()
+
+    router.get('/users/:id', async function({res, route}) {
+      res.send(route.params.id)
+    })
+
+    plant.use('/api/v1', router)
+
+    const res = new Response()
+    const req = new Request({
+      url: new URL('http://localhost/api/v1/users/111'),
+    })
+
+    await plant.getHandler()({
+      req,
+      res,
+      peer: new Peer(new URI({
+        protocol: 'process',
+        hostname: process.pid,
+      })),
+    })
+
+    should(res.body).be.equal('111')
   })
 })
