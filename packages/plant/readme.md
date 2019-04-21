@@ -60,26 +60,36 @@ npm i @plant/plant@next
 
 ## Usage
 
-Plant is abstract web server so it has no builtin transport. It depends on
-modules for http, https, ws or even rpc to provide transport layer. In this
-example https is using so it package should to be installed
-(`npm i @plant/https`).
+Plant is designed to have no side effects thus it has no builtin transport. It
+depends on modules for http, https, WebSocket or anything else to provide
+transport layer. In this example http is used and '@plant/http2' should be
+installed (`npm i @plant/http`).
 
 ```javascript
-const createServer = require('@plant/http');
-const Plant = require('@plant/plant');
+const createServer = require('@plant/http')
+const Plant = require('@plant/plant')
 
-const plant = new Plant();
+const plant = new Plant()
 
 // Send text response
 plant.use(async function({res}) {
-    res.body = 'Hello World';
-});
+    res.body = 'Hello World'
+})
 
 // Build request handler
 createServer(plant)
-.listen(8080);
+.listen(8080)
 ```
+
+### Important notices
+
+* Plant doesn't work with native node streams. It understands only WebAPI
+  streams. Use [web-stream-polyfills](https://npmjs.com/package/web-stream-polyfills)
+  package to create your wrapper. It's made for decreasing platform coupling.
+* Plant avoid extensions of Request and Response instances like express do. It's
+  using extensible contexts for that. You should avoid extension. To prevent
+  collisions it's recommended to use symbol as context entry name. Watch
+  [context extension example](https://github.com/rumkin/plant/tree/master/example/context-extension.js).
 
 ## Examples
 
@@ -99,7 +109,7 @@ The default context has this properties:
 * `route` – [Route](#route-type) instance.
 * `peer` – [Peer](#peer-type) instance.
 * `socket` – [Socket](#socket-type) instance.
-* `fetch`– [fetch()](#subrequest) function.
+* `fetch`– [fetch()](#fetch) function.
 
 ## Cascades explanation
 
@@ -525,7 +535,9 @@ Send Readable stream in response.
 
 ```javascript
 res.headers.set('content-type', 'application/octet-stream');
-res.stream(fs.createReadStream(req.path));
+// You should implement webApiStream yourself it's not a standard method.
+// You can use web-streams-polyfill for it.
+res.stream(webApiStream(fs.createReadStream(req.path)));
 ```
 
 ### Response.send()
@@ -621,7 +633,7 @@ plant.use(async function({req}, next) {
 // Response headers
 plant.use(async function({req, res}, next) {
     res.headers.set('content-type', 'image/png');
-    res.send(await fs.readFile('logo.png'));
+    res.send(webApiStream(fs.createReadStream('logo.png')));
 });
 ```
 
@@ -680,6 +692,7 @@ empty array.
 ```text
 {
     isEnded: Boolean = false,
+    canPush: Boolean = false,
 }
 ```
 
@@ -691,11 +704,15 @@ be sent.
 ### Socket.Socket()
 
 ```text
-({onEnd:() -> void}) -> Socket
+(options:{
+    onEnd?:() -> void,
+    onPush?(response: Response) -> Promise<void, Error>,
+}) -> Socket
 ```
 
-Constructor has one only option `onEnd` which is a function called when
-connection ended.
+Constructor has `onEnd` option which is a function called when
+connection ended and `onPush` option which is push handler, if it is specified
+then `Socket#canPush` will be set to `true`.
 
 ### Socket.canPush
 ```Text
