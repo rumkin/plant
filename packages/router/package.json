@@ -1,6 +1,6 @@
 {
   "name": "@plant/router",
-  "version": "1.0.0-rc3",
+  "version": "1.0.0-rc4",
   "description": "Router for plant server",
   "main": "src/index.js",
   "dependencies": {
@@ -10,7 +10,7 @@
     "path-to-regexp": "^1.7.0"
   },
   "devDependencies": {
-    "@plant/plant": "^2.0.0-rc7",
+    "@plant/plant": "^2.0.0-rc8",
     "allow-publish-tag": "^1.0.1",
     "babel-minify": "^0.5.0",
     "mocha": "^6.1.4",
