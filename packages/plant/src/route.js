@@ -64,10 +64,13 @@ class Route {
     this.path = this.path.slice(path.length)
     this.basePath = this.basePath + path
     this.params = Object.freeze({...this.params, ...params})
-    this.captured.push({
-      path,
-      params,
-    })
+    this.captured = Object.freeze([
+      ...this.captured,
+      {
+        path,
+        params,
+      },
+    ])
 
     return this
   }
