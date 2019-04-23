@@ -10,6 +10,7 @@
       "experimentalObjectRestSpread": true
     }
   },
+  "extends": "eslint:recommended",
   "rules": {
     "block-scoped-var": 2,
     "brace-style": [2, "stroustrup"],
