@@ -9,6 +9,7 @@ async function errorTrap(ctx, next) {
     await next()
   }
   catch (err) {
+    /* eslint-disable-next-line no-console */
     console.error(err)
     throw err
   }
@@ -67,6 +68,63 @@ describe('Server()', function() {
 
     const req = new Request({
       url: new URL('http://localhost/b'),
+    })
+
+    const res = new Response()
+
+    await plant.getHandler()({req, res})
+
+    should(res.body).be.equal('b')
+  })
+
+  it('Should serve complete routes', async () => {
+    const plant = new Plant()
+
+    ;['a', 'b', 'c']
+    .forEach((route) => {
+      plant.use('/' + route, ({res}) => res.body = route)
+    })
+
+    const req = new Request({
+      url: new URL('http://localhost/b-page'),
+    })
+
+    const res = new Response()
+
+    await plant.getHandler()({req, res})
+
+    should(res.body).be.equal(null)
+  })
+
+  it('Should serve route with nested paths', async () => {
+    const plant = new Plant()
+
+    ;['a', 'b', 'c']
+    .forEach((route) => {
+      plant.use('/' + route, ({res}) => res.body = route)
+    })
+
+    const req = new Request({
+      url: new URL('http://localhost/b/page'),
+    })
+
+    const res = new Response()
+
+    await plant.getHandler()({req, res})
+
+    should(res.body).be.equal('b')
+  })
+
+  it('Should serve nested routes', async () => {
+    const plant = new Plant()
+
+    ;['a', 'b', 'c']
+    .forEach((route) => {
+      plant.use('/page/' + route, ({res}) => res.body = route)
+    })
+
+    const req = new Request({
+      url: new URL('http://localhost/page/b'),
     })
 
     const res = new Response()

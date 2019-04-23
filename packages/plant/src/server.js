@@ -5,6 +5,7 @@
 
 const {and, or, getHandler} = require('@plant/flow')
 const isPlainObject = require('lodash.isplainobject')
+const escapeRegexp = require('escape-string-regexp')
 
 const cookieHandler = require('./handlers/cookie-handler')
 
@@ -282,16 +283,22 @@ function createFetch(handler, ctx) {
 }
 
 function getRouteMatcher(routePath) {
+  if (routePath === '/') {
+    // No need to match root
+    return function(ctx, next) {
+      return next()
+    }
+  }
+
+  const _routePath = routePath.replace(/\/+$/, '')
+  const re = new RegExp(`^${escapeRegexp(_routePath)}(\\/|\\/?$)`)
+
   return function({route, ...ctx}, next) {
-    if (! route.path.startsWith(routePath)) {
+    if (! re.test(route.path)) {
       return
     }
 
-    const subRoute = new Route({
-      path: route.path.slice(routePath.length),
-      basePath: route.basePath + routePath,
-      params: {...route.params},
-    })
+    const subRoute = route.clone().capture(routePath)
 
     return next({
       ...ctx,

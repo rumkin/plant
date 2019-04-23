@@ -172,7 +172,7 @@ Plant server configuration options.
 ```
 
 This method do several things:
-1. If route specified, adds route.
+1. If route specified, adds route matcher. Route like `/blog/post` will match `/blog/post` and `/blog/post/1` but not `/blog/post-true`.
 2. If handler count greater than one it creates turn for request which allows
 to change Request execution direction.
 
