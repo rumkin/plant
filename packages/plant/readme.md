@@ -580,18 +580,29 @@ Set empty body.
     path: string,
     basePath: string,
     params: Object,
+    captured: [{path: string, params: Object}],
 }
 ```
 
 Route type represents which part of path is handling now. It's using by nested
 routers. It stores parsed path in `basePath` and unparsed part in `path`
-properties. All extracted values are stored in `params`.
+properties. All extracted values are stored in `params`. Properties `params` and
+`captured` are frozen with `Object.freeze`.
 
 |Property|Description|
 |:-------|:----------|
 |path| Unparsed part of requested URL|
 |basePath| Parsed part of requested URL|
 |params| Params extracted from the `basePath` |
+|captured| Captured components of route |
+
+### Route.capture()
+```
+(path: string, [params: object]) -> Route
+```
+
+Cut `path` from route `Route#path` and append it to `Route#basePath`. Extend
+`Route#params` with values from `params`. Push path-params pair to `Route#captured` array.
 
 ### Route.clone()
 ```
@@ -605,23 +616,13 @@ Clone route object
 (props: {
     path?: string
     basePath?: string,
-    params?: object
+    params?: object,
+    captured?: [Capture],
 }) -> Route
 ```
 
-Copy current route instance and overwrite values with new `props`.
-
-
-### Route.instantiate()
+Override current values with the new `props`.
 ```
-(props: {
-    path: string
-    basePath: string,
-    params: object
-}) -> Route
-```
-
-Create nw route instance using values from `props`.
 
 ### Headers Type
 
