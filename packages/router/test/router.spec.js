@@ -24,8 +24,6 @@ function createContext(url) {
 
   const route = new Route({
     path: req.url.pathname,
-    basePath: '/',
-    params: {},
   })
 
   return {req, socket, peer, route}

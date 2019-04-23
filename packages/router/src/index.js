@@ -147,8 +147,8 @@ class Router {
    */
   getHandler() {
     return or(...this.handlers.map(
-      ({method, route, handlers}) => and(
-        method ? getRouteMatcher(method, route) : getSubrouteMatcher(route),
+      ({route, handlers}) => and(
+        getRouteMatcher(route),
         ...this.pre,
         ...handlers,
       )
@@ -229,7 +229,7 @@ class Router {
    */
 }
 
-;[
+[
   'all',
   'head',
   'get',
@@ -247,52 +247,12 @@ class Router {
 })
 
 /**
- * Creates route matcher. Wraps request object.
- *
- * @param  {String} method Http method name.
- * @param  {String} routePath  Route URL or pattern.
- * @return {HandleFunc} Route handler.
- */
-function getRouteMatcher(method, routePath) {
-  const matcher = createParamsMatcher(routePath)
-
-  return async function(ctx, next) {
-    const {req, route} = ctx
-
-    if (! req || ! route) {
-      return
-    }
-
-    if (req.method !== method && method !== 'all') {
-      return
-    }
-    const nextParams = matcher(route.path)
-
-    if (! nextParams) {
-      return
-    }
-
-    const subRoute = route.extend({
-      params: {
-        ...route.params,
-        ...nextParams,
-      },
-    })
-
-    await next({
-      ...ctx,
-      route: subRoute,
-    })
-  }
-}
-
-/**
  * Get subrouter matcher. Wraps request object.
  *
  * @param  {String} routePath Route URL or pattern.
  * @return {HandleFunc} Request handler with url matching.
  */
-function getSubrouteMatcher(routePath) {
+function getRouteMatcher(routePath) {
   const matcher = createParamsMatcher(routePath.replace(/\/*$/, '/*'))
 
   return async function(ctx, next){
@@ -302,20 +262,16 @@ function getSubrouteMatcher(routePath) {
       return
     }
 
-    const nextParams = matcher(route.path)
+    const {path} = route
+    const match = matcher(path + '/')
 
-    if (! nextParams) {
+    if (! match) {
       return
     }
 
-    const subRoute = route.instantiate({
-      path: '/' + nextParams[0],
-      basePath: route.basePath + route.path.slice(1, -nextParams[0].length),
-      params: {
-        ...route.params,
-        ...nextParams,
-      },
-    })
+    const {0: tail, ...nextParams} = match
+
+    const subRoute = route.clone().capture(path.slice(0, path.length-tail.length), nextParams)
 
     await next(
       {
@@ -356,4 +312,3 @@ function createParamsMatcher(route) {
 
 module.exports = Router
 Router.getRouteMatcher = getRouteMatcher
-Router.getSubrouteMatcher = getSubrouteMatcher
