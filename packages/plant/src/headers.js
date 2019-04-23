@@ -171,8 +171,7 @@ class Headers {
     return Array.from(this._headers.values())
     .map(function (value) {
       return value.join(', ')
-    })
-    [Symbol.iterator]()
+    })[Symbol.iterator]()
   }
 
   /**
@@ -184,8 +183,7 @@ class Headers {
     return Array.from(this._headers.entries())
     .map(function ([name, value]) {
       return [name, value.join(', ')]
-    })
-    [Symbol.iterator]()
+    })[Symbol.iterator]()
   }
 
   /**
@@ -246,7 +244,7 @@ function normalizedName(_name) {
     name = String(name)
   }
 
-  if (/[^a-z0-9\-#$%&'*+.\^_`|~\r\n]/i.test(name)) {
+  if (/[^a-z0-9\-#$%&'*+.^_`|~\r\n]/i.test(name)) {
     throw new TypeError('Invalid character in header field name')
   }
 
