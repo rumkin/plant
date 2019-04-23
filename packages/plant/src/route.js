@@ -2,8 +2,6 @@ class Route {
   static fromRequest(req) {
     return new this({
       path: req.url.pathname,
-      basePath: '/',
-      params: {},
     })
   }
 

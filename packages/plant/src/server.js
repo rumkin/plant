@@ -194,8 +194,6 @@ class Plant {
         if (! ctx.route) {
           ctx.route = new Route({
             path: ctx.req.url.pathname,
-            basePath: '/',
-            params: {},
           })
         }
 
