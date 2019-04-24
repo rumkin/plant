@@ -19,7 +19,7 @@ in the browser over WebSockets, WebRTC, or PostMessage.
 - ☁️ Lightweight: only 8 KiB minified and gzipped.
 - 📐 Standards based: uses WebAPI interfaces.
 - 🛳 Transport agnostic: no HTTP or platform coupling, ship requests via everything.
-- 🧳 Portable: works in node.js and even in browser.
+- 🧳 Portable: works even in browser.
 
 ---
 
