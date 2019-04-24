@@ -19,7 +19,6 @@ in the browser over WebSockets, WebRTC, or PostMessage.
 
 ## Features
 
-- 🏎 Fast: **15K** vs **14K** req/sec on Hello World test versus Express.
 - ☁️ Lightweight: only **8** KiB minified and gzipped.
 - 📐 Standards based: uses WebAPI interfaces.
 - 🛳 Transport agnostic: no HTTP or platform coupling, ship requests via __everything__.
