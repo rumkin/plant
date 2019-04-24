@@ -112,6 +112,8 @@ async function writeResponseIntoStream(stream, response) {
       }
 
       const reader = body.getReader()
+
+      // eslint-disable-next-line no-constant-condition
       while (true) {
         const {value, done} = await reader.read()
         // eslint-disable-next-line max-depth
