@@ -3,6 +3,9 @@
   "version": "1.0.1",
   "description": "Async flow library for Plant server",
   "main": "./src/index.js",
+  "engines": {
+    "node": ">=6"
+  },
   "devDependencies": {
     "@testup/cli": "^0.3.0",
     "@testup/console-reporter": "^0.1.1",

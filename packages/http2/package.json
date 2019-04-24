@@ -3,6 +3,9 @@
   "version": "0.1.0-a.1",
   "description": "Plant node.js HTTP2 module's server handler",
   "main": "index.js",
+  "engines": {
+    "node": ">=8"
+  },
   "scripts": {
     "test": "testup run test.spec.js",
     "prepublishOnly": "allow-publish-tag next && npm test"

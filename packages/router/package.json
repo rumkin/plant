@@ -3,6 +3,9 @@
   "version": "1.0.0-rc4",
   "description": "Router for plant server",
   "main": "src/index.js",
+  "engines": {
+    "node": ">=6"
+  },
   "dependencies": {
     "@plant/flow": "^1.0.0",
     "lodash.isplainobject": "^4.0.6",

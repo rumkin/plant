@@ -4,7 +4,7 @@
   "description": "WebAPI charged HTTP2-ready web server for node.js and browser",
   "main": "src/index.js",
   "engines": {
-    "node": ">= 10"
+    "node": ">= 11"
   },
   "scripts": {
     "start": "node .",

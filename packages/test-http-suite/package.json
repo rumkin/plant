@@ -3,6 +3,9 @@
   "version": "0.5.0",
   "description": "Simple Node.js native HTTP test server",
   "main": "index.js",
+  "engines": {
+    "node": ">=11"
+  },
   "scripts": {
     "test": "testup run test/http.spec.js test/https.spec.js test/http2.spec.js test/https2.spec.js",
     "prepublishOnly": "npm test"

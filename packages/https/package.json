@@ -3,6 +3,9 @@
   "version": "0.2.0-alpha",
   "description": "Plant node.js HTTP module's server handler",
   "main": "index.js",
+  "engines": {
+    "node": ">=6"
+  },
   "scripts": {
     "test": "NODE_TLS_REJECT_UNAUTHORIZED=0 mocha test.spec.js",
     "jsdoc": "jsdoc --configure .jsdoc.json --verbose",
