@@ -20,6 +20,7 @@ in the browser over WebSockets, WebRTC, or PostMessage.
 - 📐 Standards based: uses WebAPI interfaces.
 - 🛳 Transport agnostic: no HTTP or platform coupling, ship requests via everything.
 - 🧳 Portable: works even in browser.
+- 🛡 Security oriented: uses the most strict [Content Securiy Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) (CSP) by default.
 
 ---
 
@@ -63,6 +64,10 @@ Plant is designed to platform independent thus it has no builtin transport. It
 requires modules for http, https, WebSocket or anything else to provide
 transport layer. In this example http is used and `@plant/http2` should be
 installed (`npm i @plant/http`).
+
+> ⚠️ Note that default CSP header value is `default-src: 'self'; child-src: 'none'`.
+> This will prevent web page from loading any external resource at all.
+> Set minimal required CSP on your own. Read about [CSP](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) on Mozilla Developer Network
 
 ```javascript
 const createServer = require('@plant/http')
