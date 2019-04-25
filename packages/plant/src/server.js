@@ -17,6 +17,8 @@ const Route = require('./route')
 const Socket = require('./socket')
 const URI = require('./uri')
 
+const STRICT_CSP = 'default-src \'self\'; child-src \'none\';'
+
 /**
  * @typedef {Object} Plant.Context Default plant context with plant's instances for req and res.
  * @prop {Request} req Request instance.
@@ -89,7 +91,7 @@ class Plant {
       handlers = args.slice(1)
     }
     else {
-      options = {}
+      options = void 0
       handlers = args
     }
 
@@ -118,10 +120,11 @@ class Plant {
    * @param  {ServerOptions} options Server options params.
    * @constructor
    */
-  constructor({handlers = [], context = {}} = {}) {
+  constructor({handlers = [], context = {}, defaultCsp = STRICT_CSP} = {}) {
     this.handlers = handlers.map(getHandler)
 
     this.context = Object.assign({}, context)
+    this.defaultCsp = defaultCsp
   }
 
   /**
@@ -182,6 +185,7 @@ class Plant {
    * @returns {function(http.IncomingMessage,http.ServerResponse)} Native http request handler function
    */
   getHandler() {
+    const {defaultCsp} = this
     const initialCtx = {...this.context}
     const handler = and(
       async function (ctx, next) {
@@ -216,6 +220,10 @@ class Plant {
               )
             }
           }
+        }
+
+        if (! res.headers.has('content-security-policy') && defaultCsp) {
+          res.headers.set('content-security-policy', defaultCsp)
         }
 
         return ctx

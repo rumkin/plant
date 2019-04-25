@@ -2,7 +2,7 @@
 const should = require('should')
 
 const Plant = require('..')
-const {Request, Response, Socket} = Plant
+const {Request, Response, Peer, URI, Socket} = Plant
 
 async function errorTrap(ctx, next) {
   try {
@@ -12,6 +12,31 @@ async function errorTrap(ctx, next) {
     /* eslint-disable-next-line no-console */
     console.error(err)
     throw err
+  }
+}
+
+function createCtx({req, res, peer, socket, ...ctx} = {}) {
+  if (!res) {
+    res = new Response({
+      url: req.url,
+    })
+  }
+
+  if (! peer) {
+    peer = new Peer({
+      uri: new URI({
+        protocol: 'process:',
+        hostname: process.pid,
+      }),
+    })
+  }
+
+  if (!socket) {
+    socket = new Socket()
+  }
+
+  return {
+    req, res, peer, socket, ...ctx,
   }
 }
 
@@ -189,6 +214,25 @@ describe('Server()', function() {
       await plant.getHandler()({req, res})
 
       should(res.body).be.equal('b')
+    })
+  })
+
+  describe('Content-Security-Policy', function() {
+    it('Should be set by default (in the most strict variant)', async () => {
+      const plant = new Plant()
+
+      const req = new Request({
+        url: new URL('http://localhost/index.html'),
+      })
+
+      const ctx = createCtx({req})
+
+      const {res} = await plant.getHandler()(ctx)
+
+      should(res.headers.has('content-security-policy')).be.equal(true)
+      should(res.headers.get('content-security-policy')).be.equal(
+        'default-src \'self\'; child-src \'none\';',
+      )
     })
   })
 })
