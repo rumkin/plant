@@ -22,7 +22,7 @@ in the browser over WebSockets, WebRTC, or PostMessage.
 - ☁️ Lightweight: only **8** KiB minified and gzipped.
 - 📐 Standards based: uses WebAPI interfaces.
 - 🛳 Transport agnostic: no HTTP or platform coupling, ship requests via __everything__.
-- 🧳 Portable: works even in browser.
+- ✨ Serverless ready: works even in browser.
 - 🛡 Security oriented: uses the most strict [Content Securiy Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) (CSP) by default.
 
 ---
