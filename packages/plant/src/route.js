@@ -44,10 +44,6 @@ class Route {
   capture(path, params = {}) {
     path = path.replace(/\/$/, '')
 
-    if (! path.length) {
-      throw new Error('Empty path not allowed')
-    }
-
     if (path[0] !== '/') {
       path = '/' + path
     }
@@ -55,12 +51,15 @@ class Route {
     if (! this.path.startsWith(path)) {
       throw new Error('Current path does not start with provided path value')
     }
-    else if (this.path.length !== path.length && this.path[path.length] !== '/') {
-      throw new Error('Provided path has unexpected ending')
+    else if (path.length > 1) {
+      if (this.path.length !== path.length && this.path[path.length] !== '/') {
+        throw new Error('Provided path has unexpected ending')
+      }
+
+      this.path = this.path.slice(path.length)
+      this.basePath = this.basePath + path
     }
 
-    this.path = this.path.slice(path.length)
-    this.basePath = this.basePath + path
     this.params = Object.freeze({...this.params, ...params})
     this.captured = Object.freeze([
       ...this.captured,

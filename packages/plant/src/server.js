@@ -289,28 +289,32 @@ function createFetch(handler, ctx) {
 }
 
 function getRouteMatcher(routePath) {
-  if (routePath === '/') {
-    // No need to match root
-    return function(ctx, next) {
-      return next()
-    }
+  if (/\/\*$/.test(routePath) === false) {
+    const _routePath = routePath.replace(/\/+$/, '')
+    const re = new RegExp(`^${escapeRegexp(_routePath)}\\/?$`)
+
+    return matchRouteHandler.bind(null, re)
+  }
+  else {
+    const _routePath = routePath.replace(/\/+\*$/, '')
+    const re = new RegExp(`^${escapeRegexp(_routePath)}(\\/|\\/?$)`)
+
+    return matchRouteHandler.bind(null, re)
+  }
+}
+
+function matchRouteHandler(re, {route, ...ctx}, next) {
+  const match = route.path.match(re)
+  if (! match) {
+    return
   }
 
-  const _routePath = routePath.replace(/\/+$/, '')
-  const re = new RegExp(`^${escapeRegexp(_routePath)}(\\/|\\/?$)`)
+  const subRoute = route.clone().capture(match[0])
 
-  return function({route, ...ctx}, next) {
-    if (! re.test(route.path)) {
-      return
-    }
-
-    const subRoute = route.clone().capture(routePath)
-
-    return next({
-      ...ctx,
-      route: subRoute,
-    })
-  }
+  return next({
+    ...ctx,
+    route: subRoute,
+  })
 }
 
 module.exports = Plant

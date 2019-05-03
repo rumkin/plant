@@ -83,7 +83,71 @@ describe('Server()', function() {
     })
   })
 
-  it('Should serve routes', async () => {
+  it('Should serve "/" as route "/"', async () => {
+    const plant = new Plant()
+
+    plant.use('/', ({res}) => res.body = 'Hello, World')
+
+    const req = new Request({
+      url: new URL('http://localhost/'),
+    })
+
+    const res = new Response()
+
+    await plant.getHandler()({req, res})
+
+    should(res.body).be.equal('Hello, World')
+  })
+
+  it('Should not serve "/x" as route "/"', async () => {
+    const plant = new Plant()
+
+    plant.use('/', ({res}) => res.body = 'Hello, World')
+
+    const req = new Request({
+      url: new URL('http://localhost/x'),
+    })
+
+    const res = new Response()
+
+    await plant.getHandler()({req, res})
+
+    should(res.body).be.equal(null)
+  })
+
+  it('Should serve "/" as route "/*"', async () => {
+    const plant = new Plant()
+
+    plant.use('/*', ({res}) => res.body = 'Hello, World')
+
+    const req = new Request({
+      url: new URL('http://localhost/'),
+    })
+
+    const res = new Response()
+
+    await plant.getHandler()({req, res})
+
+    should(res.body).be.equal('Hello, World')
+  })
+
+  it('Should serve "/page" as route "/*"', async () => {
+    const plant = new Plant()
+
+    plant.use('/*', ({res}) => res.body = 'Hello, World')
+
+    const req = new Request({
+      url: new URL('http://localhost/page'),
+    })
+
+    const res = new Response()
+
+    await plant.getHandler()({req, res})
+
+    should(res.body).be.equal('Hello, World')
+  })
+
+  it('Should serve strict routes', async () => {
     const plant = new Plant()
 
     ;['a', 'b', 'c']
@@ -102,7 +166,7 @@ describe('Server()', function() {
     should(res.body).be.equal('b')
   })
 
-  it('Should serve complete routes', async () => {
+  it('Should serve complete-only routes', async () => {
     const plant = new Plant()
 
     ;['a', 'b', 'c']
@@ -121,12 +185,12 @@ describe('Server()', function() {
     should(res.body).be.equal(null)
   })
 
-  it('Should serve route with nested paths', async () => {
+  it('Should serve wildcard routes', async () => {
     const plant = new Plant()
 
     ;['a', 'b', 'c']
     .forEach((route) => {
-      plant.use('/' + route, ({res}) => res.body = route)
+      plant.use('/' + route + '/*', ({res}) => res.body = route)
     })
 
     const req = new Request({
@@ -140,7 +204,7 @@ describe('Server()', function() {
     should(res.body).be.equal('b')
   })
 
-  it('Should serve nested routes', async () => {
+  it('Should serve nested paths', async () => {
     const plant = new Plant()
 
     ;['a', 'b', 'c']
