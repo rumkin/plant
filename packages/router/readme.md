@@ -17,10 +17,10 @@ npm i @plant/router
 
 ## Usage
 
-Example of parameter handling for url `/users/1`:
+Strict route example:
 
 ```javascript
-const Router = require('@plant/router');
+const Router = require('@plant/router')
 
 const router = new Router()
 
@@ -32,8 +32,14 @@ router.get('/users/:id', ({res, route}) => {
     // Path before router
     route.basePath // '/'
 })
+```
 
-// Factory method as argument to Router.create()
+Wildcard route with nested router example:
+```javascript
+const Router = require('@plant/router')
+
+const router = new Router()
+
 router.use('/posts/*', Router.create((router) => {
   router.get('/:id', async () => {
     // ...
@@ -49,19 +55,21 @@ router.use('/posts/*', Router.create((router) => {
 
 ### Router Type
 
-Router allow to group url-dependent functions and extract params from URL.
+Router allows to filtrate request by HTTP method and URL pattern and to extract
+values from the URL.
 
 ##### Example
 
 ```javascript
-const plant = new Plant();
-const router = new Plant.Router;
+const Router = require('@plant/router')
 
-router.get('/', () => { /* get resource */ });
-router.post('/', () => { /* post resource */ });
-router.delete('/', () => { /* delete resource */ });
+const router = new Router()
 
-plant.use(router);
+router.get('/users/:id', () => { /* get resource */ })
+router.post('/users', () => { /* post resource */ })
+router.delete('/users/:id', () => { /* delete resource */ })
+
+plant.use('/api/v1/*', router)
 ```
 
 ### `Router.Router()`
@@ -79,7 +87,7 @@ Router constructor has no arguments.
 Factory method. Accepts `create` method as argument which is a function
 with router configuration logic. Example:
 
-```js
+```javascript
 Router.create((router) => {
   router.get('/greet', ({res}) => res.text('Hello World'))
 })
@@ -118,8 +126,10 @@ Specify `route` `handlers` for `GET` HTTP method.
 ##### Example
 
 ```javascript
+// Strict route
 router.get('/users/:id', () => {})
-// ...
+// Wildcard route
+router.get('/posts/*', () => {})
 ```
 
 ### `Router#post()`
