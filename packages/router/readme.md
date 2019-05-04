@@ -113,15 +113,12 @@ could be user loading or disk reading.
 (route:String, ...handlers:Handle) -> Router
 ```
 
-Methods to add handler for exact HTTP method.
+Specify `route` `handlers` for `GET` HTTP method.
 
 ##### Example
 
 ```javascript
-router.get('/users/:id', () => {});
-router.post('/users/', () => {});
-router.put('/users/:id', () => {});
-router.delete('/users/:id', () => {});
+router.get('/users/:id', () => {})
 // ...
 ```
 
