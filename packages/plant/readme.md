@@ -176,7 +176,10 @@ Plant server configuration options.
 ```
 
 This method do several things:
-1. If route specified, adds route matcher. Route like `/blog/post` will match `/blog/post` and `/blog/post/1` but not `/blog/post-true`.
+1. If route specified, adds route matcher. Route like `/blog/post` will match
+   `/blog/post` and `/blog/post` but not `/blog/post-true` or `/blog/post/1`.
+   Wildcard domains requires asterisk at the end of route. So only route `/blog/post/*`
+   will match `/blog/post/` and `/blog/post/1`.
 2. If handler count greater than one it creates turn for request which allows
 to change Request execution direction.
 
@@ -189,8 +192,9 @@ function conditionHandler({req}, next) {
     }
 }
 
-plant.use('/a', conditionHandler, ({res}) => res.text('page param passed'));
-plant.use('/a', ({res}) => res.text('page param not passed'));
+plant.use('/posts', conditionHandler, ({res}) => res.text('page param passed'));
+plant.use('/posts', ({res}) => res.text('page param not passed'));
+plant.use('/posts/*', ({res}) => res.text('internal page requested'))
 ```
 
 ### Plant.or()
