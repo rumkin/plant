@@ -52,7 +52,8 @@ Hello world with HTTP2 as transport.
 > ⚠️ Note that default CSP header value is `default-src: 'self'; child-src: 'none'`.
 > This will prevent  web page from loading any external resource at all.
 > Set minimal required CSP on your own. Read about [CSP](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) on Mozilla Developer Network
->
+
+
 ```javascript
 // Build request handler
 const createServer = require('@plant/http2');
@@ -83,7 +84,7 @@ router.get('/user/:name', async function({res, route}) {
   res.body = `Hello, ${route.params.name}!`
 })
 
-plant.use('/api/v1', router)
+plant.use('/api/v1/*', router)
 ```
 
 ### HTTP2 pushes
