@@ -289,15 +289,15 @@ function createFetch(handler, ctx) {
 }
 
 function getRouteMatcher(routePath) {
-  if (/\/\*$/.test(routePath) === false) {
-    const _routePath = routePath.replace(/\/+$/, '')
-    const re = new RegExp(`^${escapeRegexp(_routePath)}\\/?$`)
+  if (/\/\*$/.test(routePath)) {
+    const _routePath = routePath.replace(/\/+\*$/, '')
+    const re = new RegExp(`^${escapeRegexp(_routePath)}(\\/|\\/?$)`)
 
     return matchRouteHandler.bind(null, re)
   }
   else {
-    const _routePath = routePath.replace(/\/+\*$/, '')
-    const re = new RegExp(`^${escapeRegexp(_routePath)}(\\/|\\/?$)`)
+    const _routePath = routePath.replace(/\/+$/, '')
+    const re = new RegExp(`^${escapeRegexp(_routePath)}\\/?$`)
 
     return matchRouteHandler.bind(null, re)
   }
