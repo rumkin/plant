@@ -127,27 +127,27 @@ router.delete('/users/:id', () => {});
 
 ### `Router#post()`
 
-Same as [Router#get()](routerget) but for `POST` HTTP method.
+Same as [Router#get()](#routerget) but for `POST` HTTP method.
 
 ### `Router#put()`
 
-Same as [Router#get()](routerget) but for `PUT` HTTP method.
+Same as [Router#get()](#routerget) but for `PUT` HTTP method.
 
 ### `Router#patch()`
 
-Same as [Router#get()](routerget) but for `PATCH` HTTP method.
+Same as [Router#get()](#routerget) but for `PATCH` HTTP method.
 
 ### `Router#delete()`
 
-Same as [Router#get()](routerget) but for `DELETE` HTTP method.
+Same as [Router#get()](#routerget) but for `DELETE` HTTP method.
 
 ### `Router#head()`
 
-Same as [Router#get()](routerget) but for `HEAD` HTTP method.
+Same as [Router#get()](#routerget) but for `HEAD` HTTP method.
 
 ### `Router#options()`
 
-Same as [Router#get()](routerget) but for `OPTIONS` HTTP method.
+Same as [Router#get()](#routerget) but for `OPTIONS` HTTP method.
 
 ### `Router#addRoute()`
 ```
