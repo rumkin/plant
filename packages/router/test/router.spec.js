@@ -15,6 +15,10 @@ function createContext(url) {
     url: new URL(url),
   })
 
+  const res = new Response({
+    url: req.url,
+  })
+
   const peer = new Peer({
     uri: new URI({
       protocol: 'process:',
@@ -26,7 +30,7 @@ function createContext(url) {
     path: req.url.pathname,
   })
 
-  return {req, socket, peer, route}
+  return {req, res, socket, peer, route}
 }
 
 describe('Router()', function(){
@@ -67,10 +71,10 @@ describe('Router()', function(){
   it('should use subrouter', async function() {
     const router = new Router()
 
-    router.route('/users', Router.create({
-      'GET /:id': async function({res, route}) {
+    router.use('/users/*', Router.create((r) => {
+      r.get('/:id', async function({res, route}) {
         res.send(route.params.id)
-      },
+      })
     }))
 
     const res = new Response()
@@ -95,8 +99,8 @@ describe('Router()', function(){
       })
     })
 
-    router2.route('/users/:user', router3)
-    router1.route('/api', router2)
+    router2.use('/users/:user/*', router3)
+    router1.use('/api/*', router2)
 
     const res = new Response()
     const ctx = createContext('http://localhost:8080/api/users/3/param/id?raw')
@@ -120,7 +124,7 @@ describe('Router()', function(){
       res.send(route.params.id)
     })
 
-    plant.use('/api/v1', router)
+    plant.use('/api/v1/*', router)
 
     const res = new Response()
     const req = new Request({
@@ -137,5 +141,53 @@ describe('Router()', function(){
     })
 
     should(res.body).be.equal('111')
+  })
+
+  describe('Router#before()', function() {
+    it('Should add handler for custom route', async () => {
+      const router = new Router()
+
+      router.before(async (ctx, next) => {
+        return next({
+          ...ctx,
+          before: true,
+        })
+      })
+
+      router.use((ctx) => {
+        const {res, before} = ctx
+
+        res.json(before)
+      })
+
+      const ctx = createContext('http://localhost:8080/')
+      await and(router.getHandler())(ctx)
+      const {res} = ctx
+
+      should(res.body).be.a.String().and.equal('true')
+    })
+
+    it('Should not be called if route url does not match', async () => {
+      const router = new Router()
+      let hasRun = false
+      router.before(async (ctx, next) => {
+        hasRun = true
+        return next({
+          ...ctx,
+          before: true,
+        })
+      })
+
+      router.get('/some-route', (ctx) => {
+        const {res, before} = ctx
+
+        res.json(before)
+      })
+
+      const ctx = createContext('http://localhost:8080/')
+      await and(router.getHandler())(ctx)
+
+      should(hasRun).be.equal(false)
+    })
   })
 })

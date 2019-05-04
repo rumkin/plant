@@ -8,7 +8,6 @@ Router for Plant server.
 * [Usage](#usage).
 * [API](#api).
     * [Router](#router-type).
-    * [RouteState](#routestate-type).
 
 ## Install
 
@@ -33,6 +32,17 @@ router.get('/users/:id', ({res, route}) => {
     // Path before router
     route.basePath // '/'
 })
+
+// Factory method as argument to Router.create()
+router.use('/posts/*', Router.create((router) => {
+  router.get('/:id', async () => {
+    // ...
+  })
+
+  router.post('/', async () => {
+    // ...
+  })
+}))
 ```
 
 ## API
@@ -54,18 +64,53 @@ router.delete('/', () => { /* delete resource */ });
 plant.use(router);
 ```
 
-### Router.all()
+### `Router.Router()`
+```
+() -> Router
+```
+
+Router constructor has no arguments.
+
+### `Router.create()`
+```
+(create: (router: Router) -> void) -> Router
+```
+
+Factory method. Accepts `create` method as argument which is a function
+with router configuration logic. Example:
+
+```js
+Router.create((router) => {
+  router.get('/greet', ({res}) => res.text('Hello World'))
+})
+```
+
+### `Router#use()`
 
 ```text
-(url:String, ...handlers:Handle) -> Router
+(route:String, ...handlers:Handle) -> Router
 ```
 
 Method to add handler for any HTTP method.
 
-### Router.get(), .post(), .put(), .patch(), .delete(), .head(), .options()
+### `Router#before()`
 
 ```text
-(url:String, ...handlers:Handle) -> Router
+(...handlers:Handle) -> Router
+```
+
+Add handlers which will be fired before each handler defined by `.use`, `.get`,
+and other route handlers when route params are match route params
+(route and method).
+
+It can be helpful when you need to prepend each route with expensive
+computations which should be done only if request matches defined options. It
+could be user loading or disk reading.
+
+### `Router#get()`
+
+```text
+(route:String, ...handlers:Handle) -> Router
 ```
 
 Methods to add handler for exact HTTP method.
@@ -80,47 +125,37 @@ router.delete('/users/:id', () => {});
 // ...
 ```
 
-### Router.route()
+### `Router#post()`
 
-```text
-(route:String, ...handlers:Router) -> Router
+Same as [Router#get()](routerget) but for `POST` HTTP method.
+
+### `Router#put()`
+
+Same as [Router#get()](routerget) but for `PUT` HTTP method.
+
+### `Router#patch()`
+
+Same as [Router#get()](routerget) but for `PATCH` HTTP method.
+
+### `Router#delete()`
+
+Same as [Router#get()](routerget) but for `DELETE` HTTP method.
+
+### `Router#head()`
+
+Same as [Router#get()](routerget) but for `HEAD` HTTP method.
+
+### `Router#options()`
+
+Same as [Router#get()](routerget) but for `OPTIONS` HTTP method.
+
+### `Router#addRoute()`
+```
+(method:string|string[], route:string, ...handler:Handle) -> Router
 ```
 
-Add `handlers` into routes queue as new router. Subrouter will add matched
-url to `basePath` and reduce `path`. This is important for nested routers to
-receive url without prefix.
-
-##### Example
-```javascript
-router.route('/user', ({req}) => {
-    req.path; // -> '/'
-    req.basePath; // -> '/user'
-});
-router.get('/user', ({req}) => {
-    req.path; // -> '/user'
-    req.basePath; // -> '/'
-});
-```
-
-### RouteState Type
-
-```text
-{
-    path: string
-    basePath: string,
-    params: {[key: string]: string}
-}
-```
-
-Route holds router state. It has two properties `path` and `basePath`
-which are parsed and unparsed parts of the request url pathname respectively.
-Values extracted from parsed path places into `params`.
-
-|Property|Description|
-|:-------|:----------|
-|path| Current unprocessed pathname part |
-|basePath| Pathname part processed by overlaying handler |
-|params   |Params extracted from path   |
+Add route handler and return router instance. Use `method` to specify HTTP
+method or methods supported by the `route` `handler`.
 
 ## License
 

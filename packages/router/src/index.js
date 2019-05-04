@@ -6,7 +6,6 @@
 const {and, or, getHandler} = require('@plant/flow')
 
 const pathToRegexp = require('path-to-regexp')
-const isPlainObject = require('lodash.isplainobject')
 const isString = require('lodash.isstring')
 
 /**
@@ -35,21 +34,7 @@ class Router {
   static create(routes) {
     const router = this.new()
 
-    if (isPlainObject(routes)) {
-      Object.getOwnPropertyNames(routes)
-      .forEach((key) => {
-        const [method, route] = key.split(' ')
-        let handlers = routes[key]
-
-        if (! Array.isArray(handlers)) {
-          handlers = [handlers]
-        }
-        router.addRoute(method, route, ...handlers)
-      })
-    }
-    else {
-      routes(router)
-    }
+    routes(router)
 
     return router
   }
@@ -69,30 +54,22 @@ class Router {
    * @return {Router} Returns `this`.
    */
   addRoute(_method, route, ...handlers) {
-    if (_method) {
-      let methods
-      if (Array.isArray(_method)) {
-        methods = _method
-      }
-      else {
-        methods = _method.split(/\s+/)
-      }
-
-      for (const method of methods) {
-        this.handlers.push({
-          method: method.toUpperCase(),
-          route,
-          handlers: handlers.map(getHandler),
-        })
-      }
+    let methods
+    if (Array.isArray(_method)) {
+      methods = _method
     }
     else {
+      methods = _method.split(/\s+/)
+    }
+
+    for (const method of methods) {
       this.handlers.push({
-        method: null,
+        method: method.toUpperCase(),
         route,
         handlers: handlers.map(getHandler),
       })
     }
+
     return this
   }
 
@@ -130,17 +107,6 @@ class Router {
   }
 
   /**
-   * Add subrouter.
-   *
-   * @param {String} route Route URL or pattern.
-   * @param {...HandleType} handlers Subroute handlers.
-   * @returns {void} No return value.
-   */
-  route(route, ...handlers) {
-    this.addRoute(null, route, ...handlers)
-  }
-
-  /**
    * Create cascade handler from router methods.
    *
    * @return {HandleFunc} Returns HandleFunc implementation.
@@ -155,15 +121,6 @@ class Router {
     ))
   }
 
-  /**
-   * @name Router#all
-   * @function
-   * @memberof Router
-   * @description Add method to match and HTTP method
-   * @param {String} url Route URL or pattern.
-   * @param {...HandleType} handlers Request handelers.
-   * @returns {Router}
-   */
   /**
    * @name Router#get
    * @function
@@ -230,7 +187,6 @@ class Router {
 }
 
 [
-  'all',
   'head',
   'get',
   'post',
@@ -253,7 +209,7 @@ class Router {
  * @return {HandleFunc} Request handler with url matching.
  */
 function getRouteMatcher(routePath) {
-  const matcher = createParamsMatcher(routePath.replace(/\/*$/, '/*'))
+  const matcher = createParamsMatcher(routePath)
 
   return async function(ctx, next){
     const {route} = ctx
@@ -263,15 +219,20 @@ function getRouteMatcher(routePath) {
     }
 
     const {path} = route
-    const match = matcher(path + '/')
+    const {params, matches} = matcher(path + '/')
 
-    if (! match) {
+    if (! matches.length) {
       return
     }
 
-    const {0: tail, ...nextParams} = match
+    const tail = '0' in params
+      ? params['0']
+      : ''
 
-    const subRoute = route.clone().capture(path.slice(0, path.length-tail.length), nextParams)
+    delete params['0']
+
+    const subRoute = route.clone()
+    .capture(path.slice(0, path.length-tail.length), params)
 
     await next(
       {
@@ -296,7 +257,7 @@ function createParamsMatcher(route) {
     const matches = re.exec(url)
 
     if (! matches) {
-      return null
+      return {params:{}, matches:[]}
     }
 
     const params = {}
@@ -306,7 +267,7 @@ function createParamsMatcher(route) {
       params[keys[i].name] = match
     })
 
-    return params
+    return {params, matches}
   }
 }
 
