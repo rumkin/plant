@@ -295,7 +295,7 @@ describe('Server()', function() {
 
       should(res.headers.has('content-security-policy')).be.equal(true)
       should(res.headers.get('content-security-policy')).be.equal(
-        'default-src \'self\'; child-src \'none\';',
+        'default-src localhost; form-action localhost',
       )
     })
   })

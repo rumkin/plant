@@ -49,7 +49,7 @@ npm i @plant/http2
 
 Hello world with HTTP2 as transport.
 
-> ⚠️ Note that default CSP header value is `default-src: 'self'; child-src: 'none'`.
+> ⚠️ Note that default CSP header value is `default-src localhost; form-action localhost`.
 > This will prevent  web page from loading any external resource at all.
 > Set minimal required CSP on your own. Read about [CSP](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) on Mozilla Developer Network
 

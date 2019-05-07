@@ -29,6 +29,7 @@ in the browser over WebSockets, WebRTC, or PostMessage.
 * [Install](#install).
 * [Usage](#usage).
 * [Examples](#examples).
+* [Content Security Policy][#content-security-policy].
 * [API](#api).
     * [Plant](#plant-type).
     * [Handler](#handler-type).
@@ -65,7 +66,7 @@ requires modules for http, https, WebSocket or anything else to provide
 transport layer. In this example http is used and `@plant/http2` should be
 installed (`npm i @plant/http`).
 
-> ⚠️ Note that default CSP header value is `default-src: 'self'; child-src: 'none'`.
+> ⚠️ Note that default CSP header value is `default-src localhost; form-action localhost`.
 > This will prevent web page from loading any external resource at all.
 > Set minimal required CSP on your own. Read about [CSP](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) on Mozilla Developer Network
 
@@ -73,7 +74,13 @@ installed (`npm i @plant/http`).
 const createServer = require('@plant/http')
 const Plant = require('@plant/plant')
 
+// In development:
 const plant = new Plant()
+
+// In production:
+const plant = new Plant({
+  csp: Plant.CSP.STRICT,
+})
 
 // Send text response
 plant.use(async function({res}) {
@@ -143,6 +150,113 @@ It allows to create predictable behavior and avoid unexpected side effects.
 Plant itself overwrites default node.js HTTP Request and Response objects
 with Plant.Request and Plant.Response.
 
+## Content Security Policy
+
+Plant has built-in CSP header definition mechanism which is very strict. And
+doesn't provide wide permissions as other servers do. It's rules based on
+principle everything which is not allowed is forbidden. And default CSP is
+local-only. So if the server will be deployed accidentally without correct CSP
+policy the server will not work.
+
+Default CSP is `Plant.CSP.LOCAL` which allows load resources only via HTTPS
+protocol from origin domain.
+
+There is 3 types of default CSP policy sets:
+* LOCAL
+* DEV
+* TEST
+* STRICT
+
+Example:
+
+```javascript
+const Plant = require('@plant/plant')
+
+// Default CSP value defined with Plant's constant.
+const plant = new Plant({
+  csp: Plant.CSP.STRICT,
+})
+// Default CSP value defined as a method
+const plant = new Plant({
+  csp: (proto, hostname, port, pathname) => `default-src ${hostname}:${port}`,
+})
+
+// Disable default CSP (not recommended)
+const plant = new Plant({
+  csp: null
+})
+```
+
+## CSP.LOCAL (default)
+
+⚠️ Not for production
+
+`Plant.CSP.LOCAL` policy set contains policies which allows localhost serving only.
+
+|Policy|Value|
+|:-------|:----------|
+|default-src   |localhost   |
+|form-action   |localhost   |
+
+### CSP.DEV
+
+⚠️ Not for production
+
+`Plant.CSP.DEV` variable contains the most permissive CSP value: `default-src 'self'`.
+Which allows to load plugins, open site in frames and send form data everywhere.
+This policy shouldn't be used in production **never**.
+
+|Policy|Value|
+|:-------|:----------|
+|default-src   |`'self'`   |
+|form-action   |`'self'`   |
+
+### CSP.TEST
+
+⚠️ Not for production
+
+`Plant.CSP.TEST` is used for local testing without HTTPS. It's very close to
+the STRICT policy but use `'self'` as an allowed resource for loadable content
+and form data.
+
+|Policy|Value|
+|:-------|:----------|
+|default-src   |`'none'`   |
+|connect-src   | `'self'`  |
+|font-src   | `'self'`  |
+|img-src   | `'self'`  |
+|manifest-src   | `'self'`  |
+|media-src   | `'self'`  |
+|script-src   | `'self'`  |
+|style-src   | `'self'`  |
+|worker-src   | `'self'`  |
+|form-action   | `'self'`  |
+|require-sri-for   | `script style`  |
+|block-all-mixed-content   | + |
+
+### CSP.STRICT
+
+✅ Safe for production
+
+`Plant.CSP.STRICT` is production version of policy set. It doesn't allow anything
+expect of current origin as a source of any kind of resources.The only acceptable
+protocol is HTTPS.
+
+|Policy|Value|
+|:-------|:----------|
+|default-src   |`'none'`   |
+|connect-src   | `https://%OIRIGIN%`  |
+|font-src   | `https://%OIRIGIN%`  |
+|img-src   | `https://%OIRIGIN%`  |
+|manifest-src   | `https://%OIRIGIN%`  |
+|media-src   | `https://%OIRIGIN%`  |
+|script-src   | `https://%OIRIGIN%`  |
+|style-src   | `https://%OIRIGIN%`  |
+|worker-src   | `https://%OIRIGIN%`  |
+|form-action   | `https://%OIRIGIN%`  |
+|require-sri-for   | `script style`  |
+|block-all-mixed-content   | + |
+
 ## API
 
 ### Plant Type
@@ -160,6 +274,7 @@ define routes and set uncaught error handler.
 {
     handlers: Handlers[] = [],
     context: Object = {},
+    csp: string|(protocol:string, hostname:string, port:string, pathname: string) -> string,
 }
 ```
 
@@ -169,6 +284,7 @@ Plant server configuration options.
 |:-------|:----------|
 |handlers| Array of request handlers added to cascade|
 |context| Default context values. Empty object by default|
+|csp| Default CSP header string or function which produce such string. It will be used only if CSP header isn't presented in response |
 
 ### Plant.use()
 ```text

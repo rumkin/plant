@@ -17,7 +17,50 @@ const Route = require('./route')
 const Socket = require('./socket')
 const URI = require('./uri')
 
-const STRICT_CSP = 'default-src \'self\'; child-src \'none\';'
+const CSP = Object.freeze({
+  // Local resources only
+  LOCAL: [
+    'default-src localhost',
+    'form-action localhost',
+  ].join('; '),
+  // Allow current origin only
+  DEV: [
+    'default-src \'self\'',
+    'form-action \'self\'',
+  ].join('; '),
+  // Allow HTTP protocol
+  TEST: [
+    'default-src \'none\'',
+    'connect-src \'self\'',
+    'font-src \'self\'',
+    'img-src \'self\'',
+    'manifest-src \'self\'',
+    'media-src \'self\'',
+    'script-src \'self\'',
+    'style-src \'self\'',
+    'worker-src \'self\'',
+    'form-action \'self\'',
+    'require-sri-for script style',
+    'block-all-mixed-content',
+  ].join('; '),
+  // Allow only self HTTPS
+  STRICT: (protocol, hostname) => {
+    return [
+      'default-src \'none\'',
+      'connect-src https://' + hostname,
+      'font-src https://' + hostname,
+      'img-src https://' + hostname,
+      'manifest-src https://' + hostname,
+      'media-src https://' + hostname,
+      'script-src https://' + hostname,
+      'style-src https://' + hostname,
+      'worker-src https://' + hostname,
+      'form-action https://' + hostname,
+      'require-sri-for script style',
+      'block-all-mixed-content',
+    ].join('; ')
+  },
+})
 
 /**
  * @typedef {Object} Plant.Context Default plant context with plant's instances for req and res.
@@ -120,11 +163,11 @@ class Plant {
    * @param  {ServerOptions} options Server options params.
    * @constructor
    */
-  constructor({handlers = [], context = {}, defaultCsp = STRICT_CSP} = {}) {
+  constructor({handlers = [], context = {}, csp = CSP.LOCAL} = {}) {
     this.handlers = handlers.map(getHandler)
 
     this.context = Object.assign({}, context)
-    this.defaultCsp = defaultCsp
+    this.csp = csp
   }
 
   /**
@@ -185,8 +228,19 @@ class Plant {
    * @returns {function(http.IncomingMessage,http.ServerResponse)} Native http request handler function
    */
   getHandler() {
-    const {defaultCsp} = this
     const initialCtx = {...this.context}
+    let csp
+    if (typeof this.csp === 'function') {
+      csp = this.csp
+    }
+    else if (typeof this.csp === 'string') {
+      const _csp = this.csp
+      csp = () => _csp
+    }
+    else {
+      csp = null
+    }
+
     const handler = and(
       async function (ctx, next) {
         if (! ctx.socket) {
@@ -208,7 +262,7 @@ class Plant {
 
         await next({...initialCtx, ...ctx})
 
-        const {res, socket, fetch} = ctx
+        const {req, res, socket, fetch} = ctx
         if (socket.canPush && res.hasPushes) {
           for (const push of res.pushes) {
             if (push.response !== null) {
@@ -222,8 +276,9 @@ class Plant {
           }
         }
 
-        if (! res.headers.has('content-security-policy') && defaultCsp) {
-          res.headers.set('content-security-policy', defaultCsp)
+        if (csp !== null && ! res.headers.has('content-security-policy')) {
+          const {protocol, hostname, port, pathname} = req.url
+          res.headers.set('content-security-policy', csp(protocol, hostname, port, pathname))
         }
 
         return ctx
@@ -327,4 +382,5 @@ Plant.Response = Response
 Plant.Route = Route
 Plant.Socket = Socket
 Plant.URI = URI
+Plant.CSP = CSP
 Plant.createFetch = createFetch
