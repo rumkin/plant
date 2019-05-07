@@ -35,6 +35,7 @@ router.get('/users/:id', ({res, route}) => {
 ```
 
 Wildcard route with nested router example:
+
 ```javascript
 const Router = require('@plant/router')
 
@@ -68,8 +69,6 @@ const router = new Router()
 router.get('/users/:id', () => { /* get resource */ })
 router.post('/users', () => { /* post resource */ })
 router.delete('/users/:id', () => { /* delete resource */ })
-
-plant.use('/api/v1/*', router)
 ```
 
 ### `Router.Router()`
