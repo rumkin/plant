@@ -4,6 +4,7 @@
 
 const isObject = require('lodash.isobject')
 const isPlainObject = require('lodash.isplainobject')
+const statuses = require('statuses')
 
 const {isReadableStream} = require('./util/stream')
 const Request = require('./request')
@@ -142,6 +143,15 @@ class Response {
    */
   get pushes() {
     return [...this._pushes]
+  }
+
+  /**
+   * get statusText - returns status text for current status code.
+   *
+   * @return {string} Status code string value
+   */
+  get statusText() {
+    return statuses[this.status]
   }
 
   /**

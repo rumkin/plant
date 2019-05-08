@@ -120,4 +120,28 @@ describe('Response()', function() {
       should(res.headers.get('content-length')).be.equal('5')
     })
   })
+
+  describe('Response#statusText', function() {
+    it('Should return "OK" by default', function() {
+      const res = new Response()
+
+      should(res.statusText).be.equal('OK')
+    })
+
+    it('Should return "Not Found" for 404', function() {
+      const res = new Response({
+        status: 404,
+      })
+
+      should(res.statusText).be.equal('Not Found')
+    })
+
+    it('Should return "Internal Server Error" for 500', function() {
+      const res = new Response({
+        status: 500,
+      })
+
+      should(res.statusText).be.equal('Internal Server Error')
+    })
+  })
 })

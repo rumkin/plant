@@ -1,6 +1,6 @@
 {
   "name": "@plant/plant",
-  "version": "2.0.0-rc9",
+  "version": "2.0.0-rc10",
   "description": "WebAPI charged HTTP2-ready web server for node.js and browser",
   "main": "src/index.js",
   "engines": {
@@ -41,7 +41,8 @@
     "lodash.escaperegexp": "^4.1.2",
     "lodash.isobject": "^3.0.2",
     "lodash.isplainobject": "^4.0.6",
-    "lodash.isstring": "^4.0.1"
+    "lodash.isstring": "^4.0.1",
+    "statuses": "^1.5.0"
   },
   "directories": {
     "test": "test",

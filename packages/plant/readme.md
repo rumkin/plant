@@ -566,6 +566,7 @@ Read request body and returns it as a string.
     ok: Boolean,
     hasBody: Boolean,
     status: Number,
+    statusText: String,
     headers: Headers,
     body: TypedArray|ReadableStream|String|Null,
 }
@@ -577,6 +578,7 @@ Read request body and returns it as a string.
 |ok| True if status is in range of 200 and 299|
 |hasBody| True if body is not null. Specify is response should be sent|
 |status| Status code. `200` By default|
+|statusText| HTTP status text representation. `OK` By default|
 |headers| Response headers as WebAPI Headers object|
 |body| Response body. Default is `null`|
 
