@@ -81,6 +81,15 @@ class Response {
   }
 
   /**
+   * Specify wether response status code is a redirect status.
+   *
+   * @return {boolean} Always false if status is invalid or does not mean redirection.
+   */
+  get redirected() {
+    return statuses.redirect.hasOwnProperty(this.status)
+  }
+
+  /**
    * Response URL property.
    *
    * @readonly

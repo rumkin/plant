@@ -581,6 +581,7 @@ Read request body and returns it as a string.
 |statusText| HTTP status text representation. `OK` By default|
 |headers| Response headers as WebAPI Headers object|
 |body| Response body. Default is `null`|
+|redirected | Specify wether response status is a redirection status |
 
 ### Response.Response()
 ```text

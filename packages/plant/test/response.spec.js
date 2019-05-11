@@ -144,4 +144,30 @@ describe('Response()', function() {
       should(res.statusText).be.equal('Internal Server Error')
     })
   })
+
+  describe('Response#redirected', function() {
+    it('Should be `true` if status is 301', function() {
+      const res = new Response({
+        status: 301,
+      })
+
+      should(res.redirected).be.equal(true)
+    })
+
+    it('Should be `false` if status is 200', function() {
+      const res = new Response({
+        status: 200,
+      })
+
+      should(res.redirected).be.equal(false)
+    })
+
+    it('Should be `false` if status is 0', function() {
+      const res = new Response({
+        status: 0,
+      })
+
+      should(res.redirected).be.equal(false)
+    })
+  })
 })
