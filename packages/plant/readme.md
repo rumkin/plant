@@ -29,7 +29,7 @@ in the browser over WebSockets, WebRTC, or PostMessage.
 * [Install](#install).
 * [Usage](#usage).
 * [Examples](#examples).
-* [Content Security Policy][#content-security-policy].
+* [Content Security Policy](#content-security-policy).
 * [API](#api).
     * [Plant](#plant-type).
     * [Handler](#handler-type).
