@@ -1,6 +1,6 @@
 {
   "name": "@plant/https",
-  "version": "0.2.0-alpha",
+  "version": "0.2.0-alpha3",
   "description": "Plant node.js HTTP module's server handler",
   "main": "index.js",
   "engines": {
@@ -24,7 +24,7 @@
   "author": "Rumkin <dev@rumk.in> (https://rumk.in/)",
   "license": "MIT",
   "dependencies": {
-    "@plant/http-adapter": "0.2.0"
+    "@plant/http-adapter": "0.2.0-rc4"
   },
   "devDependencies": {
     "@plant/plant": "^2.0.0-beta",
