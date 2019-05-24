@@ -19,10 +19,20 @@ const URI = require('./uri')
 
 const CSP = Object.freeze({
   // Local resources only
-  LOCAL: [
-    'default-src localhost',
-    'form-action localhost',
-  ].join('; '),
+  LOCAL: (protocol, hostname, port) => {
+    let origin
+    if (port) {
+      origin = 'localhost:' + port
+    }
+    else {
+      origin = 'localhost'
+    }
+
+    return [
+      'default-src ' + origin,
+      'form-action ' + origin,
+    ].join('; ')
+  },
   // Allow current origin only
   DEV: [
     'default-src \'self\'',
