@@ -282,7 +282,7 @@ describe('Server()', function() {
   })
 
   describe('Content-Security-Policy', function() {
-    it('Should be set by default (in the most strict variant)', async () => {
+    it('Should be set by default to Plant.CSP.LOCAL', async () => {
       const plant = new Plant()
 
       const req = new Request({
@@ -295,7 +295,7 @@ describe('Server()', function() {
 
       should(res.headers.has('content-security-policy')).be.equal(true)
       should(res.headers.get('content-security-policy')).be.equal(
-        'default-src localhost; form-action localhost',
+        "default-src localhost 'unsafe-eval' 'unsafe-inline'; form-action localhost",
       )
     })
   })
