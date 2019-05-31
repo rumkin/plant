@@ -31,7 +31,7 @@
     "no-undef": 2,
     "no-unused-vars": 1,
     "indent": [2, 2, { "MemberExpression": 0 }],
-    "quotes": [2, "single", "avoid-escape"],
+    "quotes": [2, "single", {"avoidEscape": true}],
     "semi": [2, "never"],
     "keyword-spacing": [2, {"before": true, "after": true}],
     "object-curly-spacing": [2, "never"],
