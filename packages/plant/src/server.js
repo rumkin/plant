@@ -22,50 +22,50 @@ const CSP = Object.freeze({
   LOCAL: (protocol, hostname, port) => {
     let origin
     if (port) {
-      origin = 'localhost:' + port
+      origin = `localhost:${port}`
     }
     else {
       origin = 'localhost'
     }
 
     return [
-      'default-src ' + origin,
-      'form-action ' + origin,
+      `default-src ${origin} 'unsafe-eval' 'unsafe-inline'`,
+      `form-action ${origin}`,
     ].join('; ')
   },
   // Allow current origin only
   DEV: [
-    'default-src \'self\'',
-    'form-action \'self\'',
+    "default-src 'self' 'unsafe-eval' 'unsafe-inline'",
+    "form-action 'self'",
   ].join('; '),
   // Allow HTTP protocol
   TEST: [
-    'default-src \'none\'',
-    'connect-src \'self\'',
-    'font-src \'self\'',
-    'img-src \'self\'',
-    'manifest-src \'self\'',
-    'media-src \'self\'',
-    'script-src \'self\'',
-    'style-src \'self\'',
-    'worker-src \'self\'',
-    'form-action \'self\'',
+    "default-src 'none'",
+    "connect-src 'self'",
+    "font-src 'self'",
+    "img-src 'self'",
+    "manifest-src 'self'",
+    "media-src 'self'",
+    "script-src 'self'",
+    "style-src 'self'",
+    "worker-src 'self'",
+    "form-action 'self'",
     'require-sri-for script style',
     'block-all-mixed-content',
   ].join('; '),
   // Allow only self HTTPS
   STRICT: (protocol, hostname) => {
     return [
-      'default-src \'none\'',
-      'connect-src https://' + hostname,
-      'font-src https://' + hostname,
-      'img-src https://' + hostname,
-      'manifest-src https://' + hostname,
-      'media-src https://' + hostname,
-      'script-src https://' + hostname,
-      'style-src https://' + hostname,
-      'worker-src https://' + hostname,
-      'form-action https://' + hostname,
+      "default-src 'none'",
+      `connect-src https://${hostname}`,
+      `font-src https://${hostname}`,
+      `img-src https://${hostname}`,
+      `manifest-src https://${hostname}`,
+      `media-src https://${hostname}`,
+      `script-src https://${hostname}`,
+      `style-src https://${hostname}`,
+      `worker-src https://${hostname}`,
+      `form-action https://${hostname}`,
       'require-sri-for script style',
       'block-all-mixed-content',
     ].join('; ')

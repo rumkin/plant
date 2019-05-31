@@ -195,8 +195,8 @@ const plant = new Plant({
 
 |Policy|Value|
 |:-------|:----------|
-|default-src   |localhost   |
-|form-action   |localhost   |
+|default-src   |`localhost 'unsafe-eval' 'unsafe-inline'`` |
+|form-action   |`localhost`   |
 
 ### CSP.DEV
 
@@ -208,7 +208,7 @@ This policy shouldn't be used in production **never**.
 
 |Policy|Value|
 |:-------|:----------|
-|default-src   |`'self'`   |
+|default-src   |`'self' 'unsafe-eval' 'unsafe-inline'` |
 |form-action   |`'self'`   |
 
 ### CSP.TEST
@@ -245,18 +245,19 @@ protocol is HTTPS.
 |Policy|Value|
 |:-------|:----------|
 |default-src   |`'none'`   |
-|connect-src   | `https://%OIRIGIN%`  |
-|font-src   | `https://%OIRIGIN%`  |
-|img-src   | `https://%OIRIGIN%`  |
-|manifest-src   | `https://%OIRIGIN%`  |
-|media-src   | `https://%OIRIGIN%`  |
-|script-src   | `https://%OIRIGIN%`  |
-|style-src   | `https://%OIRIGIN%`  |
-|worker-src   | `https://%OIRIGIN%`  |
-|form-action   | `https://%OIRIGIN%`  |
+|connect-src   | `https://%ORIGIN%`  |
+|font-src   | `https://%ORIGIN%`  |
+|img-src   | `https://%ORIGIN%`  |
+|manifest-src   | `https://%ORIGIN%`  |
+|media-src   | `https://%ORIGIN%`  |
+|script-src   | `https://%ORIGIN%`  |
+|style-src   | `https://%ORIGIN%`  |
+|worker-src   | `https://%ORIGIN%`  |
+|form-action   | `https://%ORIGIN%`  |
 |require-sri-for   | `script style`  |
 |block-all-mixed-content   | + |
 
+* **%ORIGIN%** is a hostname and port number from URL.
 ## API
 
 ### Plant Type
