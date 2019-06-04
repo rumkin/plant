@@ -119,7 +119,6 @@ By default context has this properties:
 * `req` – [Request](#request-type) instance. Request from client.
 * `res` – [Response](#response-type) instance. Response to client.
 * `route` – [Route](#route-type) instance. Current processed path.
-* `peer` – [Peer](#peer-type) instance. Other side of connection.
 * `socket` – [Socket](#socket-type) instance. Connection socket.
 * `fetch`– [fetch()](#fetch) function. Method to send request to itself.
 
@@ -364,9 +363,9 @@ This method returns request handler for http adapter:
 {
     req: Request,
     res: Response,
-    peer: Peer,
     socket?: Socket,
     route?: Route,
+    fetch: fetch,
     [key:string]?: *,
 }
 ```
@@ -838,6 +837,7 @@ empty array.
 ### Socket Type
 ```text
 {
+    peer: Peer,
     isEnded: Boolean = false,
     canPush: Boolean = false,
 }
@@ -852,6 +852,7 @@ be sent.
 
 ```text
 (options:{
+    peer: Peer,
     onEnd?:() -> void,
     onPush?(response: Response) -> Promise<void, Error>,
 }) -> Socket
@@ -875,6 +876,13 @@ Boolean
 
 Property specifies whether socket is ended. Using to prevent response from
 sending and cascade from propagation.
+
+### Socket.peer
+```Text
+Peer
+```
+
+Peer associated with the socket. Presented as Peer class instance.
 
 ### Socket.end()
 ```text

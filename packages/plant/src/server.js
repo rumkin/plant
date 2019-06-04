@@ -74,11 +74,20 @@ const CSP = Object.freeze({
 
 /**
  * @typedef {Object} Plant.Context Default plant context with plant's instances for req and res.
+ * @prop {fetch} fetch Server fetch method.
  * @prop {Request} req Request instance.
  * @prop {Response} res Response instance.
+ * @prop {Route} route ROute instance.
  * @prop {Socket} socket Socket instance.
  */
 
+/**
+ * @function fetch
+ * @description Fetch internal resource.
+ * @param {URL|Request} Subrequest url or Request object.
+ * @async
+ * @returns {Promise<Response,Error>} Resolved with Response instance Promise.
+ */
 /**
  * @function HandleFunc
  * @description Cascade handling function
@@ -253,8 +262,13 @@ class Plant {
 
     const handler = and(
       async function (ctx, next) {
+        // TODO Decide to remove this
         if (! ctx.socket) {
-          ctx.socket = new Socket()
+          ctx.socket = new Socket({
+            peer: new Peer({
+              uri: new URI({}),
+            }),
+          })
         }
 
         // If server mounted as handler of another server then route should

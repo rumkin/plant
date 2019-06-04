@@ -32,11 +32,13 @@ function createCtx({req, res, peer, socket, ...ctx} = {}) {
   }
 
   if (!socket) {
-    socket = new Socket()
+    socket = new Socket({
+      peer,
+    })
   }
 
   return {
-    req, res, peer, socket, ...ctx,
+    req, res, socket, ...ctx,
   }
 }
 
@@ -240,6 +242,12 @@ describe('Server()', function() {
     })
 
     const socket = new Socket({
+      peer: new Peer({
+        uri: new URI({
+          protocol: 'process:',
+          hostname: process.pid,
+        }),
+      }),
       async onPush(_pushed) {
         pushed = _pushed
       },

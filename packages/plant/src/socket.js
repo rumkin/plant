@@ -4,6 +4,8 @@
 
 const EventEmitter = require('eventemitter3')
 
+const Peer = require('./peer')
+
 function noop() {}
 
 /**
@@ -20,18 +22,32 @@ class Socket extends EventEmitter {
    * @param {function(Response):Promise<Response,Error>} [options.onPush] Callback triggered when push requested by server. It should be set  only when socket support pushes.
    * @constructor
    */
-  constructor({onEnd = noop, onPush = null} = {}) {
+  constructor({peer, onEnd = noop, onPush = null} = {}) {
     super()
 
     if (onPush !== null) {
       if (typeof onPush !== 'function') {
-        throw new TypeError('options.onPush should be null or a function')
+        throw new TypeError('options.onPush should be undefined, null or a function')
       }
     }
 
+    if (peer instanceof Peer === false) {
+      throw new TypeError('options.peer should be instance of a Peer')
+    }
+
+    this._peer = peer
     this._isEnded = false
     this._end = onEnd
     this._push = onPush
+  }
+
+  /**
+   * get canPush - specify wether socket is available to push responses.
+   *
+   * @return {bool} true if constructor's options.onPush function is defined.
+   */
+  get canPush() {
+    return this._push !== null
   }
 
   /**
@@ -43,8 +59,13 @@ class Socket extends EventEmitter {
     return this._isEnded
   }
 
-  get canPush() {
-    return this._push !== null
+  /**
+   * get peer - connection peer instance
+   *
+   * @return {Peer} Peer associated with the socket
+   */
+  get peer() {
+    return this._peer
   }
 
   /**
