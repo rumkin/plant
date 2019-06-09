@@ -90,7 +90,7 @@ module.exports = (title, createServer) => describe(title, function() {
   it('Should update to proxy values', async function() {
     const server = createServer(Plant.create(
       errorTrap,
-      async function({res, req, peer}) {
+      async function({res, req, socket:{peer}}) {
         res.json({
           peer: peer.uri.toString(),
           host: req.url.hostname,

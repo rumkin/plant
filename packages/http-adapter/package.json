@@ -16,7 +16,7 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "@plant/plant": "^2.0.0-rc6",
+    "@plant/plant": "^2.0.0-rc12",
     "@plant/test-http-suite": "^0.4.0",
     "allow-publish-tag": "^1.0.1",
     "eslint": "^4.0.0",

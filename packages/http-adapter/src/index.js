@@ -143,9 +143,12 @@ async function writeResponseIntoStream(stream, response) {
  *
  * @param  {Writable} connection Writable socket stream.
  * @param  {Http2Stream} stream HTTP2 Stream of connection.
+ * @param  {object} remote Remote params.
+ * @param  {string} remote.address Remote end address.
+ * @param  {number} remote.port Remote end port.
  * @return {Socket} New socket instance.
  */
-function createSocket(connection, stream) {
+function createSocket(connection, stream, remote) {
   let onPush
 
   if (stream && stream.pushAllowed) {
@@ -178,6 +181,13 @@ function createSocket(connection, stream) {
     onPush = null
   }
   const socket = new Socket({
+    peer: new Peer({
+      uri: new URI({
+        protocol: 'tcp:',
+        hostname: remote.address,
+        post: remote.port,
+      }),
+    }),
     onEnd() {
       if (! connection.ended) {
         connection.end()
@@ -234,14 +244,7 @@ function handleRequest(httpReq, httpRes, next) {
   const [host, remote, encrypted] = getResolvedNetworkProps(httpReq)
   const req = createRequest(httpReq, {host, encrypted})
   const res = createResponse(httpRes, {url: req.url})
-  const socket = createSocket(httpReq.socket, httpReq.stream)
-  const peer = new Peer({
-    uri: new URI({
-      protocol: 'tcp:',
-      hostname: remote.address,
-      post: remote.port,
-    }),
-  })
+  const socket = createSocket(httpReq.socket, httpReq.stream, remote)
 
   httpReq.socket.setMaxListeners(Infinity)
 
@@ -250,7 +253,6 @@ function handleRequest(httpReq, httpRes, next) {
     httpRes,
     req,
     res,
-    peer,
     socket,
   })
   .then(async () => {
@@ -330,7 +332,8 @@ function handleRequestError(req, res, error) {
   // Write error to res.
   if (! res.headersSent) {
     res.statusCode = 500
-    const message = 'Internal server error:\n' + error.message
+    // TODO output message only in development environment
+    const message = 'Internal server error'
     res.setHeader('content-type', 'text/plain')
     res.setHeader('content-length', message.length)
     res.write(message)
