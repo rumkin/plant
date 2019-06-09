@@ -76,11 +76,16 @@ module.exports = (title, createServer) => describe(title, function() {
     ))
 
     server.listen()
-
+    let error
+    server.on('error', (_error) => {
+      error = _error
+    })
     try {
       const {status} = await server.fetch('/')
 
       should(status).be.equal(500)
+      should(error).be.instanceOf(Error)
+      .and.has.ownProperty('message').which.equal('test')
     }
     finally {
       server.close()

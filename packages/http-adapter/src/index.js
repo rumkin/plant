@@ -338,11 +338,9 @@ function handleRequestError(req, res, error) {
     res.setHeader('content-length', message.length)
     res.write(message)
   }
-  else {
-    this.emit('error', error)
-  }
 
   res.end()
+  this.emit('error', error)
 }
 
 function contextWithout(keys) {
