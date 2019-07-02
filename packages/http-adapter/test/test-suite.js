@@ -14,6 +14,7 @@ async function errorTrap(ctx, next) {
     await next()
   }
   catch (err) {
+    // eslint-disable-next-line no-console
     console.error(err)
     throw err
   }
