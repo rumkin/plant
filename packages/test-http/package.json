@@ -1,6 +1,6 @@
 {
-  "name": "@plant/test-http-suite",
-  "version": "0.5.2",
+  "name": "@plant/test-http",
+  "version": "0.5.3",
   "description": "Simple Node.js native HTTP test server",
   "main": "index.js",
   "engines": {
@@ -21,6 +21,7 @@
     "test-utils"
   ],
   "author": "Rumkin <dev@rumk.in> (https://rumk.in/)",
+  "homepage": "https://github.com/rumkin/plant/tree/master/packages/test-http",
   "license": "MIT",
   "devDependencies": {
     "@testup/cli": "^0.4.0",
