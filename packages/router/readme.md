@@ -25,12 +25,12 @@ const Router = require('@plant/router')
 const router = new Router()
 
 router.get('/users/:id', ({res, route}) => {
-    // Get params
-    route.params.id // -> {id: "1"}
-    // Get current path segment
-    route.path // '/users/1'
-    // Path before router
-    route.basePath // '/'
+  // Get params
+  route.params.id // -> {id: "1"}
+  // Get current path segment
+  route.path // '/users/1'
+  // Path before router
+  route.basePath // '/'
 })
 ```
 

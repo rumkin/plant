@@ -1,6 +1,6 @@
 {
   "name": "@plant/router",
-  "version": "1.0.0-rc5",
+  "version": "1.0.0",
   "description": "Router for plant server",
   "main": "src/index.js",
   "engines": {
@@ -13,7 +13,7 @@
   },
   "devDependencies": {
     "@plant/plant": "^2.0.0-rc9",
-    "allow-publish-tag": "^1.0.1",
+    "allow-publish-tag": "^2.0.0",
     "babel-minify": "^0.5.0",
     "mocha": "^6.1.4",
     "should": "^13.2.3"
@@ -22,8 +22,9 @@
     "build": "npm run clean && mkdir dist && npm run compile && npm run minify",
     "clean": "rm -rf dist",
     "compile": "browserify -s PlantRouter src/index.js > dist/router.js",
+    "lint": "eslint src/**.js test/**.js",
     "minify": "babel-minify dist/router.js -o dist/router.min.js",
-    "prepublishOnly": "allow-publish-tag next && npm test && npm run build",
+    "prepublishOnly": "allow-publish-tag next && npm run lint && npm test && npm run build",
     "test": "mocha test/*.spec.js"
   }
 }
