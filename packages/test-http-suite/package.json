@@ -1,6 +1,6 @@
 {
   "name": "@plant/test-http-suite",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "Simple Node.js native HTTP test server",
   "main": "index.js",
   "engines": {
