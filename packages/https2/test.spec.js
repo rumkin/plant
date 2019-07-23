@@ -5,8 +5,8 @@ const should = require('should')
 const Plant = require('@plant/plant')
 const {Response} = Plant
 
-const fetch = require('@plant/test-http-suite/fetch-http2')
-const createServer = require('.')
+const fetch = require('@plant/test-http/fetch-http2')
+const {createServer} = require('.')
 
 module.exports = ({describe, use, it}) => describe('@plant/https2', function() {
   use(function(ctx, next) {
@@ -32,16 +32,16 @@ module.exports = ({describe, use, it}) => describe('@plant/https2', function() {
     it(
       'Should handle request',
       useServer,
-      async function({server, usePlant}) {
+      async function({runServer}) {
         const plant = new Plant()
         plant.use(({res}) => {
           res.body = 'Hello'
         })
 
-        usePlant(plant)
+        const server = runServer(plant)
 
         const {text} = await fetch(
-          new URL(`https://127.0.0.1:${server.address().port}/`),
+          new URL(`https://localhost:${server.address().port}/`),
           {
             rejectUnauthorized: false,
           }
@@ -54,25 +54,26 @@ module.exports = ({describe, use, it}) => describe('@plant/https2', function() {
     it(
       'Should provide ssl certificate',
       useServer,
-      async function({server, usePlant}) {
+      async function({runServer}) {
         let cert
         const plant = new Plant()
         plant.use(({res, ssl}) => {
-          cert = ssl.getCertificate()
+          cert = ssl.cert
           res.body = ''
         })
 
-        usePlant(plant)
+        const server = runServer(plant)
+        server.on('error', () => {})
 
         await fetch(
-          new URL(`https://127.0.0.1:${server.address().port}/`),
+          new URL(`https://localhost:${server.address().port}/`),
           {
             rejectUnauthorized: false,
           },
         )
 
         should(cert).be.an.Object()
-        .and.hasOwnProperty('pubkey')
+        .and.ownProperty('pubkey')
 
         should(cert.pubkey.toString('base64')).be.equal(`
           MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqHBGvg/7s3rJH8V/97/D
@@ -92,7 +93,7 @@ module.exports = ({describe, use, it}) => describe('@plant/https2', function() {
     it(
       'Should be able to push',
       useServer,
-      async function({server, usePlant}) {
+      async function({runServer}) {
         let canPush = null
         const plant = new Plant()
         plant.use(({res, socket}) => {
@@ -100,10 +101,10 @@ module.exports = ({describe, use, it}) => describe('@plant/https2', function() {
           res.body = 'Hello'
         })
 
-        usePlant(plant)
+        const server = runServer(plant)
 
         const {text} = await fetch(
-          new URL(`https://127.0.0.1:${server.address().port}/`),
+          new URL(`https://localhost:${server.address().port}/`),
           {
             rejectUnauthorized: false,
           },
@@ -117,7 +118,7 @@ module.exports = ({describe, use, it}) => describe('@plant/https2', function() {
     it(
       'Should push',
       useServer,
-      async function({server, usePlant}) {
+      async function({runServer}) {
         const plant = new Plant()
         plant.use(({res, socket}) => {
           socket.push(
@@ -135,10 +136,10 @@ module.exports = ({describe, use, it}) => describe('@plant/https2', function() {
           res.body = 'Hello'
         })
 
-        usePlant(plant)
+        const server = runServer(plant)
 
         const {text, pushed} = await fetch(
-          new URL(`https://127.0.0.1:${server.address().port}/`),
+          new URL(`https://localhost:${server.address().port}/`),
           {
             rejectUnauthorized: false,
             settings: {
@@ -161,30 +162,23 @@ module.exports = ({describe, use, it}) => describe('@plant/https2', function() {
 })
 
 async function useServer(ctx, next) {
-  let handler
-
-  const server = createServer({
-    getHandler() {
-      return function(httpCtx) {
-        return handler(httpCtx)
-      }
-    },
-  }, {
-    rejectUnauthorized: false,
-    ...ctx.ssl,
-  })
+  let server
+  const {ssl} = ctx
 
   try {
-    server.listen(0)
     await next({
       ...ctx,
-      server,
-      usePlant(plant) {
-        handler = plant.getHandler()
+      runServer(plant) {
+        server = createServer(plant, {
+          rejectUnauthorized: false,
+          ...ssl,
+        })
+        server.listen(0)
+        return server
       },
     })
   }
   finally {
-    server.close()
+    server && server.close()
   }
 }

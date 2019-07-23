@@ -15,19 +15,19 @@ npm i @plant/https2
 
 ```javascript
 // Build request handler
-const createServer = require('@plant/http2');
 const Plant = require('@plant/plant');
+const {createServer} = require('@plant/http2');
 
 const plant = new Plant();
 plant.use(({res, socket}) => {
-    res.body = 'Hello, World!'
+  res.body = 'Hello, World!'
 })
 
 createServer(plant, {
   // get SSL key and cert somehow
   key,
   cert,
-}).listen(8080)
+}).listen(443)
 ```
 
 ### Enable HTTP1

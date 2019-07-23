@@ -1,5 +1,5 @@
 const http2 = require('http2')
-const createRequestHandler = require('@plant/http-adapter')
+const {createRequestHandler} = require('@plant/http-adapter')
 
 /**
  * createServer - creates http server instance with Plant as request handler.
@@ -22,12 +22,14 @@ const createRequestHandler = require('@plant/http-adapter')
  */
 function createServer(plant, options = {}) {
   const server = http2.createSecureServer(
-    options, createRequestHandler(plant, [
-      (ctx, next) => {
-        const ssl = new SSL(ctx.httpReq.connection)
-        return next({...ctx, ssl})
-      },
-    ])
+    options, createRequestHandler(plant, {
+      handlers: [
+        (ctx, next) => {
+          const ssl = new SSL(ctx.httpReq.connection)
+          return next({...ctx, ssl})
+        },
+      ],
+    })
   )
 
   return server
@@ -36,9 +38,12 @@ function createServer(plant, options = {}) {
 class SSL {
   constructor(socket) {
     // TODO implement other SSL read methods
-    this.getCertificate = socket.getCertificate.bind(socket)
-    this.getPeerCertificate = socket.getPeerCertificate.bind(socket)
+    this.protocol = socket.getProtocol()
+    this.cipher = socket.getCipher()
+    this.cert = socket.getCertificate()
+    this.peerCert = socket.getPeerCertificate(true)
   }
 }
 
-module.exports = createServer
+exports.createServer = createServer
+exports.SSL = SSL
