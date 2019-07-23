@@ -2,5 +2,23 @@
 
 set -e
 
-cd packages/plant
-npm test
+CWD=$PWD
+
+run_test() {
+  local DIR=$1
+
+  echo "TEST: $DIR"
+
+  cd "$CWD/packages/$DIR"
+  [ INSTALL == "true" ] && npm i .
+  npm test
+}
+
+run_test plant
+run_test http-adapter
+run_test http
+run_test https
+run_test http2
+run_test https2
+run_test router
+run_test flow

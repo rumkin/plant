@@ -6,4 +6,4 @@ node_js:
 branches:
   only:
   - master
-script: ./test.sh
+script: INSTALL=true ./test.sh
