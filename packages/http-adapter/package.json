@@ -1,6 +1,6 @@
 {
   "name": "@plant/http-adapter",
-  "version": "0.2.0-rc5",
+  "version": "1.0.0",
   "description": "Plant web server node.js HTTP adapter",
   "main": "src/index.js",
   "engines": {
@@ -10,18 +10,18 @@
     "test": "mocha test/index.js",
     "lint": "npm run lint:js src/**.js",
     "lint:js": "eslint",
-    "prebulish": "allow-publish-tag next && lint && npm docs",
+    "prepublish": "allow-publish-tag next && lint && npm docs",
     "jsdoc": "jsdoc --configure .jsdoc.json --verbose",
     "docs": "npm run jsdoc && rm -rf docs && mv tmp/docs/*/*/* docs && rm -rf tmp/docs"
   },
   "license": "MIT",
   "devDependencies": {
-    "@plant/plant": "^2.0.0-rc12",
-    "@plant/test-http-suite": "^0.4.0",
+    "@plant/plant": "^2.0.0",
+    "@plant/test-http": "^0.5.3",
     "allow-publish-tag": "^1.0.1",
     "eslint": "^4.0.0",
     "istanbul": "^0.4.5",
-    "jsdoc": "^3.5.5",
+    "jsdoc": "^3.6.3",
     "minami": "^1.2.3",
     "mocha": "^5.2.0",
     "node-fetch": "^2.0.0",
@@ -32,8 +32,10 @@
     "web-streams-polyfill": "^2.0.2"
   },
   "peerDependencies": {
-    "@plant/flow": "^1.0.0",
-    "@plant/plant": "^2.0.0"
+    "@plant/flow": "^1.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "directories": {
     "test": "test"

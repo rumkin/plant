@@ -1,4 +1,4 @@
-const createHttpServer = require('@plant/test-http-suite/http')
+const createHttpServer = require('@plant/test-http/http')
 const createTest = require('./test-suite')
 
 const httpHandler = require('..')

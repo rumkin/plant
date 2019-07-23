@@ -4,14 +4,6 @@
  */
 
 const {and} = require('@plant/flow')
-const {
-  Peer,
-  Response,
-  Request,
-  Headers,
-  Socket,
-  URI,
-} = require('@plant/plant')
 const streams = require('web-streams-polyfill/ponyfill')
 const {URL} = require('url')
 const isObject = require('lodash.isobject')
@@ -71,7 +63,7 @@ function getResolvedNetworkProps(req) {
  * @param  {http.IncomingMessage} req Native Http request
  * @return {Request} Returns `this`.
  */
-function createRequest(req, {host, encrypted}) {
+function createRequest(req, {host, encrypted}, {Request, Headers}) {
   const protocol = encrypted
     ? 'https'
     : 'http'
@@ -148,7 +140,7 @@ async function writeResponseIntoStream(stream, response) {
  * @param  {number} remote.port Remote end port.
  * @return {Socket} New socket instance.
  */
-function createSocket(connection, stream, remote) {
+function createSocket(connection, stream, remote, {Socket, Peer, URI}) {
   let onPush
 
   if (stream && stream.pushAllowed) {
@@ -222,7 +214,7 @@ function createSocket(connection, stream, remote) {
  * @param  {http.ServerResponse} res Nodejs http ServerResponse instance.
  * @return {Response}     Plant.Response instance.
  */
-function createResponse(res, {url}) {
+function createResponse(res, {url}, {Response, Headers}) {
   return new Response({
     url,
     status: res.statusCode,
@@ -240,11 +232,11 @@ function createResponse(res, {url}) {
  * @return {void}
  * @async
  */
-function handleRequest(httpReq, httpRes, next) {
+function handleRequest(httpReq, httpRes, constructors, next) {
   const [host, remote, encrypted] = getResolvedNetworkProps(httpReq)
-  const req = createRequest(httpReq, {host, encrypted})
-  const res = createResponse(httpRes, {url: req.url})
-  const socket = createSocket(httpReq.socket, httpReq.stream, remote)
+  const req = createRequest(httpReq, {host, encrypted}, constructors)
+  const res = createResponse(httpRes, {url: req.url}, constructors)
+  const socket = createSocket(httpReq.socket, httpReq.stream, remote, constructors)
 
   httpReq.socket.setMaxListeners(Infinity)
 
@@ -322,8 +314,10 @@ function createRequestHandler(plant, handlers = []) {
     plant,
   )
 
+  const {Headers, Peer, Request, Response, Socket, URI} = plant.constructor
+
   return function (req, res) {
-    handleRequest(req, res, handler)
+    handleRequest(req, res, {Headers, Socket, Peer, URI, Request, Response}, handler)
     .catch(handleRequestError.bind(this, req, res))
   }
 }
