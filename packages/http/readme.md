@@ -12,15 +12,15 @@ npm i @plant/http
 
 ```javascript
 const Plant = require('@plant/plant');
-const createServer = require('@plant/http');
+const {createServer} = require('@plant/http');
 
 const plant = new Plant();
 
 plant.use(({res}) => {
-    res.body = 'Ok';
+  res.body = 'Ok';
 });
 
-createServer(plant).listen(8080);
+createServer(plant).listen(80);
 ```
 
 ## License

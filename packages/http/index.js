@@ -1,5 +1,5 @@
 const http = require('http')
-const createRequestHandler = require('@plant/http-adapter')
+const {createRequestHandler} = require('@plant/http-adapter')
 
 /**
  * createServer - creates http server instance with Plant as request handler.
@@ -28,4 +28,4 @@ function createServer(plant, options = {}) {
   return server
 }
 
-module.exports = createServer
+exports.createServer = createServer

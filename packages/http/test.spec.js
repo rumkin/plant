@@ -2,10 +2,10 @@
 const net = require('net')
 
 const should = require('should')
-const fetch = require('@plant/test-http-suite/fetch-http')
+const fetch = require('@plant/test-http/fetch-http')
 const Plant = require('@plant/plant')
 
-const createServer = require('.')
+const {createServer} = require('.')
 
 describe('@plant/http', function() {
   it('Should server be instance of net.Server', function() {
