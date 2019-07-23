@@ -4,9 +4,8 @@ const fs = require('fs')
 const net = require('net')
 
 const should = require('should')
-const fetch = require('node-fetch')
 const Plant = require('@plant/plant')
-
+const fetch = require('@plant/test-http-suite/fetch-https')
 const createServer = require('.')
 
 const passphrase = '12345678'
@@ -20,11 +19,11 @@ describe('@plant/https', function() {
   })
 
   it('Should server be instance of net.Server', function() {
-    const plant = new Plant()
-    const server = createServer(plant, {
+    const server = createServer(new Plant(), {
       key,
       cert,
       passphrase,
+      rejectUnauthorized: false,
     })
 
     should(server).be.instanceOf(net.Server)
@@ -40,6 +39,7 @@ describe('@plant/https', function() {
       key,
       cert,
       passphrase,
+      rejectUnauthorized: false,
     })
 
     after(function() {
@@ -48,10 +48,12 @@ describe('@plant/https', function() {
 
     server.listen(0)
 
-    const res = await fetch(`https://127.0.0.1:${server.address().port}`)
-    const body = await res.text()
+    const {status, text} = await fetch(`https://127.0.0.1:${server.address().port}`, {
+      rejectUnauthorized: false,
+    })
 
-    should(body).be.equal('Hello')
+    should(status).be.equal(200)
+    should(text).be.equal('Hello')
   })
 
   it('Should add ssl context variable', async function() {
@@ -67,6 +69,7 @@ describe('@plant/https', function() {
       key,
       cert,
       passphrase,
+      rejectUnauthorized: false,
     })
 
     after(function() {
@@ -75,11 +78,14 @@ describe('@plant/https', function() {
 
     server.listen(0)
 
-    const res = await fetch(`https://127.0.0.1:${server.address().port}`)
-    const body = await res.text()
+    const {status, text} = await fetch(`https://127.0.0.1:${server.address().port}`, {
+      rejectUnauthorized: false,
+    })
 
-    should(body).be.equal('Hello')
+    should(status).be.equal(200)
+    should(text).be.equal('Hello')
+
     should(ssl).be.an.Object()
-    .and.hasOwnProperty('getPeerCertificate')
+    .and.hasOwnProperty('peerCert')
   })
 })

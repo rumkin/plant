@@ -36,8 +36,10 @@ function createServer(plant, options = {}) {
 class SSL {
   constructor(socket) {
     // TODO implement other SSL read methods
-    this.getCertificate = socket.getCertificate.bind(socket)
-    this.getPeerCertificate = socket.getPeerCertificate.bind(socket)
+    this.protocol = socket.getProtocol()
+    this.cipher = socket.getCipher()
+    this.cert = socket.getCertificate()
+    this.peerCert = socket.getPeerCertificate(true)
   }
 }
 
