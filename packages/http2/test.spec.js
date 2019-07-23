@@ -4,8 +4,8 @@ const should = require('should')
 const Plant = require('@plant/plant')
 const {Response} = Plant
 
-const fetch = require('@plant/test-http-suite/fetch-http2')
-const createServer = require('.')
+const fetch = require('@plant/test-http/fetch-http2')
+const {createServer} = require('.')
 
 module.exports = ({describe, it}) => describe('@plant/http2', function() {
   describe('Interface', () => {
@@ -21,7 +21,7 @@ module.exports = ({describe, it}) => describe('@plant/http2', function() {
     it(
       'Should be able to push',
       useServer,
-      async function({server, usePlant}) {
+      async function({runServer}) {
         let canPush = null
         const plant = new Plant()
         plant.use(({res, socket}) => {
@@ -29,7 +29,7 @@ module.exports = ({describe, it}) => describe('@plant/http2', function() {
           res.body = 'Hello'
         })
 
-        usePlant(plant)
+        const server = runServer(plant)
         const {text} = await fetch(new URL(
           `http://127.0.0.1:${server.address().port}/`
         ))
@@ -42,7 +42,7 @@ module.exports = ({describe, it}) => describe('@plant/http2', function() {
     it(
       'Should push',
       useServer,
-      async function({server, usePlant}) {
+      async function({runServer}) {
         const plant = new Plant()
         plant.use(({res, socket}) => {
           socket.push(
@@ -60,7 +60,7 @@ module.exports = ({describe, it}) => describe('@plant/http2', function() {
           res.body = 'Hello'
         })
 
-        usePlant(plant)
+        const server = runServer(plant)
 
         const {text, pushed} = await fetch(
           new URL(`http://127.0.0.1:${server.address().port}/`),
@@ -85,27 +85,20 @@ module.exports = ({describe, it}) => describe('@plant/http2', function() {
 })
 
 async function useServer(ctx, next) {
-  let handler
-
-  const server = createServer({
-    getHandler() {
-      return function(httpCtx) {
-        return handler(httpCtx)
-      }
-    },
-  })
+  let server
 
   try {
-    server.listen(0)
     await next({
       ...ctx,
       server,
-      usePlant(plant) {
-        handler = plant.getHandler()
+      runServer(plant) {
+        server = createServer(plant)
+        server.listen(0)
+        return server
       },
     })
   }
   finally {
-    server.close()
+    server && server.close()
   }
 }

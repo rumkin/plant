@@ -15,16 +15,16 @@ npm i @plant/http2
 
 ```javascript
 // Build request handler
-const createServer = require('@plant/http2');
 const Plant = require('@plant/plant');
+const {createServer} = require('@plant/http2');
 
 const plant = new Plant();
 plant.use(({res, socket}) => {
-    res.body = 'Hello, World!'
+  res.body = 'Hello, World!'
 })
 
 createServer(plant)
-.listen(8080)
+.listen(80)
 ```
 
 ### Enable HTTP1
