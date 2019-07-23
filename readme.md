@@ -179,10 +179,10 @@ This is library for cascades. This is where contexts manage take place and reque
 
 This package is using to connect Plant and native Node's HTTP server. Modules http, https, http2, and https2 use it under the hood.
 
-### [Test HTTP Suite](packages/test-http-suite) `@plant/test-http-suite`
+### [Test HTTP Suite](packages/test-http) `@plant/test-http`
 
-[NPM](https://npmjs.com/package/@plant/test-http-suite) ·
-[Source](packages/test-http-suite) · [Readme](packages/test-http-suite/readme.md)
+[NPM](https://npmjs.com/package/@plant/test-http) ·
+[Source](packages/test-http) · [Readme](packages/test-http/readme.md)
 
 Tiny package with tools for HTTP testing. It simplify server creation and request sending and receiving.
 
