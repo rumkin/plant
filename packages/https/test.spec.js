@@ -5,8 +5,8 @@ const net = require('net')
 
 const should = require('should')
 const Plant = require('@plant/plant')
-const fetch = require('@plant/test-http-suite/fetch-https')
-const createServer = require('.')
+const fetch = require('@plant/test-http/fetch-https')
+const {createServer} = require('.')
 
 const passphrase = '12345678'
 let key
@@ -86,6 +86,6 @@ describe('@plant/https', function() {
     should(text).be.equal('Hello')
 
     should(ssl).be.an.Object()
-    .and.hasOwnProperty('peerCert')
+    .and.ownProperty('peerCert')
   })
 })

@@ -12,20 +12,20 @@ npm i @plant/https
 
 ```javascript
 const Plant = require('@plant/plant');
-const createServer = require('@plant/https');
+const {createServer} = require('@plant/https');
 
 const plant = new Plant();
 
 plant.use(({res}) => {
-    res.body = 'Ok';
+  res.body = 'Ok';
 });
 
 createServer(plant, {
-    // get SSL key and cert somehow
-    key,
-    cert,
+  // get SSL key and cert somehow
+  key,
+  cert,
 })
-.listen(8080);
+.listen(443);
 ```
 
 ## Copyright

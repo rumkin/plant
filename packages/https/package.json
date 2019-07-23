@@ -1,6 +1,6 @@
 {
   "name": "@plant/https",
-  "version": "0.2.0-alpha4",
+  "version": "1.0.0",
   "description": "Plant node.js HTTP module's server handler",
   "main": "index.js",
   "engines": {
@@ -8,9 +8,11 @@
   },
   "scripts": {
     "test": "mocha test.spec.js",
+    "lint": "eslint *.js",
     "jsdoc": "jsdoc --configure .jsdoc.json --verbose",
     "docs": "npm run jsdoc && rm -rf docs && mv tmp/docs/*/*/* docs && rm -rf tmp/docs",
-    "ssl-cert": "openssl req -newkey rsa:2048 -nodes -keyout var/key.pem -x509 -days 365 -out var/cert.pem"
+    "ssl-cert": "openssl req -newkey rsa:2048 -nodes -keyout var/key.pem -x509 -days 365 -out var/cert.pem",
+    "prepublishOnly": "allow-publish-tag next && npm run lint && npm test"
   },
   "repository": {
     "type": "git",
@@ -24,12 +26,13 @@
   "author": "Rumkin <dev@rumk.in> (https://rumk.in/)",
   "license": "MIT",
   "dependencies": {
-    "@plant/http-adapter": "^0.2.0-rc5"
+    "@plant/http-adapter": "^1.0.0"
   },
   "devDependencies": {
     "@plant/plant": "^2.0.0-rc12",
-    "@plant/test-http-suite": "^0.5.0",
-    "jsdoc": "^3.5.5",
+    "@plant/test-http": "^0.5.3",
+    "allow-publish-tag": "^2.0.0",
+    "jsdoc": "^3.6.3",
     "minami": "^1.2.3",
     "mocha": "^5.2.0",
     "should": "^13.2.2"

@@ -1,5 +1,5 @@
 const https = require('https')
-const createRequestHandler = require('@plant/http-adapter')
+const {createRequestHandler} = require('@plant/http-adapter')
 
 /**
  * createServer - creates http server instance with Plant as request handler.
@@ -22,12 +22,14 @@ const createRequestHandler = require('@plant/http-adapter')
  */
 function createServer(plant, options = {}) {
   const server = https.createServer(
-    options, createRequestHandler(plant, [
-      (ctx, next) => {
-        const ssl = new SSL(ctx.httpReq.connection)
-        return next({...ctx, ssl})
-      },
-    ])
+    options, createRequestHandler(plant, {
+      handlers: [
+        (ctx, next) => {
+          const ssl = new SSL(ctx.httpReq.connection)
+          return next({...ctx, ssl})
+        },
+      ],
+    })
   )
 
   return server
@@ -43,4 +45,5 @@ class SSL {
   }
 }
 
-module.exports = createServer
+exports.createServer = createServer
+exports.SSL = SSL
