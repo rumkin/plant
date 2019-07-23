@@ -1,6 +1,6 @@
 {
   "name": "@plant/plant",
-  "version": "2.0.0-rc12",
+  "version": "2.0.0",
   "description": "WebAPI charged HTTP2-ready web server for node.js and browser",
   "main": "src/index.js",
   "engines": {
@@ -9,9 +9,9 @@
   "scripts": {
     "start": "node .",
     "test": "mocha test/index.js",
-    "lint": "npm run lint:js src/**.js",
+    "lint": "npm run lint:js src/**.js var/**.js",
     "lint:js": "eslint",
-    "prepublishOnly": "allow-publish-tag next && npm run lint && npm run build && npm run docs",
+    "prepublishOnly": "npm run lint && npm run build && npm run docs",
     "jsdoc": "jsdoc --configure .jsdoc.json --verbose",
     "docs": "npm run jsdoc && rm -rf docs && mv ./tmp/docs/@plant/plant/* docs && rm -rf tmp/docs",
     "clean": "rm -rf dist",
@@ -23,14 +23,12 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "allow-publish-tag": "^1.0.0",
     "babel-minify": "^0.5.0",
     "browserify": "^16.2.3",
     "eslint": "^5.16.0",
-    "jsdoc": "^3.5.5",
+    "jsdoc": "^3.6.3",
     "minami": "^1.2.3",
-    "mocha": "^6.0.2",
-    "node-fetch": "^2.0.0",
+    "mocha": "^6.2.0",
     "should": "^11.2.1"
   },
   "dependencies": {
@@ -61,5 +59,8 @@
   ],
   "author": "rumkin",
   "homepage": "https://github.com/rumkin/plant",
-  "bugs": "https://github.com/rumkin/plant/issues"
+  "bugs": "https://github.com/rumkin/plant/issues",
+  "publishConfig": {
+    "access": "public"
+  }
 }

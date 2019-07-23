@@ -1,1 +1,2 @@
-window.Plant = require('../');
+/* global window */
+window.Plant = require('../')
