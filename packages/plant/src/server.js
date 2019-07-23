@@ -288,16 +288,15 @@ class Plant {
 
         const {req, res, socket, fetch} = ctx
         if (socket.canPush && res.hasPushes) {
-          for (const push of res.pushes) {
+          await Promise.all(res.pushes.map(push => {
             if (push.response !== null) {
-              await socket.push(push.response)
+              return socket.push(push.response)
             }
             else {
-              await socket.push(
-                await fetch(push.request, push.context)
-              )
+              return fetch(push.request, push.context)
+              .then(response => socket.push(response))
             }
-          }
+          }))
         }
 
         if (csp !== null && ! res.headers.has('content-security-policy')) {

@@ -226,7 +226,7 @@ describe('Server()', function() {
   })
 
   it('Should send pushes if socket supports it', async () => {
-    let pushed
+    const pushed = []
     const plant = new Plant()
 
     plant.use('/script.js', ({res}) => {
@@ -234,9 +234,17 @@ describe('Server()', function() {
       res.body = 'console.log("Hello")'
     })
 
+    plant.use('/style.css', ({res}) => {
+      res.headers.set('content-type', 'text/css')
+      res.body = 'body { font-family: sans-serif }'
+    })
+
     plant.use(({res}) => {
       res.push(new Request({
         url: new URL('/script.js', res.url),
+      }))
+      res.push(new Request({
+        url: new URL('/style.css', res.url),
       }))
       res.body = 'Hello, World!'
     })
@@ -248,8 +256,8 @@ describe('Server()', function() {
           hostname: process.pid,
         }),
       }),
-      async onPush(_pushed) {
-        pushed = _pushed
+      async onPush(response) {
+        pushed.push(response)
       },
     })
 
@@ -264,8 +272,11 @@ describe('Server()', function() {
     await plant.getHandler()({req, res, socket})
 
     should(res.body).be.equal('Hello, World!')
-    should(pushed).be.instanceof(Response)
-    should(pushed.body).be.equal('console.log("Hello")')
+    should(pushed).has.lengthOf(2)
+    should(pushed[0]).be.instanceof(Response)
+    should(pushed[0].body).be.equal('console.log("Hello")')
+    should(pushed[1]).be.instanceof(Response)
+    should(pushed[1].body).be.equal('body { font-family: sans-serif }')
   })
 
   describe('Server.route()', function() {
