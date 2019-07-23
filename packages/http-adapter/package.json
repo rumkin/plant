@@ -10,7 +10,7 @@
     "test": "mocha test/index.js",
     "lint": "npm run lint:js src/**.js",
     "lint:js": "eslint",
-    "prepublish": "allow-publish-tag next && lint && npm docs",
+    "prepublishOnly": "allow-publish-tag next && npm run lint && npm docs",
     "jsdoc": "jsdoc --configure .jsdoc.json --verbose",
     "docs": "npm run jsdoc && rm -rf docs && mv tmp/docs/*/*/* docs && rm -rf tmp/docs"
   },
@@ -18,7 +18,7 @@
   "devDependencies": {
     "@plant/plant": "^2.0.0",
     "@plant/test-http": "^0.5.3",
-    "allow-publish-tag": "^1.0.1",
+    "allow-publish-tag": "^2.0.0",
     "eslint": "^4.0.0",
     "istanbul": "^0.4.5",
     "jsdoc": "^3.6.3",

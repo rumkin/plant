@@ -69,28 +69,87 @@ module.exports = (title, createServer) => describe(title, function() {
     }
   })
 
-  it('Should return 500 response on errors', async function() {
-    const server = createServer(Plant.create(
-      async function() {
-        throw new Error('test')
+  describe('Error handling', function() {
+    it('Should return Unknown Error body, if options.debug is not specified', async function() {
+      const server = createServer(Plant.create(
+        async function() {
+          throw new Error('test')
+        }
+      ))
+
+      server.listen()
+      server.on('error', () => {})
+      try {
+        const {text} = await server.fetch('/')
+
+        should(text).be.equal('Internal server error')
       }
-    ))
-
-    server.listen()
-    let error
-    server.on('error', (_error) => {
-      error = _error
+      finally {
+        server.close()
+      }
     })
-    try {
-      const {status} = await server.fetch('/')
 
-      should(status).be.equal(500)
-      should(error).be.instanceOf(Error)
-      .and.has.ownProperty('message').which.equal('test')
-    }
-    finally {
-      server.close()
-    }
+    it('Should return Unknown Error body, if options.debug is specified', async function() {
+      const server = createServer(Plant.create(
+        async function() {
+          throw new Error('test')
+        }
+      ), {debug: true})
+
+      server.listen()
+      server.on('error', () => {})
+
+      try {
+        const {text} = await server.fetch('/')
+
+        should(text).be.equal('Error: test')
+      }
+      finally {
+        server.close()
+      }
+    })
+
+    it('Should return 500 response on errors', async function() {
+      const server = createServer(Plant.create(
+        async function() {
+          throw new Error('test')
+        }
+      ))
+
+      server.listen()
+      server.on('error', () => {})
+      try {
+        const {status} = await server.fetch('/')
+
+        should(status).be.equal(500)
+      }
+      finally {
+        server.close()
+      }
+    })
+
+    it('Should emit "error" event for server instance', async function() {
+      const server = createServer(Plant.create(
+        async function() {
+          throw new Error('test')
+        }
+      ))
+
+      server.listen()
+      let error
+      server.on('error', (arg) => {
+        error = arg
+      })
+      try {
+        await server.fetch('/')
+
+        should(error).be.instanceOf(Error)
+        .and.has.ownProperty('message').which.equal('test')
+      }
+      finally {
+        server.close()
+      }
+    })
   })
 
   it('Should update to proxy values', async function() {

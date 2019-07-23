@@ -11,6 +11,8 @@ const isObject = require('lodash.isobject')
 const {ReadableStream} = streams
 const TypedArray = Object.getPrototypeOf(Uint8Array)
 
+const INTERNAL_SERVER_ERROR_MSG = 'Internal server error'
+
 /**
  * @typedef {Object} NativeContext Initial http context with native instances for req and res.
  * @prop {http.IncomingMessage} req Request instance.
@@ -60,7 +62,11 @@ function getResolvedNetworkProps(req) {
 /**
  * Create Plant Request from native http.IncomingMessage
  *
- * @param  {http.IncomingMessage} req Native Http request
+ * @param {http.IncomingMessage} req Native Http request
+ * @param {Object} data Request data.
+ * @param {string} data.host Request hostname.
+ * @param {bool} data.encrypted Request encryption flag.
+ * @param {PlantLib} lib Plant objects constructors.
  * @return {Request} Returns `this`.
  */
 function createRequest(req, {host, encrypted}, {Request, Headers}) {
@@ -133,11 +139,12 @@ async function writeResponseIntoStream(stream, response) {
  * Creates Plant.Socket instance from http socket object. Bind abort event
  * listener to mark socket closed.
  *
- * @param  {Writable} connection Writable socket stream.
- * @param  {Http2Stream} stream HTTP2 Stream of connection.
- * @param  {object} remote Remote params.
- * @param  {string} remote.address Remote end address.
- * @param  {number} remote.port Remote end port.
+ * @param {Writable} connection Writable socket stream.
+ * @param {Http2Stream} stream HTTP2 Stream of connection.
+ * @param {object} remote Remote params.
+ * @param {string} remote.address Remote end address.
+ * @param {number} remote.port Remote end port.
+ * @param {PlantLib} lib Plant objects constructors.
  * @return {Socket} New socket instance.
  */
 function createSocket(connection, stream, remote, {Socket, Peer, URI}) {
@@ -211,7 +218,10 @@ function createSocket(connection, stream, remote, {Socket, Peer, URI}) {
 /**
  * Create Plant.Response instance from http.ServerResponse.
  *
- * @param  {http.ServerResponse} res Nodejs http ServerResponse instance.
+ * @param {http.ServerResponse} res Nodejs http ServerResponse instance.
+ * @param {Object} options Response options
+ * @param {URL} options.url Response URL.
+ * @param {PlantLib} lib Plant objects constructors.
  * @return {Response}     Plant.Response instance.
  */
 function createResponse(res, {url}, {Response, Headers}) {
@@ -228,15 +238,16 @@ function createResponse(res, {url}, {Response, Headers}) {
  *
  * @param  {http.IncomingMessage} httpReq - Http client request
  * @param  {http.ServerResponse} httpRes - Http server response
+ * @param  {PlantLib} lib - Plant constructors for Request, Response, Socket, etc.
  * @param  {function} next Default Plant's next method
  * @return {void}
  * @async
  */
-function handleRequest(httpReq, httpRes, constructors, next) {
+function handleRequest(httpReq, httpRes, lib, next) {
   const [host, remote, encrypted] = getResolvedNetworkProps(httpReq)
-  const req = createRequest(httpReq, {host, encrypted}, constructors)
-  const res = createResponse(httpRes, {url: req.url}, constructors)
-  const socket = createSocket(httpReq.socket, httpReq.stream, remote, constructors)
+  const req = createRequest(httpReq, {host, encrypted}, lib)
+  const res = createResponse(httpRes, {url: req.url}, lib)
+  const socket = createSocket(httpReq.socket, httpReq.stream, remote, lib)
 
   httpReq.socket.setMaxListeners(Infinity)
 
@@ -291,9 +302,21 @@ function handleRequest(httpReq, httpRes, constructors, next) {
  */
 
 /**
- * @typedef {Object} Handler Cascade handler is an object with method handler
- * @prop {CreateHandleFunc} handler Function that creates HandleFunc.
+ * Cascade handler is an object with method handler
+ * @typedef {Object} Handler
+ * @prop {CreateHandleFunc} handler - Function that creates HandleFunc.
  */
+
+/**
+  * Plant constructors object.
+  * @typedef {Object} PlantLib
+  * @prop {Headers} Headers - Headers constructor.
+  * @prop {Peer} Peer - Peer constructor.
+  * @prop {Request} Request - Request constructor.
+  * @prop {Response} Response - Response constructor.
+  * @prop {Socket} Socket - Socket constructor.
+  * @prop {URI} URI - URI constructor.
+  */
 
 /**
  * @typedef {HandleFunc|Handler} HandleType Cascade request handle function or Object
@@ -304,10 +327,12 @@ function handleRequest(httpReq, httpRes, constructors, next) {
  * Create native http request handler from Plant  instance
  *
  * @param {Plant} plant - Plant server instance.
- * @param {Handler[]} handlers – Intermediate handlers
- * @returns {function(http.IncomingMessage,http.ServerResponse)} Native http request handler function
+ * @param {Object} options - Handler creation options.
+ * @param {Handler[]} options.handlers – Intermediate handlers.
+ * @param {boolean} options.debug – Specify wether adapter is running in debug mode.
+ * @returns {function(http.IncomingMessage,http.ServerResponse)} Native http request handler function.
  */
-function createRequestHandler(plant, handlers = []) {
+function createRequestHandler(plant, {handlers = [], debug = false} = {}) {
   const handler = and(
     ...handlers,
     contextWithout(['httpReq', 'httpRes']),
@@ -318,16 +343,18 @@ function createRequestHandler(plant, handlers = []) {
 
   return function (req, res) {
     handleRequest(req, res, {Headers, Socket, Peer, URI, Request, Response}, handler)
-    .catch(handleRequestError.bind(this, req, res))
+    .catch(handleRequestError.bind(this, req, res, debug))
   }
 }
 
-function handleRequestError(req, res, error) {
+function handleRequestError(req, res, debug, error) {
   // Write error to res.
   if (! res.headersSent) {
+    const message = debug
+      ? `Error: ${error.message}`
+      : INTERNAL_SERVER_ERROR_MSG
+
     res.statusCode = 500
-    // TODO output message only in development environment
-    const message = 'Internal server error'
     res.setHeader('content-type', 'text/plain')
     res.setHeader('content-length', message.length)
     res.write(message)
@@ -350,3 +377,4 @@ function without(keys, value) {
 }
 
 module.exports = createRequestHandler
+createRequestHandler.INTERNAL_SERVER_ERROR_MSG = INTERNAL_SERVER_ERROR_MSG
