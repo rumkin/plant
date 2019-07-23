@@ -23,8 +23,8 @@ npm i @plant/plant
 
 ```javascript
 const http = require('http');
-const httpHandler = require('@plant/http-adapter');
 const Plant = require('@plant/plant');
+const {createRequestHandler} = require('@plant/http-adapter');
 
 const plant = new Plant();
 
@@ -34,8 +34,8 @@ plant.use('/greet', async function({res}) {
 });
 
 // Build request handler
-http.createServer(httpHandler(plant))
-.listen(8080);
+http.createServer(createRequestHandler(plant))
+.listen(80);
 ```
 
 ## Examples

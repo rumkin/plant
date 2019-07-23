@@ -376,5 +376,5 @@ function without(keys, value) {
   return newValue
 }
 
-module.exports = createRequestHandler
-createRequestHandler.INTERNAL_SERVER_ERROR_MSG = INTERNAL_SERVER_ERROR_MSG
+exports.createRequestHandler = createRequestHandler
+exports.INTERNAL_SERVER_ERROR_MSG = INTERNAL_SERVER_ERROR_MSG
