@@ -5,13 +5,13 @@ This is a very simple test servers made for Plant development.
 ## Install
 
 ```bash
-npm i @plant/test-server-suite
+npm i @plant/test-http-suite
 ```
 
 ## Usage
 
 ```javascript
-const createHttp = require('@plant/test-server-suite/http')
+const createHttp = require('@plant/test-http-suite/http')
 
 const server = createHttp((req, res) => {
     res.end('Hello')

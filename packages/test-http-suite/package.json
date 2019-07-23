@@ -1,6 +1,6 @@
 {
   "name": "@plant/test-http-suite",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Simple Node.js native HTTP test server",
   "main": "index.js",
   "engines": {
@@ -27,5 +27,8 @@
     "@testup/console-reporter": "^0.1.1",
     "@testup/core": "^0.1.2",
     "should": "^13.2.3"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
