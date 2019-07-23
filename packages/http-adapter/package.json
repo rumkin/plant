@@ -19,7 +19,6 @@
     "@plant/plant": "^2.0.0",
     "@plant/test-http": "^0.5.3",
     "allow-publish-tag": "^2.0.0",
-    "eslint": "^4.0.0",
     "istanbul": "^0.4.5",
     "jsdoc": "^3.6.3",
     "minami": "^1.2.3",
