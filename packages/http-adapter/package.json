@@ -1,6 +1,6 @@
 {
   "name": "@plant/http-adapter",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Plant web server node.js HTTP adapter",
   "main": "src/index.js",
   "engines": {

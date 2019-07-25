@@ -8,7 +8,7 @@ const streams = require('web-streams-polyfill/ponyfill')
 const {URL} = require('url')
 const isObject = require('lodash.isobject')
 
-const {ReadableStream} = streams
+const {ReadableStream: WebReadableStream} = streams
 const TypedArray = Object.getPrototypeOf(Uint8Array)
 
 const INTERNAL_SERVER_ERROR_MSG = 'Internal server error'
@@ -81,7 +81,7 @@ function createRequest(req, {host, encrypted}, {Request, Headers}) {
     method,
     url,
     headers: new Headers(req.headers, Headers.MODE_IMMUTABLE),
-    body: new ReadableStream({
+    body: new WebReadableStream({
       start(controller) {
         req.resume()
         req.on('data', (chunk) => {
@@ -100,39 +100,75 @@ function createRequest(req, {host, encrypted}, {Request, Headers}) {
   return inReq
 }
 
-async function writeResponseIntoStream(stream, response) {
+/**
+ * writeResponseToWritableStream - Write Plant Response into Writeable stream.
+ *
+ * @param  {WriteableStream} stream WriteableStream instance.
+ * @param  {Response} response Plant Response instance.
+ * @return {Promise<void,Error>} Resolves when Response's stream writing is finished.
+ */
+async function writeResponseToWritableStream(stream, response) {
   const {body} = response
 
-  if (isObject(body)) {
-    if (typeof body.getReader === 'function') {
-      if (body.locked) {
-        throw new Error('Body is locked')
+  try {
+    if (isObject(body)) {
+      if (typeof body.getReader === 'function') {
+        await writeWebReadableStreamToWritableStream(stream, body)
       }
-
-      const reader = body.getReader()
-
-      // eslint-disable-next-line no-constant-condition
-      while (true) {
-        const {value, done} = await reader.read()
-        // eslint-disable-next-line max-depth
-        if (done) {
-          break
-        }
-        stream.write(value)
+      else if (body instanceof TypedArray || body instanceof String) {
+        stream.write(body)
+      }
+      else {
+        throw new TypeError('Invalid body type')
       }
     }
-    else if (body instanceof TypedArray) {
+    else if (typeof body === 'string') {
       stream.write(body)
     }
     else {
       throw new TypeError('Invalid body type')
     }
   }
-  else {
-    stream.write(body)
+  finally {
+    stream.end()
   }
+}
 
-  stream.end()
+/**
+ * writeWebReadableStream - Write Web ReadableStream into regular stream.
+ *
+ * @param  {WriteableStream} destination Writeable stream instance.
+ * @param  {WebReadableStream} source WebReadaableStream instance.
+ * @return {Promise<void,Error>} Return promise which resolves when stream writing ends.
+ */
+async function writeWebReadableStreamToWritableStream(destination, source) {
+  let reader
+  try {
+    if (source.locked) {
+      throw new Error('Source stream is locked')
+    }
+
+    reader = source.getReader()
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      const {value, done} = await reader.read()
+
+      // eslint-disable-next-line max-depth
+      if (done) {
+        break
+      }
+      destination.write(value)
+    }
+  }
+  finally {
+    if (reader !== void 0) {
+      reader.cancel()
+    }
+    else {
+      source.cancel()
+    }
+  }
 }
 
 /**
@@ -169,7 +205,7 @@ function createSocket(connection, stream, remote, {Socket, Peer, URI}) {
             pushStream.respond({
               ':status': res.status,
             })
-            writeResponseIntoStream(pushStream, res)
+            writeResponseToWritableStream(pushStream, res)
             .then(resolve, reject)
           }
         })
@@ -274,7 +310,7 @@ function handleRequest(httpReq, httpRes, lib, next) {
       httpRes.setHeader(header, res.headers.raw(header))
     }
 
-    writeResponseIntoStream(httpRes, res)
+    return writeResponseToWritableStream(httpRes, res)
   })
 }
 
