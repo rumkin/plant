@@ -1,6 +1,6 @@
 {
   "name": "@plant/http",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Plant node.js HTTP module's server handler",
   "main": "index.js",
   "engines": {
@@ -24,9 +24,7 @@
   ],
   "author": "Rumkin <dev@rumk.in> (https://rumk.in/)",
   "license": "MIT",
-  "dependencies": {
-    "eslint": "^6.1.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@plant/http-adapter": "^1.0.0",
     "@plant/plant": "^2.0.0",
