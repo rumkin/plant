@@ -11,4 +11,24 @@ function isReadableStream(value) {
   && typeof value.getReader === 'function'
 }
 
+function isDisturbed(stream) {
+  if (typeof stream._disturbed === 'boolean') {
+    return stream._disturbed
+  }
+  else if (typeof Response !== 'undefined') {
+    try {
+      // eslint-disable-next-line no-undef
+      new Response(stream)
+      return true
+    }
+    catch (_) {
+      return false
+    }
+  }
+  else {
+    throw new Error('Could not determine wether stream was disturbed')
+  }
+}
+
 exports.isReadableStream = isReadableStream
+exports.isDisturbed = isDisturbed

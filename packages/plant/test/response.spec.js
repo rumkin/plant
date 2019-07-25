@@ -86,6 +86,31 @@ describe('Response()', function() {
     })
   })
 
+  describe('Response.stream()', function() {
+    class ReadableStreamMock {
+      constructor() {
+        this._disturbed = false
+      }
+      getReader() {}
+    }
+
+    it('Should append stream as body', function() {
+      const res = new Response()
+      const stream = new ReadableStreamMock()
+      res.stream(stream)
+
+      should(res.body).be.an.Object().and.equal(stream)
+    })
+
+    it('Should throw if stream is disturbed', function() {
+      const res = new Response()
+      const stream = new ReadableStreamMock()
+      stream._disturbed = true
+
+      should.throws(() => res.stream(stream))
+    })
+  })
+
   describe('Response.body', function() {
     it('Should accept string', function() {
       const res = new Response()

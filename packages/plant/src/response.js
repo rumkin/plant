@@ -2,14 +2,16 @@
  * @module Plant
  */
 
-const isObject = require('lodash.isobject')
 const isPlainObject = require('lodash.isplainobject')
 const statuses = require('statuses')
 
-const {isReadableStream} = require('./util/stream')
+const {isReadableStream, isDisturbed} = require('./util/stream')
 const Request = require('./request')
 const Headers = require('./headers')
 const TypedArray = Object.getPrototypeOf(Uint8Array)
+
+const DISTURBED_ERR_MSG = 'Response body object should not be disturbed or locked'
+const BODY_TYPE_ERR_MSG = 'Body value could be a string, TypedArray, ReadableStream or null'
 
 /**
  * @typedef Push
@@ -134,6 +136,9 @@ class Response {
       this.headers.delete('content-type')
     }
     else if (isReadableStream(value)) {
+      if (isDisturbed(value)) {
+        throw new TypeError(DISTURBED_ERR_MSG)
+      }
       this._body = value
     }
     else if (typeof value === 'string' || value instanceof TypedArray) {
@@ -141,7 +146,7 @@ class Response {
       this.headers.set('content-length', value.length)
     }
     else {
-      throw new TypeError('Body value could be a string, TypedArray, ReadableStream or null')
+      throw new TypeError(BODY_TYPE_ERR_MSG)
     }
   }
   /**
@@ -223,6 +228,9 @@ class Response {
     if (! isReadableStream(stream)) {
       throw new TypeError('Not a ReadableStream')
     }
+    else if (isDisturbed(stream)) {
+      throw new TypeError(DISTURBED_ERR_MSG)
+    }
 
     this._body = stream
 
@@ -236,12 +244,7 @@ class Response {
    * @return {Response}  Returns `this`.
    */
   send(body) {
-    if (isObject(body) && isReadableStream(body)) {
-      this._body = body
-    }
-    else {
-      this.body = body
-    }
+    this.body = body
 
     return this
   }
