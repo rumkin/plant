@@ -18,8 +18,9 @@ function isDisturbed(stream) {
   else if (typeof Response !== 'undefined') {
     try {
       // eslint-disable-next-line no-undef
-      new Response(stream)
-      return true
+      const response = new Response(stream)
+      // WebKit doesn't through
+      return response.bodyUsed
     }
     catch (_) {
       return false
