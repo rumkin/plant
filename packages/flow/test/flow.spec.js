@@ -23,7 +23,7 @@ module.exports = ({describe, it}) => describe('Plant.Flow', function() {
             assert.equal(round, 2)
 
             await next()
-
+            // eslint-disable-next-line require-atomic-updates
             round += 1
           }
         )
