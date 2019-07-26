@@ -106,7 +106,7 @@ plant.use('/script.js', ({res}) => {
 plant.use('/index.html', ({res, fetch}) => {
   // Push '/script.js' URL to pushed resources.
   // It will be requested before sending main response.
-  res.push(new URL('/script.js', res.url))
+  res.push('/script.js')
   // ... or ...
   // Push complete response from subrequest
   res.push(
