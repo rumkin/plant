@@ -11,6 +11,7 @@ run_test() {
 
   cd "$CWD/packages/$DIR"
   [ "$INSTALL" == "1" ] && npm i .
+  [ "$LINT" == "1" ] && npm run lint
   npm test
 }
 
