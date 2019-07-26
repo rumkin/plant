@@ -4,9 +4,10 @@
  */
 
 const {and} = require('@plant/flow')
-const streams = require('web-streams-polyfill/ponyfill')
 const {URL} = require('url')
 const isObject = require('lodash.isobject')
+
+const streams = require('./deps/web-streams-polyfill')
 
 const {ReadableStream: WebReadableStream} = streams
 const TypedArray = Object.getPrototypeOf(Uint8Array)

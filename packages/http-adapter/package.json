@@ -1,6 +1,6 @@
 {
   "name": "@plant/http-adapter",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Plant web server node.js HTTP adapter",
   "main": "src/index.js",
   "engines": {
@@ -26,8 +26,7 @@
     "should": "^11.2.1"
   },
   "dependencies": {
-    "lodash.isobject": "^3.0.2",
-    "web-streams-polyfill": "^2.0.2"
+    "lodash.isobject": "^3.0.2"
   },
   "peerDependencies": {
     "@plant/flow": "^1.0.0"
