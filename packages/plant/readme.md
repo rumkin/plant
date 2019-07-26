@@ -701,6 +701,37 @@ Set any string-like value as response.
 
 Set empty body.
 
+### Response.push()
+
+```text
+(target:Request|Response|URL|string, context:Object) -> Response
+```
+
+Push resource to the client using HTTP2 pushes mechanics. It's possible push
+already fetched resource, for example from cache or to push new request which
+will be sent with response itself.
+
+#### Example
+
+Push common JS and CSS for any underlaying pages:
+
+```javascript
+plant.use(({res}, next) => {
+  res.push('/js/index.js')
+  res.push('/css/style.css')
+
+  return next()
+})
+
+plant.use('/users', ({res}) => {
+  // Render user page somehow
+})
+
+plant.use('/photos', ({res}) => {
+  // Render photos page somehow
+})
+```
+
 ### Route Type
 ```
 {

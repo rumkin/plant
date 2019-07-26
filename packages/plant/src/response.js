@@ -278,7 +278,7 @@ class Response {
    * Add request or response into response pushes list. It's using for transports
    * which support pushes.
    *
-   * @param  {Response|Request|URL} target Complete response or new request.
+   * @param  {Response|Request|URL|String} target Complete response or new request.
    * @param  {Object} [context] Context is optional and is using when overriding is required.
    * @return {Response} Return itself
    * @throws {TypeError} if the first argument type is mismatched.
@@ -302,6 +302,15 @@ class Response {
       this._pushes.push({
         request: new Request({
           url: target,
+        }),
+        context,
+        response: null,
+      })
+    }
+    else if (typeof target === 'string') {
+      this._pushes.push({
+        request: new Request({
+          url: new URL(target, this._url),
         }),
         context,
         response: null,

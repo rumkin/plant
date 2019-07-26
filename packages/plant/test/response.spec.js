@@ -1,7 +1,7 @@
 /* global describe it */
 const should = require('should')
 
-const {Response} = require('..')
+const {Response, Request} = require('..')
 
 describe('Response()', function() {
   it('Should be a function', function() {
@@ -193,6 +193,70 @@ describe('Response()', function() {
       })
 
       should(res.redirected).be.equal(false)
+    })
+  })
+
+  describe('Response#push()', function() {
+    it('Should accept Request as target', function() {
+      const res = new Response({
+        url: new URL('http://localhost/test'),
+      })
+
+      should(res.pushes.length).be.equal(0)
+
+      res.push(new Request({
+        url: res.url,
+      }))
+
+      should(res.pushes.length).be.equal(1)
+    })
+
+    it('Should accept Response as target', function() {
+      const res = new Response({
+        url: new URL('http://localhost/test'),
+      })
+
+      should(res.pushes.length).be.equal(0)
+
+      res.push(new Response({
+        url: res.url,
+        status: 200,
+        body: '',
+      }))
+
+      should(res.pushes.length).be.equal(1)
+    })
+
+    it('Should accept URL as target', function() {
+      const res = new Response({
+        url: new URL('http://localhost/test'),
+      })
+
+      should(res.pushes.length).be.equal(0)
+
+      res.push(new URL('/page', res.url))
+
+      should(res.pushes.length).be.equal(1)
+    })
+
+    it('Should accept string as target', function() {
+      const res = new Response({
+        url: new URL('http://localhost/test'),
+      })
+
+      should(res.pushes.length).be.equal(0)
+
+      res.push('/page')
+
+      should(res.pushes.length).be.equal(1)
+    })
+
+    it('Should throw otherwise', function() {
+      const res = new Response({
+        url: new URL('http://localhost/test'),
+      })
+
+      should.throws(() => res.push(null))
     })
   })
 })
