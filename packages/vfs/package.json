@@ -1,0 +1,41 @@
+{
+  "name": "@plant/vfs",
+  "version": "0.1.0",
+  "description": "Virtual FS handler for Plant server",
+  "main": "src/index.js",
+  "engines": {
+    "node": ">=8.0"
+  },
+  "scripts": {
+    "prepublishOnly": "allow-publish-tag next && npm run lint",
+    "test": "echo 'No test' && exit 1",
+    "lint": "eslint src/**.js test/**.js"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "allow-publish-tag": "^2.1.1"
+  },
+  "dependencies": {
+    "escape-html": "^1.0.3",
+    "mime": "^2.4.4"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rumkin/plant.git"
+  },
+  "keywords": [
+    "@plant/plant",
+    "web",
+    "http",
+    "handler"
+  ],
+  "author": "rumkin",
+  "homepage": "https://github.com/rumkin/plant/tree/master/packages/vfs",
+  "bugs": "https://github.com/rumkin/plant/issues"
+}

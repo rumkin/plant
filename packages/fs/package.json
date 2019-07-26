@@ -1,0 +1,42 @@
+{
+  "name": "@plant/fs",
+  "version": "0.1.0",
+  "description": "Node.js FS module bindings for VFS handlers",
+  "main": "src/index.js",
+  "engines": {
+    "node": ">=8.0"
+  },
+  "scripts": {
+    "prepublishOnly": "allow-publish-tag next && npm run lint",
+    "test": "echo 'No test' && exit 1",
+    "lint": "eslint src/**.js test/**.js"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "allow-publish-tag": "^2.1.1"
+  },
+  "dependencies": {
+    "web-streams-polyfill": "^2.0.3",
+    "@plant/vfs": "^0.1.0"
+  },
+  "peerDependencies": {},
+  "publishConfig": {
+    "access": "public"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rumkin/plant.git"
+  },
+  "keywords": [
+    "@plant/plant",
+    "web",
+    "http",
+    "handler"
+  ],
+  "author": "rumkin",
+  "homepage": "https://github.com/rumkin/plant/tree/master/packages/fs",
+  "bugs": "https://github.com/rumkin/plant/issues"
+}
