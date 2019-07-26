@@ -2,9 +2,24 @@
   "name": "@plant/router",
   "version": "1.0.0",
   "description": "Router for plant server",
+  "repository": {
+    "type": "git",
+    "url": "github.com/rumkin/plant"
+  },
+  "homepage": "https://github.com/rumkin/plant/tree/master/packages/router",
+  "author": "Rumkin <dev@rumk.in> (https://rumk.in/)",
   "main": "src/index.js",
   "engines": {
     "node": ">=6"
+  },
+  "scripts": {
+    "build": "npm run clean && mkdir dist && npm run compile && npm run minify",
+    "clean": "rm -rf dist",
+    "compile": "browserify -s PlantRouter src/index.js > dist/router.js",
+    "lint": "eslint src/**.js test/**.js",
+    "minify": "babel-minify dist/router.js -o dist/router.min.js",
+    "prepublishOnly": "allow-publish-tag next && npm run lint && npm test && npm run build",
+    "test": "mocha test/*.spec.js"
   },
   "dependencies": {
     "@plant/flow": "^1.0.0",
@@ -17,14 +32,5 @@
     "babel-minify": "^0.5.0",
     "mocha": "^6.1.4",
     "should": "^13.2.3"
-  },
-  "scripts": {
-    "build": "npm run clean && mkdir dist && npm run compile && npm run minify",
-    "clean": "rm -rf dist",
-    "compile": "browserify -s PlantRouter src/index.js > dist/router.js",
-    "lint": "eslint src/**.js test/**.js",
-    "minify": "babel-minify dist/router.js -o dist/router.min.js",
-    "prepublishOnly": "allow-publish-tag next && npm run lint && npm test && npm run build",
-    "test": "mocha test/*.spec.js"
   }
 }

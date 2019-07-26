@@ -1,5 +1,5 @@
 <p align="center">
-  <img alt="Plant logo" src="packages/plant/assets/cover.png" width="300"/>
+  <img alt="Plant logo" src="packages/plant/dev/cover.png" width="300"/>
 </p>
 
 # Plant

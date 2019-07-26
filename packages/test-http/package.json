@@ -2,26 +2,27 @@
   "name": "@plant/test-http",
   "version": "0.5.3",
   "description": "Simple Node.js native HTTP test server",
-  "main": "index.js",
-  "engines": {
-    "node": ">=11"
-  },
-  "scripts": {
-    "test": "testup run test/http.spec.js test/https.spec.js test/http2.spec.js test/https2.spec.js",
-    "prepublishOnly": "npm test"
-  },
-  "repository": {
-    "type": "git",
-    "url": "github.com/rumkin/plant"
-  },
   "keywords": [
     "http",
     "native-http",
     "test",
     "test-utils"
   ],
-  "author": "Rumkin <dev@rumk.in> (https://rumk.in/)",
+  "repository": {
+    "type": "git",
+    "url": "github.com/rumkin/plant"
+  },
   "homepage": "https://github.com/rumkin/plant/tree/master/packages/test-http",
+  "author": "Rumkin <dev@rumk.in> (https://rumk.in/)",
+  "main": "src/index.js",
+  "engines": {
+    "node": ">=11"
+  },
+  "scripts": {
+    "lint": "eslint src/**.js test/**.js",
+    "test": "testup run test/http.spec.js test/https.spec.js test/http2.spec.js test/https2.spec.js",
+    "prepublishOnly": "npm test"
+  },
   "license": "MIT",
   "devDependencies": {
     "@testup/cli": "^0.4.0",

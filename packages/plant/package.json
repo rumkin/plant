@@ -9,8 +9,7 @@
   "scripts": {
     "start": "node .",
     "test": "mocha test/index.js",
-    "lint": "npm run lint:js src/**.js var/**.js",
-    "lint:js": "eslint",
+    "lint": "eslint src/**.js test/**.js",
     "prepublishOnly": "npm run lint && npm run build && npm run docs",
     "jsdoc": "jsdoc --configure .jsdoc.json --verbose",
     "docs": "npm run jsdoc && rm -rf docs && mv ./tmp/docs/@plant/plant/* docs && rm -rf tmp/docs",

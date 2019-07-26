@@ -5,7 +5,7 @@ const Plant = require('@plant/plant')
 const {Response} = Plant
 
 const fetch = require('@plant/test-http/fetch-http2')
-const {createServer} = require('.')
+const {createServer} = require('..')
 
 module.exports = ({describe, it}) => describe('@plant/http2', function() {
   describe('Interface', () => {

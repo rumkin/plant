@@ -1,0 +1,14 @@
+dev/
+docs/
+tmp/
+local/
+
+*.pid
+*.lock
+.jsdoc.json
+.testuprc
+
+# System files
+.DS_Store
+[Th]umbs.db
+Desktop.ini

@@ -6,7 +6,7 @@ const net = require('net')
 const should = require('should')
 const Plant = require('@plant/plant')
 const fetch = require('@plant/test-http/fetch-https')
-const {createServer} = require('.')
+const {createServer} = require('..')
 
 const passphrase = '12345678'
 let key
@@ -14,8 +14,8 @@ let cert
 
 describe('@plant/https', function() {
   before(function() {
-    key = fs.readFileSync(__dirname + '/var/key.pem')
-    cert = fs.readFileSync(__dirname + '/var/cert.pem')
+    key = fs.readFileSync(__dirname + '/fixtures/key.pem')
+    cert = fs.readFileSync(__dirname + '/fixtures/cert.pem')
   })
 
   it('Should server be instance of net.Server', function() {

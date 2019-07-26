@@ -1,12 +1,1 @@
-var/
-tmp/
-example/
-docs/
-
-.jsdoc.json
-.editorconfig
-.eslintrc
-.travis.yml
-changelog.md
-bake.sh
-todo.md
+../-/.npmignore

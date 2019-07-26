@@ -2,13 +2,13 @@
   "name": "@plant/https",
   "version": "1.0.0",
   "description": "Plant node.js HTTP module's server handler",
-  "main": "index.js",
+  "main": "src/index.js",
   "engines": {
     "node": ">=6"
   },
   "scripts": {
-    "test": "mocha test.spec.js",
-    "lint": "eslint *.js",
+    "test": "mocha test/*.spec.js",
+    "lint": "eslint src/**.js test/**.js",
     "jsdoc": "jsdoc --configure .jsdoc.json --verbose",
     "docs": "npm run jsdoc && rm -rf docs && mv tmp/docs/*/*/* docs && rm -rf tmp/docs",
     "ssl-cert": "openssl req -newkey rsa:2048 -nodes -keyout var/key.pem -x509 -days 365 -out var/cert.pem",

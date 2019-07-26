@@ -6,15 +6,15 @@ const Plant = require('@plant/plant')
 const {Response} = Plant
 
 const fetch = require('@plant/test-http/fetch-http2')
-const {createServer} = require('.')
+const {createServer} = require('..')
 
 module.exports = ({describe, use, it}) => describe('@plant/https2', function() {
   use(function(ctx, next) {
     return next({
       ...ctx,
       ssl: {
-        key: fs.readFileSync(__dirname + '/var/ssl/key.pem'),
-        cert: fs.readFileSync(__dirname + '/var/ssl/cert.pem'),
+        key: fs.readFileSync(__dirname + '/fixtures/key.pem'),
+        cert: fs.readFileSync(__dirname + '/fixtures/cert.pem'),
       },
     })
   })

@@ -1,11 +1,14 @@
-node_modules
+node_modules/
 npm-debug.log
 *.pid
-packages/*/docs/
 
-**/.DS_Store
-
-tmp/
-local/
 build/
 dist/
+docs/
+local/
+tmp/
+
+# OS files
+.DS_Store
+[Tt]humbs.db
+Desktop.ini

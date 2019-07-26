@@ -1,7 +1,13 @@
 {
   "name": "@plant/flow",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Async flow library for Plant server",
+  "repository": {
+    "type": "git",
+    "url": "github.com/rumkin/plant"
+  },
+  "homepage": "https://github.com/rumkin/plant/tree/master/packages/router",
+  "author": "Rumkin <dev@rumk.in> (https://rumk.in/)",
   "main": "./src/index.js",
   "engines": {
     "node": ">=6"
@@ -13,6 +19,7 @@
     "allow-publish-tag": "^1.0.1"
   },
   "scripts": {
+    "lint": "eslint src/**.js test/**.js",
     "prepublishOnly": "npm test",
     "test": "testup run test/**.spec.js"
   }

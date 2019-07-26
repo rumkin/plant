@@ -8,8 +8,7 @@
   },
   "scripts": {
     "test": "mocha test/index.js",
-    "lint": "npm run lint:js src/**.js",
-    "lint:js": "eslint",
+    "lint": "eslint src/**.js test/**.js",
     "prepublishOnly": "allow-publish-tag next && npm run lint && npm docs",
     "jsdoc": "jsdoc --configure .jsdoc.json --verbose",
     "docs": "npm run jsdoc && rm -rf docs && mv tmp/docs/*/*/* docs && rm -rf tmp/docs"

@@ -10,7 +10,7 @@ run_test() {
   echo "TEST: $DIR"
 
   cd "$CWD/packages/$DIR"
-  [ $INSTALL -eq 1 ] && npm i .
+  [ "$INSTALL" == "1" ] && npm i .
   npm test
 }
 
