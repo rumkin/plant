@@ -5,7 +5,7 @@ const plant = new Plant()
 
 plant.use(async ({res}) => {
   // Send text response
-  res.body = 'Hello, World!';
+  res.body = 'Hello, World!'
 })
 
 createServer(plant.handler())

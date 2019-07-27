@@ -1,7 +1,7 @@
 const fs = require('fs')
 const createServer = require('@plant/http')
 const Plant = require('@plant/plant')
-const WebStream = require('web-streams-polyfill/ponyfill')
+const {ReadableStream} = require('web-streams-polyfill/ponyfill')
 
 const plant = new Plant()
 
@@ -11,7 +11,7 @@ plant.use(async ({res}) => {
   // Wrap Node stream into WebAPI stream
   const webStream = wrapNodeStream(stream)
   // Send stream with response
-  res.stream(webStream);
+  res.stream(webStream)
 })
 
 createServer(plant.handler())

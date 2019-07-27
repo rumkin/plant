@@ -2,30 +2,42 @@ const Plant = require('@plant/plant')
 
 const SESSION = Symbol('session')
 
-async function addSession(ctx, next) {
+// Write session somehow
+async function writeSession() {}
+// Read session somehow
+async function readSession() {}
+// Load user somehow
+async function loadUser() {}
+// Define session web handler
+async function sessionHandler(ctx, next) {
+  const {res} = ctx
   // Get session somehow
-  const session = await getSession()
+  const session = await readSession(res.cookies.sessionId)
   await next({
     ...ctx,
     [SESSION]: session,
   })
-  // Write session somehow
-  await writeSession(session)
-}
 
-function getSession(ctx) {
-  return ctx[SESSION]
+  await writeSession(session)
 }
 
 // Create server instance
 const app = new Plant()
 
 // Add session to context
-app.use(addSession)
+app.use(sessionHandler)
 
 // Use session
-app.use(async function({res, ...ctx}, next) {
-  const session = getSession(ctx)
+app.use(async function(ctx, next) {
+  const {[SESSION]:session} = ctx
 
-  await next()
+  if (session.userId) {
+    await next({
+      ...ctx,
+      user: await loadUser(session.userId),
+    })
+  }
+  else {
+    await next()
+  }
 })
