@@ -51,6 +51,31 @@ describe('Router()', function(){
     should(res.body).be.a.String().and.equal('1')
   })
 
+  it('Should fall through same routes', async function() {
+    const router = new Router()
+    let i = 0
+    router.get('/users/:id', async function() {
+      i++
+    })
+    router.get('/users/:id', async function() {
+      i++
+    })
+    router.get('/users/:id', async function({res}) {
+      res.body = 'OK'
+      i++
+    })
+
+    const res = new Response()
+    const ctx = createContext('http://localhost:8080/users/1')
+    await and(router.getHandler())({
+      ...ctx,
+      res,
+    })
+
+    should(res.body).be.a.String().and.equal('OK')
+    should(i).be.equal(3)
+  })
+
   it('should define several method handlers with addRoute()', async function() {
     const router = new Router()
 
