@@ -5,8 +5,8 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "./test.sh lint",
-      "pre-push": "./test.sh test"
+      "pre-commit": "./bin/lint.sh",
+      "pre-push": "./bin/test.sh test"
     }
   }
 }
