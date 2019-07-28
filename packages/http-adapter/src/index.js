@@ -120,15 +120,7 @@ async function writeResponseToWritableStream(stream, response) {
         stream.write(body)
       }
       else if (body instanceof TypedArray) {
-        const {prototype} = body.constructor
-        Object.setPrototypeOf(body, Buffer.prototype)
-        // eslint-disable-next-line max-depth
-        try {
-          stream.write(body)
-        }
-        finally {
-          Object.setPrototypeOf(body, prototype)
-        }
+        writeUint8ArrayToNodeStream(stream, body)
       }
       else {
         throw new TypeError('Invalid body type')
@@ -170,7 +162,13 @@ async function writeWebReadableStreamToWritableStream(destination, source) {
       if (done) {
         break
       }
-      destination.write(value)
+
+      if (typeof value === 'string' || value instanceof Buffer) {
+        destination.write(value)
+      }
+      else {
+        writeUint8ArrayToNodeStream(destination, value)
+      }
     }
   }
   finally {
@@ -180,6 +178,18 @@ async function writeWebReadableStreamToWritableStream(destination, source) {
     else {
       source.cancel()
     }
+  }
+}
+
+// Convert Uint8Array into Buffer without reallocaation
+function writeUint8ArrayToNodeStream(stream, value) {
+  const {prototype} = value.constructor
+  Object.setPrototypeOf(value, Buffer.prototype)
+  try {
+    stream.write(value)
+  }
+  finally {
+    Object.setPrototypeOf(value, prototype)
   }
 }
 

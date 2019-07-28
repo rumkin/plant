@@ -2,7 +2,6 @@
 /* global it */
 
 const should = require('should')
-const fs = require('fs')
 const streams = require('../src/deps/web-streams-polyfill')
 
 const Plant = require('@plant/plant')
@@ -446,19 +445,15 @@ module.exports = (title, createServer) => describe(title, function() {
     }
   })
 
-  it('Should output streams', async function() {
+  it('Should output buffer streams', async function() {
     const server = createServer(Plant.create(
       errorTrap,
       async function({res}) {
         res.send(new ReadableStream({
           start(controller) {
-            const fileStream = fs.createReadStream(__filename)
-            fileStream.on('data', (chunk) => {
-              controller.enqueue(chunk)
-            })
-            fileStream.on('end', () => {
-              controller.close()
-            })
+            setImmediate(() => controller.enqueue(Buffer.from('Buffer')))
+            setImmediate(() => controller.enqueue(Buffer.from(' streaming')))
+            setImmediate(() => controller.close())
           },
         }))
       }
@@ -469,7 +464,38 @@ module.exports = (title, createServer) => describe(title, function() {
     try {
       const {status, text} = await server.fetch('/')
       should(status).be.equal(200)
-      should(text).be.equal(fs.readFileSync(__filename, 'utf8'))
+      should(text).be.equal('Buffer streaming')
+    }
+    finally {
+      server.close()
+    }
+  })
+
+  it('Should output Uint8Array streams', async function() {
+    const server = createServer(Plant.create(
+      errorTrap,
+      async function({res}) {
+        res.send(new ReadableStream({
+          type: 'bytes',
+          start(controller) {
+            setImmediate(() => controller.enqueue(
+              Uint8Array.from('Uint8Array', (ch) => ch.charCodeAt(0)))
+            )
+            setImmediate(() => controller.enqueue(
+              Uint8Array.from(' streaming', (ch) => ch.charCodeAt(0)))
+            )
+            setImmediate(() => controller.close())
+          },
+        }))
+      }
+    ))
+
+    server.listen()
+
+    try {
+      const {status, text} = await server.fetch('/')
+      should(status).be.equal(200)
+      should(text).be.equal('Uint8Array streaming')
     }
     finally {
       server.close()
