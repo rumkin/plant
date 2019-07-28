@@ -3,7 +3,7 @@
 
 const should = require('should')
 const fs = require('fs')
-const streams = require('web-streams-polyfill/ponyfill')
+const streams = require('../src/deps/web-streams-polyfill')
 
 const Plant = require('@plant/plant')
 
@@ -50,6 +50,30 @@ module.exports = (title, createServer) => describe(title, function() {
       errorTrap,
       async function({res}) {
         res.body = Buffer.from('hello')
+      }
+    ))
+
+    server.listen()
+
+    try {
+      const {text} = await server.fetch('/', {
+        headers: {
+          'content-type': 'text/plain',
+        },
+      })
+
+      should(text).be.equal('hello')
+    }
+    finally {
+      server.close()
+    }
+  })
+
+  it('Should return Uint8Array response', async function() {
+    const server = createServer(Plant.create(
+      errorTrap,
+      async function({res}) {
+        res.body = Uint8Array.from('hello'.split(''), (ch) => ch.charCodeAt(0))
       }
     ))
 

@@ -116,8 +116,19 @@ async function writeResponseToWritableStream(stream, response) {
       if (typeof body.getReader === 'function') {
         await writeWebReadableStreamToWritableStream(stream, body)
       }
-      else if (body instanceof TypedArray || body instanceof String) {
+      else if (body instanceof Buffer || body instanceof String) {
         stream.write(body)
+      }
+      else if (body instanceof TypedArray) {
+        const {prototype} = body.constructor
+        Object.setPrototypeOf(body, Buffer.prototype)
+        // eslint-disable-next-line max-depth
+        try {
+          stream.write(body)
+        }
+        finally {
+          Object.setPrototypeOf(body, prototype)
+        }
       }
       else {
         throw new TypeError('Invalid body type')
