@@ -4,7 +4,7 @@ import {serveDir} from '@plant/fs'
 
 const plant = new Plant()
 
-plant.use('/assets', serveDir('./public'))
+plant.use('/assets/*', serveDir('./public'))
 
 plant.use(({res}) => {
   res.push('/assets/index.js')
