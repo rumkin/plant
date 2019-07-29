@@ -1,4 +1,4 @@
-const vfs = require('vfs')
+const vfs = require('@plant/vfs')
 const customFs = require('./custom-fs')
 
 function serveDir(...args) {

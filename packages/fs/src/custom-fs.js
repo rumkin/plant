@@ -15,7 +15,6 @@ module.exports = {
     let isCanceled = false
 
     return new ReadableStream({
-      // type: 'bytes',
       start(controller) {
         stream = fs.createReadStream(filepath, options)
 
