@@ -34,7 +34,7 @@ function createContext(url) {
 }
 
 describe('Router()', function(){
-  it('Should get params from req.url', async function() {
+  it('Should match route with params', async function() {
     const router = new Router()
 
     router.get('/users/:id', async function({res, route}) {
@@ -43,6 +43,23 @@ describe('Router()', function(){
 
     const res = new Response()
     const ctx = createContext('http://localhost:8080/users/1')
+    await and(router.getHandler())({
+      ...ctx,
+      res,
+    })
+
+    should(res.body).be.a.String().and.equal('1')
+  })
+
+  it('Should match route with trailing slash', async function() {
+    const router = new Router()
+
+    router.get('/users/:id', async function({res, route}) {
+      res.send(route.params.id)
+    })
+
+    const res = new Response()
+    const ctx = createContext('http://localhost:8080/users/1/')
     await and(router.getHandler())({
       ...ctx,
       res,

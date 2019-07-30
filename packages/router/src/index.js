@@ -219,7 +219,9 @@ function getRouteMatcher(routePath) {
     }
 
     const {path} = route
-    const {params, matches} = matcher(path + '/')
+    const {params, matches} = matcher(
+      normalizePathBeforeMatch(path)
+    )
 
     if (! matches.length) {
       return
@@ -268,6 +270,22 @@ function createParamsMatcher(route) {
     })
 
     return {params, matches}
+  }
+}
+
+/**
+ * normalizePathBeforeMatch - normalize route path before matching by adding trailing slash
+ * at the end if necessary.
+ *
+ * @param  {string} path Route path
+ * @return {string} Path with '/' at the end.
+ */
+function normalizePathBeforeMatch(path) {
+  if (path.length && path[path.length - 1] !== '/') {
+    return path + '/'
+  }
+  else {
+    return path
   }
 }
 
