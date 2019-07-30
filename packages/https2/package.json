@@ -1,5 +1,5 @@
 {
-  "name": "@plant/https",
+  "name": "@plant/https2",
   "version": "1.0.0",
   "description": "Plant node.js HTTP2 module's SSL server handler",
   "main": "src/index.js",
