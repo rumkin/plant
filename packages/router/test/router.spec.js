@@ -8,10 +8,22 @@ const {Request, Response, Route, Socket, Peer, URI} = Plant
 
 const Router = require('..')
 
-function createContext(url) {
+function createContext(options) {
+  let url
+  let method = 'GET'
+
+  if (typeof options === 'string') {
+    url = options
+  }
+  else {
+    url = options.url
+    method = options.method
+  }
+
   const socket = new Socket()
 
   const req = new Request({
+    method,
     url: new URL(url),
   })
 
@@ -108,6 +120,54 @@ describe('Router()', function(){
     })
 
     should(res.body).be.a.String().and.equal('1')
+  })
+
+  it('should match GET HTTP method()', async function() {
+    const router = new Router()
+
+    router.post('/users', function({res}) {
+      res.json('post')
+    })
+
+    router.get('/users', function({res}) {
+      res.json('get')
+    })
+
+    const res = new Response()
+    const ctx = createContext({
+      method: 'GET',
+      url: 'http://localhost:8080/users',
+    })
+    await and(router.getHandler())({
+      ...ctx,
+      res,
+    })
+
+    should(res.body).be.a.String().and.equal('"get"')
+  })
+
+  it('should match POST HTTP method()', async function() {
+    const router = new Router()
+
+    router.post('/users', function({res}) {
+      res.json('post')
+    })
+
+    router.get('/users', function({res}) {
+      res.json('get')
+    })
+
+    const res = new Response()
+    const ctx = createContext({
+      method: 'POST',
+      url: 'http://localhost:8080/users',
+    })
+    await and(router.getHandler())({
+      ...ctx,
+      res,
+    })
+
+    should(res.body).be.a.String().and.equal('"post"')
   })
 
   it('should use subrouter', async function() {

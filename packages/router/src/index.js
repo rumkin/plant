@@ -92,7 +92,7 @@ class Router {
       handlers = args
     }
 
-    this.addRoute('all', route, ...handlers)
+    this.addRoute('*', route, ...handlers)
     return this
   }
 
@@ -113,11 +113,21 @@ class Router {
    */
   getHandler() {
     return or(...this.handlers.map(
-      ({route, handlers}) => and(
-        getRouteMatcher(route),
-        ...this.pre,
-        ...handlers,
-      )
+      ({method, route, handlers}) => {
+        const matchers = []
+        if (method !== '*') {
+          matchers.push(getMethodMatcher(method))
+        }
+        if (route) {
+          matchers.push(getRouteMatcher(route))
+        }
+
+        return and(
+          ...matchers,
+          ...this.pre,
+          ...handlers,
+        )
+      }
     ))
   }
 
@@ -202,6 +212,23 @@ class Router {
   }
 })
 
+/**
+ * Get HTTP methods matcher function.
+ *
+ * @param  {string} method HTTP method.
+ * @return {HandleFunc} Matcher handler.
+ */
+function getMethodMatcher(method) {
+  method = method.toUpperCase()
+
+  return function(ctx, next) {
+    if (ctx.req.method !== method) {
+      return
+    }
+
+    return next()
+  }
+}
 /**
  * Get subrouter matcher. Wraps request object.
  *
