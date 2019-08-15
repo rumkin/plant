@@ -1,4 +1,4 @@
-/* global describe it URL */
+/* global describe it */
 const should = require('should')
 
 const Plant = require('..')
@@ -301,8 +301,12 @@ describe('Server()', function() {
   })
 
   describe('Content-Security-Policy', function() {
-    it('Should be set by default to Plant.CSP.LOCAL', async () => {
+    it('Should be set by default to Plant.CSP.LOCAL for HTML content', async () => {
       const plant = new Plant()
+
+      plant.use(({res}) => {
+        res.html('<html />')
+      })
 
       const req = new Request({
         url: new URL('http://localhost/index.html'),
@@ -316,6 +320,24 @@ describe('Server()', function() {
       should(res.headers.get('content-security-policy')).be.equal(
         "default-src localhost 'unsafe-eval' 'unsafe-inline'; form-action localhost",
       )
+    })
+
+    it('Should not be set for non-HTML content', async () => {
+      const plant = new Plant()
+
+      plant.use(({res}) => {
+        res.text('Plain text')
+      })
+
+      const req = new Request({
+        url: new URL('http://localhost/index.html'),
+      })
+
+      const ctx = createCtx({req})
+
+      const {res} = await plant.getHandler()(ctx)
+
+      should(res.headers.has('content-security-policy')).be.equal(false)
     })
   })
 })

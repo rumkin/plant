@@ -299,7 +299,7 @@ class Plant {
           }))
         }
 
-        if (csp !== null && ! res.headers.has('content-security-policy')) {
+        if (csp !== null && requiresCsp(res)) {
           const {protocol, hostname, port, pathname} = req.url
           res.headers.set('content-security-policy', csp(protocol, hostname, port, pathname))
         }
@@ -311,6 +311,21 @@ class Plant {
     )
 
     return handler
+  }
+}
+
+function requiresCsp(res) {
+  if (res.headers.has('content-security-policy')) {
+    return false
+  }
+  else if (
+    ! res.headers.has('content-type')
+    || ! res.headers.get('content-type').trimStart().startsWith('text/html')
+  ) {
+    return false
+  }
+  else {
+    return true
   }
 }
 
