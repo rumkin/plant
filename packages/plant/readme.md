@@ -1,5 +1,5 @@
 <p align="center">
-    <img alt="Plant logo" src="dev/cover.png" width="300"/>
+    <img alt="Plant logo" src="/packages/plant/dev/cover.png" width="300"/>
 </p>
 
 [![npm](https://img.shields.io/npm/v/@plant/plant.svg?style=flat-square)](https://npmjs.com/package/@plant/plant)
