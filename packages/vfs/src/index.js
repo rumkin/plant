@@ -5,13 +5,14 @@ const mime = require('mime')
 function createDirHandler(fs, dir, {
   redirect = true,
   listDir = false,
+  filter = () => true,
   indexFile = 'index.html',
 } = {}) {
   return async function handleDir({req, res, route}) {
     const filename = path.resolve('/', route.path)
     const {basePath} = route
 
-    if (! await fs.exists(path.join(dir, filename))) {
+    if (filter(filename) !== true) {
       return
     }
 
@@ -85,7 +86,19 @@ async function resolveResource(fs, {
   isNested,
 }) {
   const filepath = path.join(dir, filename)
-  const stat = await fs.lstat(filepath)
+
+  let stat
+  try {
+    stat = await fs.lstat(filepath)
+  }
+  catch (err) {
+    if (err.code === 'ENOENT') {
+      return
+    }
+    else {
+      throw err
+    }
+  }
 
   if (stat.isDirectory()) {
     if (isNested) {

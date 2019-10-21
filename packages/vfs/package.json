@@ -1,6 +1,6 @@
 {
   "name": "@plant/vfs",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Virtual FS handler for Plant server",
   "main": "src/index.js",
   "engines": {
