@@ -315,10 +315,14 @@ async function sendFile({
   fs,
   res,
   resource,
+  options: {dir},
 }) {
   res.headers.set('content-type', resource.mimetype)
   res.headers.set('content-length', resource.stat.size)
-  const stream = fs.createReadStream(resource.filename)
+
+  const stream = fs.createReadStream(
+    path.join(dir, resource.filename)
+  )
   res.stream(stream)
 }
 

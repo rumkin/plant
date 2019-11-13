@@ -10,6 +10,7 @@ function createFs() {
     exists: pify((...args) => fs.exists(...args)),
     stat: pify((...args) => fs.stat(...args)),
     lstat: pify((...args) => fs.lstat(...args)),
+    mkdir: pify((...args) => fs.mkdir(...args)),
     readDir: pify((...args) => fs.readDir(...args)),
     readLink: pify((...args) => fs.readLink(...args)),
     writeFile: pify((...args) => fs.writeFile(...args)),

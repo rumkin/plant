@@ -18,7 +18,9 @@ function createCtx({
   const res = new Response({
     url,
   })
-  const route = new Route()
+  const route = new Route({
+    path: url.pathname,
+  })
 
   return {req, res, route}
 }
@@ -26,7 +28,9 @@ function createCtx({
 module.exports = ({describe, it}) => {
   describe('createDirHandler()', () => {
     it('Should serve file', async () => {
-      const ctx = createCtx(new URL('http://localhost/index.html'))
+      const ctx = createCtx({
+        url: new URL('http://localhost/index.html'),
+      })
 
       const vfs = createFs()
       const file = {
@@ -47,8 +51,60 @@ module.exports = ({describe, it}) => {
       assert.equal(body, file.content, 'Response body matches')
     })
 
+    it('Should serve file', async () => {
+      const ctx = createCtx({
+        url: new URL('http://localhost/dir/index.html'),
+      })
+
+      const vfs = createFs()
+      const file = {
+        name: '/index.html',
+        content: '<html><body>Hello</body></html>',
+      }
+      await vfs.writeFile(file.name, file.content)
+
+      const handle = createDirHandler(vfs, '/')
+
+      await handle(ctx)
+      const {res} = ctx
+
+      assert.equal(res.hasBody, false, 'No content returned')
+    })
+
+    it('Should serve nested file', async () => {
+      const ctx = createCtx({
+        url: new URL('http://localhost/dir/index.txt'),
+      })
+
+      const vfs = createFs()
+      const fileA = {
+        name: '/dir/index.txt',
+        content: 'a',
+      }
+      const fileB = {
+        name: '/index.txt',
+        content: 'b',
+      }
+      await vfs.mkdir('/dir')
+      await vfs.writeFile(fileA.name, fileA.content)
+      await vfs.writeFile(fileB.name, fileB.content)
+
+      const handle = createDirHandler(vfs, '/')
+
+      await handle(ctx)
+      const {res} = ctx
+
+      assert.equal(res.headers.get('content-type'), 'text/plain', 'Content-type header is text/plain')
+
+      const body = await readStream(res.body, 'utf8')
+
+      assert.equal(body, fileA.content, 'Response body matches')
+    })
+
     it('Should use options.indexFile', async () => {
-      const ctx = createCtx(new URL('http://localhost/'))
+      const ctx = createCtx({
+        url: new URL('http://localhost/'),
+      })
 
       const vfs = createFs()
       const file = {
@@ -72,7 +128,9 @@ module.exports = ({describe, it}) => {
     })
 
     it('Should serve nothing', async () => {
-      const ctx = createCtx(new URL('http://localhost/'))
+      const ctx = createCtx({
+        url: new URL('http://localhost/'),
+      })
 
       const vfs = createFs()
       const file = {
@@ -92,7 +150,9 @@ module.exports = ({describe, it}) => {
 
   describe('createFileHandler()', () => {
     it('Should serve file', async () => {
-      const ctx = createCtx(new URL('http://localhost/index.txt'))
+      const ctx = createCtx({
+        url: new URL('http://localhost/index.txt'),
+      })
 
       const vfs = createFs()
       const file = {
