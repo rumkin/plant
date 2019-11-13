@@ -165,7 +165,7 @@ Plant adapter for native node.js https module. It creates server listener from p
 
 ## Internal packages
 
-### [flow](packages/flow) `@plant/flow`
+### [Flow](packages/flow) `@plant/flow`
 
 [NPM](https://npmjs.com/package/@plant/flow) ·
 [Source](packages/flow) · [Readme](packages/flow/readme.md)
@@ -178,6 +178,14 @@ This is library for cascades. This is where contexts manage take place and reque
 [Source](packages/http-adapter) · [Readme](packages/http-adapter/readme.md)
 
 This package is using to connect Plant and native Node's HTTP server. Modules http, https, http2, and https2 use it under the hood.
+
+### [Node Stream Utils](packages/node-stream-utils) `@plant/node-stream-utils`
+
+[NPM](https://npmjs.com/package/@plant/node-stream-utils) ·
+[Source](packages/node-stream-utils) · [Readme](packages/node-stream-utils/readme.md)
+
+Node <-> WebAPI streams adapters. Useful for wrapping Node.js streams to work
+with Plant.
 
 ### [Test HTTP Suite](packages/test-http) `@plant/test-http`
 
