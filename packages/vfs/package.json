@@ -1,6 +1,6 @@
 {
   "name": "@plant/vfs",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Virtual FS handler for Plant server",
   "main": "src/index.js",
   "engines": {
@@ -8,12 +8,19 @@
   },
   "scripts": {
     "prepublishOnly": "allow-publish-tag next && npm run lint",
-    "test": "echo 'No test' && exit 1",
-    "lint": "eslint src/**.js test/**.js"
+    "test": "testup run -r console test/**.spec.js",
+    "lint": "eslint src/**.js test/**.js && npm test"
   },
   "license": "MIT",
   "devDependencies": {
-    "allow-publish-tag": "^2.1.1"
+    "@plant/node-stream-utils": "^0.1.2",
+    "@plant/plant": "^2.4.0",
+    "@testup/cli": "^0.4.0",
+    "@testup/console-reporter": "^0.1.1",
+    "@testup/core": "^0.2.1",
+    "allow-publish-tag": "^2.1.1",
+    "memfs": "^2.16.1",
+    "pify": "^4.0.1"
   },
   "dependencies": {
     "escape-html": "^1.0.3",
