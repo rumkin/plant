@@ -1,0 +1,38 @@
+{
+  "name": "@plant/node-stream-utils",
+  "version": "0.1.2",
+  "description": "Node stream utils required to wrap native streams with simple wrappers",
+  "main": "src/index.js",
+  "engines": {
+    "node": ">=8.0"
+  },
+  "scripts": {
+    "prepublishOnly": "allow-publish-tag next && npm run lint && npm test",
+    "test": "echo 'No tests yet'",
+    "lint": "eslint src/**.js test/**.js"
+  },
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "allow-publish-tag": "^2.1.1"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rumkin/plant.git"
+  },
+  "keywords": [
+    "@plant/plant",
+    "web",
+    "http",
+    "handler"
+  ],
+  "author": "rumkin",
+  "homepage": "https://github.com/rumkin/plant/tree/master/packages/node-stream-utils",
+  "bugs": "https://github.com/rumkin/plant/issues"
+}
