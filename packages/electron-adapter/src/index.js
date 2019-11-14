@@ -15,8 +15,17 @@ function withCallback(promise, callback) {
   }
 }
 
+function getHandler(plant) {
+  if (typeof plant !== 'function') {
+    return plant.getHandler()
+  }
+  else {
+    return plant
+  }
+}
+
 function createRequestHandler(plant, session) {
-  const handle = plant.getHandler()
+  const handle = getHandler(plant)
 
   return function(request, callback) {
     return withCallback(
