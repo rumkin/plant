@@ -1,6 +1,6 @@
 {
   "name": "@plant/electron-adapter",
-  "version": "0.1.0-alpha1",
+  "version": "0.1.0",
   "description": "Plant server adapter for Electron",
   "main": "src/index.js",
   "engines": {
