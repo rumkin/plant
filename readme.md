@@ -130,7 +130,6 @@ createServer(plant)
 
 Plant standalone router.
 
-
 ### [HTTP2](packages/http2) `@plant/http2`
 
 [NPM](https://npmjs.com/package/@plant/http2) ·
@@ -163,6 +162,14 @@ Plant adapter for native node.js http module. It creates server listener from pl
 
 Plant adapter for native node.js https module. It creates server listener from plant instance and https options.
 
+### [Electron](packages/electron-adapter) `@plant/electron`
+
+[NPM](https://npmjs.com/package/@plant/electron) ·
+[Source](packages/electron) · [Readme](packages/electron/readme.md)
+
+This package is using to connect Plant and with current Electron instance protocols API.
+It's using `electron-adapter` under the hood.
+
 ## Internal packages
 
 ### [Flow](packages/flow) `@plant/flow`
@@ -178,6 +185,13 @@ This is library for cascades. This is where contexts manage take place and reque
 [Source](packages/http-adapter) · [Readme](packages/http-adapter/readme.md)
 
 This package is using to connect Plant and native Node's HTTP server. Modules http, https, http2, and https2 use it under the hood.
+
+### [Electron Adapter](packages/electron-adapter) `@plant/electron-adapter`
+
+[NPM](https://npmjs.com/package/@plant/electron-adapter) ·
+[Source](packages/electron-adapter) · [Readme](packages/electron-adapter/readme.md)
+
+This package is using to connect Plant and with Electron protocols API.
 
 ### [Node Stream Utils](packages/node-stream-utils) `@plant/node-stream-utils`
 
