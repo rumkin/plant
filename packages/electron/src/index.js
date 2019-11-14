@@ -1,37 +1,46 @@
 const electron = require('electron')
-
 const {createRequestHandler} = require('@plant/electron-adapter')
+
+const {protocol} = electron
 
 function createServer(plant, {
   session = electron.session,
 } = {}) {
   return new ElectronServer({
-    handler: plant.getHandler(),
+    plant,
     session,
   })
 }
 
 class ElectronServer {
-  constructor({handler, session}) {
-    this.handler = handler
+  constructor({plant, session}) {
+    this.plant = plant
     this.session = session
   }
 
+  getHandler() {
+    const handle = createRequestHandler(
+      this.plant, this.session
+    )
+
+    return (request, callback) => {
+      handle(request)
+      .then(callback)
+    }
+  }
+
   interceptProtocol(name) {
-    electron.protocol.interceptStreamProtocol(
-      name, createRequestHandler(
-        this.handler, this.session
-      )
+    protocol.interceptStreamProtocol(
+      name, this.getHandler()
     )
     return this
   }
 
   registerProtocol(name) {
-    electron.protocol.registerStreamProtocol(
-      name, createRequestHandler(
-        this.handler, this.session
-      )
+    protocol.registerStreamProtocol(
+      name, this.getHandler()
     )
+
     return this
   }
 }
