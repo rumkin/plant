@@ -1,0 +1,41 @@
+{
+  "name": "@plant/electron",
+  "version": "0.1.0-beta",
+  "description": "Listen Electron's protocols",
+  "main": "src/index.js",
+  "engines": {
+    "electron": ">=7.0",
+    "node": ">=8.0"
+  },
+  "scripts": {
+    "prepublishOnly": "allow-publish-tag next && npm run lint && npm test",
+    "test": "echo 'No tests yet'",
+    "lint": "eslint src/**.js test/**.js"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@plant/electron-adapter": "^0.1.0"
+  },
+  "devDependencies": {
+    "allow-publish-tag": "^2.1.1"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rumkin/plant.git"
+  },
+  "keywords": [
+    "@plant/plant",
+    "web",
+    "http",
+    "handler"
+  ],
+  "author": "rumkin",
+  "homepage": "https://github.com/rumkin/plant/tree/master/packages/electron",
+  "bugs": "https://github.com/rumkin/plant/issues"
+}
