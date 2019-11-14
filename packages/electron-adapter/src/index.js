@@ -1,17 +1,28 @@
-const {Readable, PassThrough} = require('stream')
 const fs = require('fs')
+const {Readable, PassThrough} = require('stream')
 
 const Plant = require('@plant/plant')
 const {WebToNodeStream, NodeToWebStream} = require('@plant/node-stream-utils')
 
 const {Request, Response, Socket, Peer, URI} = Plant
 
+function withCallback(promise, callback) {
+  if (callback) {
+    return promise.then(callback)
+  }
+  else {
+    return promise
+  }
+}
+
 function createRequestHandler(plant, session) {
   const handle = plant.getHandler()
 
   return function(request, callback) {
-    handleRequest(handle, session, request)
-    .then(callback)
+    return withCallback(
+      handleRequest(handle, session, request),
+      callback,
+    )
   }
 }
 
