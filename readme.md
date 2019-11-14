@@ -130,6 +130,8 @@ createServer(plant)
 
 Plant standalone router.
 
+## Http(s) Packages
+
 ### [HTTP2](packages/http2) `@plant/http2`
 
 [NPM](https://npmjs.com/package/@plant/http2) ·
@@ -162,6 +164,15 @@ Plant adapter for native node.js http module. It creates server listener from pl
 
 Plant adapter for native node.js https module. It creates server listener from plant instance and https options.
 
+### [HTTP Adapter](packages/http-adapter) `@plant/http-adapter`
+
+[NPM](https://npmjs.com/package/@plant/http-adapter) ·
+[Source](packages/http-adapter) · [Readme](packages/http-adapter/readme.md)
+
+This package is using to connect Plant and native Node's HTTP server. Modules http, https, http2, and https2 use it under the hood.
+
+## Electron Packages
+
 ### [Electron](packages/electron-adapter) `@plant/electron`
 
 [NPM](https://npmjs.com/package/@plant/electron) ·
@@ -170,7 +181,14 @@ Plant adapter for native node.js https module. It creates server listener from p
 This package is using to connect Plant and with current Electron instance protocols API.
 It's using `electron-adapter` under the hood.
 
-## Internal packages
+### [Electron Adapter](packages/electron-adapter) `@plant/electron-adapter`
+
+[NPM](https://npmjs.com/package/@plant/electron-adapter) ·
+[Source](packages/electron-adapter) · [Readme](packages/electron-adapter/readme.md)
+
+This package is using to connect Plant and with Electron protocols API.
+
+## Utility Packages
 
 ### [Flow](packages/flow) `@plant/flow`
 
@@ -179,12 +197,6 @@ It's using `electron-adapter` under the hood.
 
 This is library for cascades. This is where contexts manage take place and requests pass from one handler to another.
 
-### [HTTP Adapter](packages/http-adapter) `@plant/http-adapter`
-
-[NPM](https://npmjs.com/package/@plant/http-adapter) ·
-[Source](packages/http-adapter) · [Readme](packages/http-adapter/readme.md)
-
-This package is using to connect Plant and native Node's HTTP server. Modules http, https, http2, and https2 use it under the hood.
 
 ### [Electron Adapter](packages/electron-adapter) `@plant/electron-adapter`
 
@@ -200,6 +212,8 @@ This package is using to connect Plant and with Electron protocols API.
 
 Node <-> WebAPI streams adapters. Useful for wrapping Node.js streams to work
 with Plant.
+
+## Tests Packages
 
 ### [Test HTTP Suite](packages/test-http) `@plant/test-http`
 
