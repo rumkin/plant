@@ -130,7 +130,7 @@ createServer(plant)
 
 Plant standalone router.
 
-## Http(s) Packages
+## HTTP(S) Packages
 
 ### [HTTP2](packages/http2) `@plant/http2`
 
@@ -196,14 +196,6 @@ This package is using to connect Plant and with Electron protocols API.
 [Source](packages/flow) · [Readme](packages/flow/readme.md)
 
 This is library for cascades. This is where contexts manage take place and requests pass from one handler to another.
-
-
-### [Electron Adapter](packages/electron-adapter) `@plant/electron-adapter`
-
-[NPM](https://npmjs.com/package/@plant/electron-adapter) ·
-[Source](packages/electron-adapter) · [Readme](packages/electron-adapter/readme.md)
-
-This package is using to connect Plant and with Electron protocols API.
 
 ### [Node Stream Utils](packages/node-stream-utils) `@plant/node-stream-utils`
 
