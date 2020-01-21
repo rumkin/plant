@@ -2,6 +2,9 @@ dev/
 docs/
 tmp/
 local/
+examples/
+test/
+utils/
 
 *.pid
 *.lock
