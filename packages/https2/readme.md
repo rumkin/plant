@@ -16,7 +16,7 @@ npm i @plant/https2
 ```javascript
 // Build request handler
 const Plant = require('@plant/plant');
-const {createServer} = require('@plant/http2');
+const {createServer} = require('@plant/https2');
 
 const plant = new Plant();
 plant.use(({res, socket}) => {

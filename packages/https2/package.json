@@ -1,6 +1,6 @@
 {
   "name": "@plant/https2",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Plant node.js HTTP2 module's SSL server handler",
   "main": "src/index.js",
   "engines": {
@@ -9,7 +9,7 @@
   "scripts": {
     "lint": "eslint src/**.js test/**.js",
     "prepublishOnly": "allow-publish-tag next && npm test",
-    "ssl": "bin/ssl.sh var/ssl",
+    "ssl": "utils/ssl.sh var/ssl",
     "test": "testup run test/*.spec.js"
   },
   "repository": {
