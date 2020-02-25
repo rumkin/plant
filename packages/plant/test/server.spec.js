@@ -1,4 +1,4 @@
-/* global describe it URL */
+/* global describe it */
 const should = require('should')
 
 const Plant = require('..')

@@ -7,7 +7,7 @@
     "node": ">=8"
   },
   "scripts": {
-    "lint": "npm run lint:src && npm run lint:test && npm run lint:examples",
+    "lint": "npm run lint:src && npm run lint:test",
     "lint:src": "eslint src/**.js",
     "lint:test": "eslint test/**.js",
     "lint:exampples": "eslint exampples/**.js",
