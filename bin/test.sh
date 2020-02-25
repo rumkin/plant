@@ -33,7 +33,7 @@ run_lint() {
 
   cd "$DIR"
 
-  ln -s "$CWD/node_modules/.bin/eslint" "node_modules/.bin/eslint"
+  ln -s "$CWD/node_modules/.bin/eslint" "$DIR/node_modules/.bin/eslint"
   npm run lint
 }
 
