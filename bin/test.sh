@@ -45,6 +45,10 @@ cmd_install() {
   run_install flow
 }
 
+cmd_install_root() {
+  npm i .
+}
+
 cmd_test() {
   run_test plant
   run_test http-adapter
@@ -79,6 +83,7 @@ CMD=$1
 shift 1
 
 case $CMD in
+  "install-root") cmd_install_root $@ ;;
   "install") cmd_install $@ ;;
   "lint") cmd_lint $@ ;;
   "test") cmd_test $@ ;;
