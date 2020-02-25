@@ -34,6 +34,17 @@ run_lint() {
   npm run lint
 }
 
+cmd_install() {
+  run_install plant
+  run_install http-adapter
+  run_install http
+  run_install https
+  run_install http2
+  run_install https2
+  run_install router
+  run_install flow
+}
+
 cmd_test() {
   run_test plant
   run_test http-adapter
