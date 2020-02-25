@@ -211,22 +211,22 @@ function createSocket(connection, stream, remote, {Socket, Peer, URI}) {
   if (stream && stream.pushAllowed) {
     onPush = function(res) {
       return new Promise(function(resolve, reject) {
-        const headers = {
+        stream.pushStream({
           ':path': res.url.pathname + res.url.search,
-        }
-
-        res.headers.forEach((function(value, header) {
-          headers[header] = value
-        }))
-
-        stream.pushStream(headers, function(err, pushStream) {
+        }, function(err, pushStream) {
           if (err) {
             reject(err)
           }
           else {
-            pushStream.respond({
-              ':status': res.status,
-            })
+             const headers = {
+               ':status': res.status,
+             }
+
+            res.headers.forEach((function(value, header) {
+              headers[header] = value
+            }))
+            
+            pushStream.respond(headers)
             writeResponseToWritableStream(pushStream, res)
             .then(resolve, reject)
           }
