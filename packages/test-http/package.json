@@ -19,9 +19,11 @@
     "node": ">=11"
   },
   "scripts": {
-    "lint": "eslint src/**.js test/**.js",
-    "test": "testup run test/http.spec.js test/https.spec.js test/http2.spec.js test/https2.spec.js",
-    "prepublishOnly": "npm test"
+    "lint": "npm run lint:src && npm run lint:test",
+    "lint:src": "eslint src/**.js",
+    "lint:test": "eslint test/**.js",
+    "prepublishOnly": "npm test",
+    "test": "testup run test/http.spec.js test/https.spec.js test/http2.spec.js test/https2.spec.js"
   },
   "license": "MIT",
   "devDependencies": {

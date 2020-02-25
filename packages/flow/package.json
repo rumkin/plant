@@ -19,7 +19,9 @@
     "allow-publish-tag": "^1.0.1"
   },
   "scripts": {
-    "lint": "eslint src/**.js test/**.js",
+    "lint": "npm run lint:src && npm run lint:test",
+    "lint:src": "eslint src/**.js",
+    "lint:test": "eslint test/**.js",
     "prepublishOnly": "npm test",
     "test": "testup run test/**.spec.js"
   }

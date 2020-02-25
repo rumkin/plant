@@ -7,12 +7,14 @@
     "node": ">=6"
   },
   "scripts": {
-    "test": "mocha test/*.spec.js",
-    "lint": "eslint src/**.js test/**.js",
-    "jsdoc": "jsdoc --configure .jsdoc.json --verbose",
     "docs": "npm run jsdoc && rm -rf docs && mv tmp/docs/*/*/* docs && rm -rf tmp/docs",
+    "jsdoc": "jsdoc --configure .jsdoc.json --verbose",
+    "lint": "npm run lint:src && npm run lint:test",
+    "lint:src": "eslint src/**.js",
+    "lint:test": "eslint test/**.js",
+    "prepublishOnly": "allow-publish-tag next && npm run lint && npm test",
     "ssl-cert": "openssl req -newkey rsa:2048 -nodes -keyout var/key.pem -x509 -days 365 -out var/cert.pem",
-    "prepublishOnly": "allow-publish-tag next && npm run lint && npm test"
+    "test": "mocha test/*.spec.js"
   },
   "repository": {
     "type": "git",

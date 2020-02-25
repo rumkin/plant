@@ -16,7 +16,9 @@
     "build": "npm run clean && mkdir dist && npm run compile && npm run minify",
     "clean": "rm -rf dist",
     "compile": "browserify -s PlantRouter src/index.js > dist/router.js",
-    "lint": "eslint src/**.js test/**.js",
+    "lint": "npm run lint:src && npm run lint:test",
+    "lint:src": "eslint src/**.js",
+    "lint:test": "eslint test/**.js",
     "minify": "babel-minify dist/router.js -o dist/router.min.js",
     "prepublishOnly": "allow-publish-tag next && npm run lint && npm test && npm run build",
     "test": "mocha test/*.spec.js"

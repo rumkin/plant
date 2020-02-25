@@ -7,9 +7,11 @@
     "node": ">=8.0"
   },
   "scripts": {
+    "lint": "npm run lint:src && npm run lint:test",
+    "lint:src": "eslint src/**.js",
+    "lint:test": "eslint test/**.js",
     "prepublishOnly": "allow-publish-tag next && npm run lint",
-    "test": "testup run -r console test/**.spec.js",
-    "lint": "eslint src/**.js test/**.js && npm test"
+    "test": "testup run -r console test/**.spec.js"
   },
   "license": "MIT",
   "devDependencies": {

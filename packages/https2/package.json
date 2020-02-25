@@ -7,7 +7,9 @@
     "node": ">=8"
   },
   "scripts": {
-    "lint": "eslint src/**.js test/**.js",
+    "lint": "npm run lint:src && npm run lint:test",
+    "lint:src": "eslint src/**.js",
+    "lint:test": "eslint test/**.js",
     "prepublishOnly": "allow-publish-tag next && npm test",
     "ssl": "utils/ssl.sh var/ssl",
     "test": "testup run test/*.spec.js"

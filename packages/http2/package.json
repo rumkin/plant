@@ -7,9 +7,12 @@
     "node": ">=8"
   },
   "scripts": {
-    "test": "testup run test/*.spec.js",
-    "lint": "eslint src/**.js test/**.js examples/**.js",
-    "prepublishOnly": "allow-publish-tag next && npm run lint && npm test"
+    "lint": "npm run lint:src && npm run lint:test && npm run lint:examples",
+    "lint:src": "eslint src/**.js",
+    "lint:test": "eslint test/**.js",
+    "lint:exampples": "eslint exampples/**.js",
+    "prepublishOnly": "allow-publish-tag next && npm run lint && npm test",
+    "test": "testup run test/*.spec.js"
   },
   "repository": {
     "type": "git",

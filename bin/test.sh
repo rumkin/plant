@@ -33,8 +33,6 @@ run_lint() {
 
   cd "$DIR"
 
-  stat "$DIR/node_modules/.bin/eslint"
-  $DIR/node_modules/.bin/eslint --help
   npm run lint
 }
 
@@ -47,11 +45,6 @@ cmd_install() {
   run_install https2
   run_install router
   run_install flow
-}
-
-cmd_install_root() {
-  echo "FILEPATH: $CWD"
-  npm i .
 }
 
 cmd_test() {
@@ -81,7 +74,7 @@ cmd_usage() {
   echo ""
   echo "Commands are:"
   echo "- install"
-  echo "- install-root"
+  echo "- install-eslint"
   echo "- lint"
   echo "- test"
 }
@@ -91,7 +84,6 @@ shift 1
 
 case $CMD in
   "install") cmd_install $@ ;;
-  "install-root") cmd_install_root $@ ;;
   "lint") cmd_lint $@ ;;
   "test") cmd_test $@ ;;
   *) cmd_usage ;;
