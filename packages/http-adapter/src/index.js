@@ -218,14 +218,14 @@ function createSocket(connection, stream, remote, {Socket, Peer, URI}) {
             reject(err)
           }
           else {
-             const headers = {
-               ':status': res.status,
-             }
+            const headers = {
+              ':status': res.status,
+            }
 
             res.headers.forEach((function(value, header) {
               headers[header] = value
             }))
-            
+
             pushStream.respond(headers)
             writeResponseToWritableStream(pushStream, res)
             .then(resolve, reject)
