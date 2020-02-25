@@ -1,4 +1,3 @@
-/* global TextDecoder */
 /**
  * @module Plant
  */
