@@ -16,20 +16,22 @@ run_install() {
 
 run_test() {
   local DIR=$1
+  local FILEPATH="$CWD/packages/$DIR"
 
-  echo "TEST: $DIR"
+  echo "TEST: $DIR at $FILEPATH"
 
-  cd "$CWD/packages/$DIR"
+  cd "$FILEPATH"
 
   npm test
 }
 
 run_lint() {
   local DIR=$1
+  local FILEPATH="$CWD/packages/$DIR"
 
-  echo "LINT: $DIR"
+  echo "LINT: $DIR at $FILEPATH"
 
-  cd "$CWD/packages/$DIR"
+  cd "$FILEPATH"
 
   npm run lint
 }
@@ -46,6 +48,7 @@ cmd_install() {
 }
 
 cmd_install_root() {
+  echo "FILEPATH: $CWD"
   npm i .
 }
 
