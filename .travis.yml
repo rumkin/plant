@@ -2,8 +2,12 @@ sudo: false
 language: node_js
 node_js:
   - "node"
-  - "11"
+  - "12"
+  - "10"
 branches:
   only:
   - master
-script: INSTALL=1 ./bin/test.sh test
+script:
+  - ./bin/test.sh install
+  - ./bin/test.sh lint
+  - ./bin/test.sh test

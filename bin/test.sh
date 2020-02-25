@@ -4,6 +4,16 @@ set -e
 
 CWD=$PWD
 
+run_install() {
+  local DIR=$1
+
+  echo "INSTALL: $DIR"
+
+  cd "$CWD/packages/$DIR"
+
+  npm i .
+}
+
 run_test() {
   local DIR=$1
 
@@ -11,7 +21,6 @@ run_test() {
 
   cd "$CWD/packages/$DIR"
 
-  [ "$INSTALL" == "1" ] && npm i .
   npm test
 }
 
@@ -59,6 +68,7 @@ CMD=$1
 shift 1
 
 case $CMD in
+  "install") cmd_install $@ ;;
   "lint") cmd_lint $@ ;;
   "test") cmd_test $@ ;;
   *) cmd_usage ;;
