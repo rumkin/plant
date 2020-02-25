@@ -33,7 +33,8 @@ run_lint() {
 
   cd "$DIR"
 
-  PATH="$DIR/node_modules/.bin:$CWD/node_modules/.bin:$PATH" npm run lint
+  ln -s "$CWD/node_modules/.bin/eslint" "node_modules/.bin/eslint"
+  npm run lint
 }
 
 cmd_install() {
