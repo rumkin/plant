@@ -7,8 +7,8 @@ node_js:
 branches:
   only:
   - master
-script:
-  - ./bin/test.sh install-root
-  - ./bin/test.sh install
-  - ./bin/test.sh lint
-  - ./bin/test.sh test
+script: |
+  ./bin/test.sh install-root && \
+  ./bin/test.sh install && \
+  ./bin/test.sh lint && \
+  ./bin/test.sh test

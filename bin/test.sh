@@ -75,16 +75,18 @@ cmd_usage() {
   echo "Usage is: test.sh COMMAND"
   echo ""
   echo "Commands are:"
-  echo "- test"
+  echo "- install"
+  echo "- install-root"
   echo "- lint"
+  echo "- test"
 }
 
 CMD=$1
 shift 1
 
 case $CMD in
-  "install-root") cmd_install_root $@ ;;
   "install") cmd_install $@ ;;
+  "install-root") cmd_install_root $@ ;;
   "lint") cmd_lint $@ ;;
   "test") cmd_test $@ ;;
   *) cmd_usage ;;
