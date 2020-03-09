@@ -131,18 +131,18 @@ or adjacent contexts.
 
 ```javascript
 plant.use(async function({req, res, socket}, next) => {
-    await next({}); // Set context empty
-});
+  await next({}) // Set context empty
+})
 
 plant.use(async (ctx, next) => {
-    ctx; // -> {}
-    await next({number: 3.14}); // Create new context with `number` property
-});
+  ctx // -> {}
+  await next({number: 3.14}) // Create new context with `number` property
+})
 
 plant.use(async (ctx, next) => {
-    ctx; // -> {number: 3.14}
-    await next(); // No context modification
-});
+  ctx // -> {number: 3.14}
+  await next() // No context modification
+})
 ```
 
 It allows to create predictable behavior and avoid unexpected side effects.
@@ -186,7 +186,7 @@ const plant = new Plant({
 })
 ```
 
-## CSP.LOCAL (default)
+### CSP.LOCAL (default)
 
 ⚠️ Not for production
 
@@ -264,7 +264,7 @@ protocol is HTTPS.
 Plant is the main configuration instrument. It's using to specify execution order,
 define routes and set uncaught error handler.
 
-### Plant.constuctor()
+### `Plant.Plant()`
 ```text
 ([options:PlantOptions]) -> Plant
 ```
@@ -286,7 +286,7 @@ Plant server configuration options.
 |context| Default context values. Empty object by default|
 |csp| Default CSP header string or function which produce such string. It will be used only if CSP header isn't presented in response |
 
-### Plant.use()
+### `Plant#use()`
 ```text
 ([route:String], ...handlers:Handler) -> Plant
 ```
@@ -304,16 +304,16 @@ to change Request execution direction.
 ```javascript
 function conditionHandler({req}, next) {
     if (req.url.searchParams.has('page')) {
-        return next();
+        return next()
     }
 }
 
-plant.use('/posts', conditionHandler, ({res}) => res.text('page param passed'));
-plant.use('/posts', ({res}) => res.text('page param not passed'));
+plant.use('/posts', conditionHandler, ({res}) => res.text('page param passed'))
+plant.use('/posts', ({res}) => res.text('page param not passed'))
 plant.use('/posts/*', ({res}) => res.text('internal page requested'))
 ```
 
-### Plant.or()
+### `Plant#or()`
 ```text
 (...handlers: Handler) -> Plant
 ```
@@ -328,13 +328,13 @@ plant.or(
     // Executed. Send nothing, so go to the next handler.
     ({req}) => {},
     // Executed. Send 'ok'.
-    ({res}) => { res.body = 'ok'; },
+    ({res}) => { res.body = 'ok' },
     // Not executed. Previous handler set response body.
     ({req}) => {}
-);
+)
 ```
 
-### Plant.and()
+### `Plant#and()`
 ```text
 (...handlers:Handle) -> Plant
 ```
@@ -343,14 +343,14 @@ This method set new cascades. It's the same as call `use` for each handler.
 ##### Example
 ```javascript
 function add({i = 0, ctx}, next) {
-    return next({...ctx, i: i + 1});
+    return next({...ctx, i: i + 1})
 }
 
 // Define cascade
-plant.and(add, add, add, ({i, res}) => res.text(i)); // i is 3
+plant.and(add, add, add, ({i, res}) => res.text(i)) // i is 3
 ```
 
-### Plant.getHandler()
+### `Plant#getHandler()`
 
 ```text
 () -> (context: InitialContext) -> Promise<InitialContext, Error>
@@ -383,9 +383,9 @@ const createRequestListener = require('@plant/http-adapter')
 const Plant = require('@Plant/plant')
 
 http.createServer(
-    createRequestListener(plant.getHandler())
+  createRequestListener(plant.getHandler())
 )
-.listen(8080);
+.listen(8080)
 ```
 
 ### Handler Type
@@ -393,20 +393,20 @@ http.createServer(
 This type specify cascadable function or object which has method to create such function.
 
 ```javascript
-const Router = require('@plant/router');
+const Router = require('@plant/router')
 
-const router = new Router();
+const router = new Router()
 router.get('/', ({res}) => {
-    res.body = 'Hello';
-});
+  res.body = 'Hello'
+})
 
-server.use(router.handler());
+server.use(router.handler())
 ```
 
 ### Peer Type
 ```text
 {
-    uri: URI
+  uri: URI
 }
 ```
 
@@ -418,11 +418,11 @@ For local TCP connections it could look like this:
 
 ```javascript
 new Peer({
-    uri: new URI({
-        protocol: 'tcp:',
-        hostname: '127.0.0.1',
-        port: 12345,
-    })
+  uri: new URI({
+    protocol: 'tcp:',
+    hostname: '127.0.0.1',
+    port: 12345,
+  })
 })
 ```
 
@@ -430,12 +430,12 @@ new Peer({
 
 ```text
 {
-    url: URL,
-    method: String,
-    headers: Headers,
-    domains: String[],
-    body: ReadableStream|null,
-    buffer: ArrayBuffer|null,
+  url: URL,
+  method: String,
+  headers: Headers,
+  domains: String[],
+  body: ReadableStream|String|TypedArray|null,
+  buffer: ArrayBuffer|null,
 }
 ```
 
@@ -460,11 +460,11 @@ be in immutable mode.
 #### RequestOptions
 ```text
 {
-    method: String='GET',
-    url: URL,
-    headers: Object|Headers={},
-    body: ReadableStream|Null=null,
-    parent: Request|Null = null,
+  method: String='GET',
+  url: URL,
+  headers: Object|Headers={},
+  body: ReadableStream|Null=null,
+  parent: Request|Null = null,
 }
 ```
 
@@ -489,14 +489,14 @@ matching value either returns `null`.
 ##### Example
 ```javascript
 switch(req.type(['json', 'multipart'])) {
-    case 'json':
-        req.data = JSON.parse(req.body);
-        break;
-    case 'multipart':
-        req.data = parseMultipart(req.body);
-        break;
-    default:
-        req.data = {};
+  case 'json':
+    req.data = JSON.parse(req.body)
+    break
+  case 'multipart':
+    req.data = parseMultipart(req.body)
+    break
+  default:
+    req.data = {}
 }
 ```
 
@@ -511,14 +511,14 @@ matching value otherwise returns `null`.
 ##### Example
 ```javascript
 switch(req.accept(['json', 'text'])) {
-    case 'json':
-        res.json({result: 3.14159});
-        break;
-    case 'text':
-        res.text('3.14159');
-        break;
-    default:
-        res.html('<html><body>3.14159</body></html>');
+  case 'json':
+    res.json({result: 3.14159})
+    break
+  case 'text':
+    res.text('3.14159')
+    break
+  default:
+    res.html('<html><body>3.14159</body></html>')
 }
 ```
 
@@ -562,13 +562,13 @@ Read request body and returns it as a string.
 ### Response Type
 ```text
 {
-    url: URL,
-    ok: Boolean,
-    hasBody: Boolean,
-    status: Number,
-    statusText: String,
-    headers: Headers,
-    body: TypedArray|ReadableStream|String|Null,
+  url: URL,
+  ok: Boolean,
+  hasBody: Boolean,
+  status: Number,
+  statusText: String,
+  headers: Headers,
+  body: TypedArray|ReadableStream|String|Null,
 }
 ```
 
@@ -594,10 +594,10 @@ have mode 'none'.
 #### ResponseOptions
 ```text
 {
-    url: URL,
-    status: Number=200,
-    headers: Headers|Object={},
-    body: TypedArray|ReadableStream|String|Null=null,
+  url: URL,
+  status: Number=200,
+  headers: Headers|Object={},
+  body: TypedArray|ReadableStream|String|Null=null,
 }
 ```
 
@@ -612,7 +612,7 @@ Set response `status` property.
 
 ```javascript
 res.setStatus(200)
-.send('Hello');
+.send('Hello')
 ```
 
 ### Response.redirect()
@@ -627,7 +627,7 @@ Redirect page to another url. Set empty body.
 
 ```javascript
 res.redirect('../users')
-.text('Page moved');
+.text('Page moved')
 ```
 
 ### Response.json()
@@ -639,7 +639,7 @@ res.redirect('../users')
 Send JS value as response with conversion it to JSON string. Set `application/json` content type.
 
 ```javascript
-res.json({number: 3.14159});
+res.json({number: 3.14159})
 ```
 
 ### Response.text()
@@ -653,7 +653,7 @@ Send text as response. Set `text/plain` content type.
 ##### Example
 
 ```javascript
-res.text('3.14159');
+res.text('3.14159')
 ```
 
 ### Response.html()
@@ -666,7 +666,7 @@ Send string as response. Set `text/html` content type.
 ##### Example
 
 ```javascript
-res.html('<html><body>3.14159</body></html>');
+res.html('<html><body>3.14159</body></html>')
 ```
 
 ### Response.stream()
@@ -679,10 +679,10 @@ Send Readable stream in response.
 ##### Example
 
 ```javascript
-res.headers.set('content-type', 'application/octet-stream');
+res.headers.set('content-type', 'application/octet-stream')
 // You should implement webApiStream yourself it's not a standard method.
 // You can use web-streams-polyfill for it.
-res.stream(webApiStream(fs.createReadStream(req.path)));
+res.stream(webApiStream(fs.createReadStream(req.path)))
 ```
 
 ### Response.send()
@@ -735,10 +735,10 @@ plant.use('/photos', ({res}) => {
 ### Route Type
 ```
 {
-    path: string,
-    basePath: string,
-    params: Object,
-    captured: [{path: string, params: Object}],
+  path: string,
+  basePath: string,
+  params: Object,
+  captured: [{path: string, params: Object}],
 }
 ```
 
@@ -772,10 +772,10 @@ Clone route object
 ### Route.extend()
 ```
 (props: {
-    path?: string
-    basePath?: string,
-    params?: object,
-    captured?: [Capture],
+  path?: string
+  basePath?: string,
+  params?: object,
+  captured?: [Capture],
 }) -> Route
 ```
 
@@ -786,7 +786,7 @@ Override current values with the new `props`.
 
 ```text
 {
-    mode: String=Headers.MODE_NONE
+  mode: String=Headers.MODE_NONE
 }
 ```
 
@@ -799,19 +799,19 @@ Plant is using [WebAPI Headers](https://developer.mozilla.org/en-US/docs/Web/API
 ```javascript
 // Request headers
 plant.use(async function({req}, next) {
-    if (req.headers.has('authorization')) {
-        const auth = req.headers.get('authorization');
-        // Process authorization header...
-    }
+  if (req.headers.has('authorization')) {
+    const auth = req.headers.get('authorization')
+    // Process authorization header...
+  }
 
-    await next();
-});
+  await next()
+})
 
 // Response headers
 plant.use(async function({req, res}, next) {
-    res.headers.set('content-type', 'image/png');
-    res.send(webApiStream(fs.createReadStream('logo.png')));
-});
+  res.headers.set('content-type', 'image/png')
+  res.send(webApiStream(fs.createReadStream('logo.png')))
+})
 ```
 
 > Request Headers object has immutable mode (Headers.MODE_IMMUTABLE) and
@@ -849,12 +849,12 @@ Object.<String,String>|Array.<Array.<String, String>>
 
 ```javascript
 const headers = new Headers({
-    'content-type': 'text/plain',
-}, Headers.MODE_IMMUTABLE);
+  'content-type': 'text/plain',
+}, Headers.MODE_IMMUTABLE)
 // ... same as ...
 const headers = new Headers([
-    ['content-type', 'text/plain'],
-]);
+  ['content-type', 'text/plain'],
+])
 ```
 
 ### Headers.raw()
@@ -868,9 +868,9 @@ empty array.
 ### Socket Type
 ```text
 {
-    peer: Peer,
-    isEnded: Boolean = false,
-    canPush: Boolean = false,
+  peer: Peer,
+  isEnded: Boolean = false,
+  canPush: Boolean = false,
 }
 ```
 
@@ -883,9 +883,9 @@ be sent.
 
 ```text
 (options:{
-    peer: Peer,
-    onEnd?:() -> void,
-    onPush?(response: Response) -> Promise<void, Error>,
+  peer: Peer,
+  onEnd?:() -> void,
+  onPush?(response: Response) -> Promise<void, Error>,
 }) -> Socket
 ```
 
@@ -953,10 +953,10 @@ This is how Plant represents TCP address of the HTTP peer:
 
 ```javascript
 new URI({
-    protocol: 'tcp:',
-    hostname: 'localhost',
-    port: '12345',
-    pathname: '/',
+  protocol: 'tcp:',
+  hostname: 'localhost',
+  port: '12345',
+  pathname: '/',
 })
 ```
 
@@ -971,12 +971,12 @@ Send request to the server.
 
 ```js
 plant.use(async ({res, socket, fetch}) => {
-    if (socket.canPush) {
-        await fetch('/style.css')
-        .then((styleRes) => socket.push(styleRes))
-    }
+  if (socket.canPush) {
+    await fetch('/style.css')
+    .then((styleRes) => socket.push(styleRes))
+  }
 
-    res.body = '<html>...'
+  res.body = '<html>...'
 })
 ```
 
@@ -986,22 +986,22 @@ Async cascade model allow to capture errors with try/catch:
 
 ```javascript
 async function errorHandler({req, res}, next) {
-    try {
-        await next(); // Run all underlaying handlers
-    }
-    catch (error) {
-        res.status(500);
+  try {
+    await next() // Run all underlaying handlers
+  }
+  catch (error) {
+    res.status(500)
 
-        if (req.is('json')) {
-            res.json({
-                error: error.message,
-            });
-        }
-        else {
-            res.text(error.message);
-        }
+    if (req.is('json')) {
+      res.json({
+        error: error.message,
+      })
     }
-};
+    else {
+      res.text(error.message)
+    }
+  }
+}
 ```
 ---
 
@@ -1019,30 +1019,30 @@ modified while moving through cascade but only for underlaying handlers:
 
 ```javascript
 async function sendVersion({res, v}) {
-    res.text(`version: ${v}`);
+  res.text(`version: ${v}`)
 }
 
 plant.use('/api/v1', async function(ctx, next) {
-    ctx.v = 1;
-    // Update ctx
-    await next(ctx);
-}, sendVersion); // This will send `version: 1`
+  ctx.v = 1
+  // Update ctx
+  await next(ctx)
+}, sendVersion) // This will send `version: 1`
 
 plant.use('/api/v2', async function(ctx, next) {
-    ctx.v = 2;
-    // Update ctx
-    await next(ctx);
-}, sendVersion); // This will send `version: 2`
+  ctx.v = 2
+  // Update ctx
+  await next(ctx)
+}, sendVersion) // This will send `version: 2`
 
-plant.use(sendVersion); // This will send `version: undefined`
+plant.use(sendVersion) // This will send `version: undefined`
 ```
 
 Also plant is using express-like response methods: text, html, json, send:
 
 ```javascript
 plant.use(async function({req, res}) {
-    res.send(req.stream);
-});
+  res.send(req.stream)
+})
 ```
 
 ### Difference from Express
@@ -1058,7 +1058,7 @@ Request object has `domains` property instead of `subdomains` and has *all*
 parts of host from tld zone:
 
 ```javascript
-req.domains; // -> ['com', 'github', 'api'] for api.github.com
+req.domains // -> ['com', 'github', 'api'] for api.github.com
 ```
 
 ### No extension
