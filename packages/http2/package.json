@@ -1,6 +1,6 @@
 {
   "name": "@plant/http2",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Plant node.js HTTP2 module's server handler",
   "main": "src/index.js",
   "engines": {
@@ -26,7 +26,7 @@
   "author": "Rumkin <dev@rumk.in> (https://rumk.in/)",
   "license": "MIT",
   "dependencies": {
-    "@plant/http-adapter": "^1.0.0"
+    "@plant/http-adapter": "^1.4.0"
   },
   "devDependencies": {
     "@plant/plant": "^2.0.0",
