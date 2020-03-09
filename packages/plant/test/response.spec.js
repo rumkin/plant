@@ -120,12 +120,29 @@ describe('Response()', function() {
       should(res.body).be.a.String().and.equal('Hello')
     })
 
-    it('Should set proper content-length header with string', function() {
+    it('Should set proper content-length header with ascii string', function() {
       const res = new Response()
 
       res.body = 'Hello'
 
       should(res.headers.get('content-length')).be.equal('5')
+    })
+
+    it('Should set proper content-length header with utf-8 string', function() {
+      const res = new Response()
+
+      res.body = 'Zю'
+
+      should(res.headers.get('content-length')).be.equal('3')
+    })
+
+    it('Should set proper content-length header with cp1251 string', function() {
+      const res = new Response()
+
+      res.headers.set('content-type', 'text/plain; charset=cp1251')
+      res.body = 'Zю'
+
+      should(res.headers.get('content-length')).be.equal('3')
     })
 
     it('Should accept Byffer', function() {

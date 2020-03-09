@@ -1,6 +1,6 @@
 {
   "name": "@plant/plant",
-  "version": "2.4.0",
+  "version": "2.4.2",
   "description": "WebAPI charged HTTP2-ready web server for node.js and browser",
   "main": "src/index.js",
   "engines": {

@@ -141,7 +141,18 @@ class Response {
       }
       this._body = value
     }
-    else if (typeof value === 'string' || value instanceof TypedArray) {
+    else if (typeof value === 'string') {
+      const match = this.headers.get('content-type').match(/;\scharset=(\S+)/)
+      const charset = match ? match[1] : 'utf8'
+      const bytes = new TextEncoder(charset).encode(value)
+
+      this._body = value
+      this.headers.set(
+        'content-length',
+        bytes.length,
+      )
+    }
+    else if (value instanceof TypedArray) {
       this._body = value
       this.headers.set('content-length', value.length)
     }
