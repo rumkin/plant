@@ -147,6 +147,12 @@ async function writeResponseToWritableStream(stream, response) {
  */
 async function writeWebReadableStreamToWritableStream(destination, source) {
   let reader
+  let error
+
+  function onError(err) {
+    error = err
+  }
+
   try {
     if (source.locked) {
       throw new Error('Source stream is locked')
@@ -154,12 +160,17 @@ async function writeWebReadableStreamToWritableStream(destination, source) {
 
     reader = source.getReader()
 
+    destination.on('error', onError)
+
     // eslint-disable-next-line no-constant-condition
     while (true) {
       const {value, done} = await reader.read()
 
       // eslint-disable-next-line max-depth
-      if (done) {
+      if (error) {
+        throw error
+      }
+      else if (done || destination.closed) {
         break
       }
 
@@ -174,10 +185,11 @@ async function writeWebReadableStreamToWritableStream(destination, source) {
   finally {
     if (reader !== void 0) {
       reader.cancel()
+      reader.releaseLock()
     }
-    else {
-      source.cancel()
-    }
+
+    source.cancel()
+    destination.removeListener('error', onError)
   }
 }
 
@@ -227,8 +239,18 @@ function createSocket(connection, stream, remote, {Socket, Peer, URI}) {
             }))
 
             pushStream.respond(headers)
+
             writeResponseToWritableStream(pushStream, res)
+            .catch((error) => {
+              if (error.code === 'ERR_HTTP2_STREAM_ERROR' && error.message.includes('NGHTTP2_REFUSED_STREAM')) {
+                return
+              }
+              else {
+                throw error
+              }
+            })
             .then(resolve, reject)
+            .finally(() => pushStream.close())
           }
         })
       })
