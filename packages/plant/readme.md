@@ -388,6 +388,29 @@ http.createServer(
 .listen(8080)
 ```
 
+### `Plant#fetch()`
+
+```
+(url: string|URL|Request|RequestOptions, options?: RequestOptions) -> Promise<Response>
+```
+
+Send request to a server and retrieve a response.
+
+#### Example
+
+```javascript
+const plant = new Plant()
+
+plant.use(({res}) => {
+  res.text('OK')
+})
+
+plant.fetch('/')
+.then(res) => {
+  res.body // 'OK'
+})
+```
+
 ### Handler Type
 
 This type specify cascadable function or object which has method to create such function.

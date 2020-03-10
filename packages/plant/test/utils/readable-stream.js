@@ -17,8 +17,14 @@ class ReadableStreamMock {
     this.reader = {
       read: async () => {
         if (values.length) {
+          let value = values.shift()
+
+          if (typeof value === 'string') {
+            value = new TextEncoder('utf8').encode(value)
+          }
+
           return {
-            value: values.shift(),
+            value,
             done: false,
           }
         }

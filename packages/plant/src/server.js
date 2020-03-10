@@ -312,6 +312,46 @@ class Plant {
 
     return handler
   }
+
+  fetch(params, ctx = {}) {
+    let req
+    if (typeof params === 'string') {
+      req = new Request({
+        url: new URL(params, 'http://0.0.0.0/'),
+      })
+    }
+    else if (params instanceof URL) {
+      req = new Request({params})
+    }
+    else if (isPlainObject(params)) {
+      const url = new URL(params.url || '/', 'http://0.0.0.0/')
+      req = new Request({
+        method: 'GET',
+        ...params,
+        url,
+      })
+    }
+    else if (params instanceof Request === false) {
+      req = params
+    }
+    else {
+      throw new TypeError('Argument should be a String, URL, Request, or a RequestOptions')
+    }
+
+    const res = new Response({
+      url: req.url,
+    })
+
+    const handler = this.getHandler()
+    const fullCtx = {
+      ...ctx,
+      req,
+      res,
+    }
+
+    return handler(fullCtx)
+    .then(() => res)
+  }
 }
 
 function createFetch(handler, ctx) {

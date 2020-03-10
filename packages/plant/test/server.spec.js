@@ -4,6 +4,8 @@ const should = require('should')
 const Plant = require('..')
 const {Request, Response, Peer, URI, Socket} = Plant
 
+const {ReadableStream} = require('./utils/readable-stream')
+
 async function errorTrap(ctx, next) {
   try {
     await next()
@@ -297,6 +299,41 @@ describe('Server()', function() {
       await plant.getHandler()({req, res})
 
       should(res.body).be.equal('b')
+    })
+  })
+
+  describe('Server#fetch()', function() {
+    it('Should server "GET /"', async () => {
+      const plant = new Plant()
+
+      plant.use(({res}) => {
+        res.text('OK')
+      })
+
+      const res = await plant.fetch('/')
+
+      should(res.status).be.equal(200)
+      should(res.body).be.equal('OK')
+    })
+
+    it('Should server "POST /"', async () => {
+      const plant = new Plant()
+
+      plant.use(async ({res, req}) => {
+        const body = await req.text()
+        res.text(body)
+      })
+
+      const res = await plant.fetch({
+        url: '/',
+        method: 'POST',
+        body: new ReadableStream([
+          '<body>',
+        ]),
+      })
+
+      should(res.status).be.equal(200)
+      should(res.body).be.equal('<body>')
     })
   })
 
