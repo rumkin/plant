@@ -42,7 +42,7 @@ class StreamReader {
 }
 
 async function * iterateReader(reader) {
-  for (const value of reader) {
+  for await (const value of reader) {
     yield value
   }
 }
