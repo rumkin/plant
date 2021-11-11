@@ -30,6 +30,7 @@ async function handleRequest(handle, session, request) {
   const req = new Request({
     method: request.method,
     url: new URL(request.url),
+    headers: request.headers,
     body: createBodyFromUploadData(session, request.uploadData),
   })
   const res = new Response({
