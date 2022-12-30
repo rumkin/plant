@@ -28,7 +28,7 @@
     "browserify": "^16.2.3",
     "jsdoc": "^3.6.3",
     "minami": "^1.2.3",
-    "mocha": "^6.2.0",
+    "mocha": "^10.2.0",
     "should": "^11.2.1"
   },
   "dependencies": {
